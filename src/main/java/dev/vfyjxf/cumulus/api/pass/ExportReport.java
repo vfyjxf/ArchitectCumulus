@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * exporter 输出。
+ */
 public record ExportReport(
         InstanceStatus status,
         List<Diagnostic> diagnostics,

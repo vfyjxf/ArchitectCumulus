@@ -5,6 +5,9 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
 
+/**
+ * 方块部件引用：以世界坐标表示。
+ */
 public record BlockPartRef(BlockPos pos) implements PartRef {
     public static final ResourceLocation KIND = ResourceLocation.fromNamespaceAndPath("cumulus", "block");
 

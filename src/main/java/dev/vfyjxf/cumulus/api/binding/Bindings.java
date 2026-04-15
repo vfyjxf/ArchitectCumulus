@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * 默认 bindings 实现：以不可变 Map 存储 role -> parts。
+ */
 public record Bindings(Map<String, List<PartRef>> byRole) implements BindingsView {
     public Bindings {
         byRole = Map.copyOf(Objects.requireNonNull(byRole, "byRole"));

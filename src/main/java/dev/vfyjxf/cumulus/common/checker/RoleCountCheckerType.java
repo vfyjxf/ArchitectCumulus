@@ -8,6 +8,14 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
 
+/**
+ * {@code cumulus:role_count_checker}。
+ *
+ * <p>config 示例：
+ * <pre>{@code
+ * { "role": "controller", "min": 1, "max": 1 }
+ * }</pre>
+ */
 public final class RoleCountCheckerType implements SchemaComponentType<Checker> {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("cumulus", "role_count_checker");
 
@@ -27,4 +35,3 @@ public final class RoleCountCheckerType implements SchemaComponentType<Checker> 
         return new RoleCountChecker(role, min, max);
     }
 }
-

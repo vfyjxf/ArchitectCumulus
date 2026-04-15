@@ -10,6 +10,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * 默认的实例快照实现。
+ *
+ * <p>实现方也可以提供自定义 {@link InstanceView}，但建议保持字段含义一致。
+ */
 public record InstanceSnapshot(
         InstanceKey key,
         InstanceStatus status,

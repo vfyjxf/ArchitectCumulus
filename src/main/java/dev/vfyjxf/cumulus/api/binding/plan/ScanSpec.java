@@ -8,6 +8,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import java.util.Objects;
 
+/**
+ * 扫描描述：告诉 binder “去哪里找部件”。
+ *
+ * <p>v1 默认 anchor 为 {@link net.minecraft.core.BlockPos}，因此扫描以 anchor 为基准给出局部偏移。
+ */
 public sealed interface ScanSpec permits ScanSpec.Anchor, ScanSpec.Box, ScanSpec.EntityRadius {
     Codec<ScanSpec> CODEC = new Codec<>() {
         @Override
@@ -49,11 +54,17 @@ public sealed interface ScanSpec permits ScanSpec.Anchor, ScanSpec.Box, ScanSpec
                 Codec.INT.optionalFieldOf("offset_z", 0).forGetter(Anchor::offsetZ)
         ).apply(instance, Anchor::new));
 
+        /**
+         * 扫描 anchor 自身。
+         */
         public static Anchor atAnchor() {
             return new Anchor(0, 0, 0);
         }
     }
 
+    /**
+     * 盒子扫描：在 [min,max]（包含端点）范围内逐格扫描。
+     */
     record Box(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) implements ScanSpec {
         public static final Codec<Box> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.INT.fieldOf("min_x").forGetter(Box::minX),
@@ -65,6 +76,9 @@ public sealed interface ScanSpec permits ScanSpec.Anchor, ScanSpec.Box, ScanSpec
         ).apply(instance, Box::new));
     }
 
+    /**
+     * 以 anchor 为中心的实体半径扫描（球形）。
+     */
     record EntityRadius(int radius) implements ScanSpec {
         public static final Codec<EntityRadius> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.INT.fieldOf("radius").forGetter(EntityRadius::radius)

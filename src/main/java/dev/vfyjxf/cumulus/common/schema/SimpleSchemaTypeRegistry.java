@@ -16,6 +16,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * 一个简单的内存 {@link SchemaTypeRegistry} 实现（common）。
+ *
+ * <p>用于把数据驱动的 {@code typeId -> SchemaComponentType} 映射落地。
+ */
 public final class SimpleSchemaTypeRegistry implements SchemaTypeRegistry {
     private final Map<ResourceLocation, SchemaComponentType<AnchorFinder>> anchorFinders = new HashMap<>();
     private final Map<ResourceLocation, SchemaComponentType<Binder>> binders = new HashMap<>();
@@ -95,4 +100,3 @@ public final class SimpleSchemaTypeRegistry implements SchemaTypeRegistry {
         return Optional.ofNullable(exporters.get(type));
     }
 }
-

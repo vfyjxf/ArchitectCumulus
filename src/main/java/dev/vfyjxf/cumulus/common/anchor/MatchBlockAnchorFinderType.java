@@ -9,6 +9,11 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
 
+/**
+ * {@code cumulus:match_block_anchor_finder}。
+ *
+ * <p>config 使用 {@link MatchSpec#CODEC}，含义为“哪些方块可作为 anchor”。
+ */
 public final class MatchBlockAnchorFinderType implements SchemaComponentType<AnchorFinder> {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("cumulus", "match_block_anchor_finder");
 
@@ -28,4 +33,3 @@ public final class MatchBlockAnchorFinderType implements SchemaComponentType<Anc
         return new MatchBlockAnchorFinder(match);
     }
 }
-

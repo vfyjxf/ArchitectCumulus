@@ -18,6 +18,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * 实体变化轮询策略：只轮询“实例兴趣集声明的 sections”，并对实体集合做轻量 hash，
+ * hash 变化则输出 dirty section。
+ *
+ * <p>用途：在缺少实体事件流时，用 interest 收敛轮询范围，避免全世界扫描。
+ *
+ * <p>注意：hash 策略是示例实现（包含 uuid/type/pos），生产场景可更精确或更便宜。
+ */
 public final class InterestEntityPollDriver implements DriverStrategy {
     private final int sectionsPerTick;
 
@@ -40,6 +48,7 @@ public final class InterestEntityPollDriver implements DriverStrategy {
     public DriverOutput run(DriverContext ctx) {
         Objects.requireNonNull(ctx, "ctx");
         Set<SectionKey> interested = new HashSet<>();
+        // 聚合所有实例的 interest.sections（去重）。
         for (InstanceView view : ctx.instances().views()) {
             interested.addAll(view.interest().sections());
         }
@@ -55,6 +64,7 @@ public final class InterestEntityPollDriver implements DriverStrategy {
         }
 
         Set<SectionKey> dirty = new HashSet<>();
+        // 轮询固定数量 sections，避免每 tick 全部轮询造成卡顿。
         for (int i = 0; i < sectionsPerTick; i++) {
             if (!ctx.budget().tryConsume(1)) {
                 break;
@@ -98,4 +108,3 @@ public final class InterestEntityPollDriver implements DriverStrategy {
         return hash;
     }
 }
-

@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * linker 输出。
+ */
 public record LinkReport(
         InstanceStatus status,
         List<Diagnostic> diagnostics,

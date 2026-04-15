@@ -9,6 +9,11 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
 
+/**
+ * {@code cumulus:plan_binder}：把 {@link BindingPlan}（JSON）解析成 {@link PlanBinder}。
+ *
+ * <p>config 结构：见 {@link BindingPlan#CODEC}。
+ */
 public final class PlanBinderType implements SchemaComponentType<Binder> {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("cumulus", "plan_binder");
 

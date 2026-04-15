@@ -14,6 +14,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * 一个常用规则：检查某个 role 的绑定数量是否在 [min, max] 内。
+ *
+ * <p>示例：controller 必须且只能存在 1 个：
+ * {@code new RoleCountChecker("controller", 1, 1)}。
+ */
 public final class RoleCountChecker implements Checker {
     public static final ResourceLocation DIAG_ROLE_COUNT = ResourceLocation.fromNamespaceAndPath("cumulus", "role_count");
 
@@ -46,4 +52,3 @@ public final class RoleCountChecker implements Checker {
         return CheckReport.ok(InterestUpdate.empty());
     }
 }
-

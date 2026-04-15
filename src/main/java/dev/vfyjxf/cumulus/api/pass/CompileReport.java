@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * compiler 输出。
+ */
 public record CompileReport(
         InstanceStatus status,
         List<Diagnostic> diagnostics,

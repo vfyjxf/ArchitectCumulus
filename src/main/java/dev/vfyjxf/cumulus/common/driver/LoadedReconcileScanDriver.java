@@ -12,6 +12,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * loaded-only 对账扫描：定期枚举 {@link dev.vfyjxf.cumulus.api.partition.PartitionAccess#loadedSections()}，
+ * 并以“每 tick 固定数量”输出 dirty sections。
+ *
+ * <p>用途：
+ * <ul>
+ *     <li>没有事件流时：让引擎最终收敛（低频全量巡检）</li>
+ *     <li>事件不完整时：兜底修正漏掉的变化</li>
+ * </ul>
+ *
+ * <p>注意：该策略只扫描“已加载范围内”，不会主动加载区块。
+ */
 public final class LoadedReconcileScanDriver implements DriverStrategy {
     private final int sectionsPerTick;
     private final int refreshIntervalTicks;
@@ -40,6 +52,7 @@ public final class LoadedReconcileScanDriver implements DriverStrategy {
         Objects.requireNonNull(ctx, "ctx");
         long tick = ctx.tick();
 
+        // 周期性刷新 loadedSections 快照，避免每 tick 枚举导致开销过大。
         if (tick - lastRefreshTick >= refreshIntervalTicks || cursor >= snapshot.size()) {
             List<SectionKey> next = new ArrayList<>();
             for (SectionKey key : ctx.world().loadedSections()) {
@@ -58,6 +71,7 @@ public final class LoadedReconcileScanDriver implements DriverStrategy {
         }
 
         Set<SectionKey> dirty = new HashSet<>();
+        // 每 tick 取固定数量推进游标，形成轮询。
         for (int i = 0; i < sectionsPerTick; i++) {
             if (!ctx.budget().tryConsume(1)) {
                 break;
@@ -74,4 +88,3 @@ public final class LoadedReconcileScanDriver implements DriverStrategy {
         return new DriverOutput(dirty, Set.of(), List.of(), ChangeCause.SCAN);
     }
 }
-

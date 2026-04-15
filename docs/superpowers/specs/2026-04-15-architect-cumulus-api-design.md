@@ -327,16 +327,26 @@ ArchitectSchema schema = ArchitectSchemaDsl.schema(id("mymod:crusher"))
 - 跨实例依赖与循环诊断
 - interest/watch 驱动的实体增量
 
-建议包含（实现后续再做）：
-- `InMemorySectionWorld`：`Map<SectionKey, SectionData>`（支持 LOADED/MISSING）
-- `DummyPartitionAccess`：从内存 world 提供 `SectionView`
-- `DummyDriver`：模拟 loaded-only 扫描与 requesting 请求
-- `ExampleSchema`：最小 binder/checker/compiler/linker/exporter
-
 当前仓库已落地（供参考/跑通）：
 - `DummyArchitectEngine`（pipeline + evict + probe + dep-cycle 诊断）
-- `InMemoryPartitionAccess`（LOADED/MISSING section + block/entity 只读视图）
+- `InMemoryPartitionAccess`（LOADED/MISSING section + block/blockEntity/entity 只读视图 + tag 映射）
 - `PlanBinder`（BindingPlan + 分块 footprint → BindReport + InterestUpdate + DataRequest）
+- drivers：
+  - `LoadedReconcileScanDriver`（loaded-only 对账扫描）
+  - `RequestingPrefetchScanDriver`（INCOMPLETE 实例缺失 section 请求）
+  - `InterestEntityPollDriver`（按兴趣集轮询实体变化）
+- v2 骨架最小可跑组件：
+  - `ArchitectSchemaSpec/ComponentSpec`（Codec）
+  - `SchemaTypeRegistry` + `SimpleSchemaTypeRegistry`
+  - `ArchitectSchemaLoader/ArchitectSchemaManager/ArchitectSchemaReloadListener`
+  - `BuiltInSchemaTypes`（注册 common 内置 type）
+- common 内置 schema types（可用于 JSON spec 演示）：
+  - `cumulus:match_block_anchor_finder`
+  - `cumulus:plan_binder`
+  - `cumulus:role_count_checker`
+  - `cumulus:bindings_compiler`
+- 测试：
+  - `DummyArchitectEngineTest` 使用 `testframework` 的 `EphemeralTestServerProvider` 做端到端验证
 
 ---
 

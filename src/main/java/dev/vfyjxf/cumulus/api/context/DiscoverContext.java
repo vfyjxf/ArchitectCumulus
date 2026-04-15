@@ -6,6 +6,9 @@ import dev.vfyjxf.cumulus.api.partition.SectionKey;
 
 import java.util.Objects;
 
+/**
+ * anchor discover 上下文（按 section 扫描）。
+ */
 public record DiscoverContext(PartitionAccess world, SectionKey section, Budget budget) {
     public DiscoverContext {
         Objects.requireNonNull(world, "world");

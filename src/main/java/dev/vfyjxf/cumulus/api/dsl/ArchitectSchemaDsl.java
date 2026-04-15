@@ -15,6 +15,21 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+/**
+ * 代码侧 schema DSL。
+ *
+ * <p>目标：用流式 API 构建 {@link dev.vfyjxf.cumulus.api.ArchitectSchema}，并保持与数据驱动 schema 的结构同构。
+ *
+ * <p>示例：
+ * <pre>{@code
+ * ArchitectSchema schema = ArchitectSchemaDsl.schema(id)
+ *     .anchor(a -> a.finder(anchorFinder))
+ *     .bind(b -> b.plan(planDsl -> planDsl.role("controller").fromAnchorBlock()))
+ *     .check("rule1", c -> c.checker(checker))
+ *     .compile(c -> c.compiler(compiler))
+ *     .build();
+ * }</pre>
+ */
 public final class ArchitectSchemaDsl {
     private ArchitectSchemaDsl() {
     }
@@ -93,12 +108,18 @@ public final class ArchitectSchemaDsl {
             delegate.binder(binder);
         }
 
+        /**
+         * 以 DSL 构建 {@link BindingPlan}，并使用 common {@code PlanBinder} 执行。
+         */
         public void plan(java.util.function.Consumer<BindingPlanDsl> config) {
             BindingPlanDsl dsl = new BindingPlanDsl();
             Objects.requireNonNull(config, "config").accept(dsl);
             delegate.binder(PlanBinder.of(dsl.build()));
         }
 
+        /**
+         * 直接使用一个 {@link BindingPlan}，并使用 common {@code PlanBinder} 执行。
+         */
         public void plan(BindingPlan plan) {
             delegate.binder(PlanBinder.of(Objects.requireNonNull(plan, "plan")));
         }

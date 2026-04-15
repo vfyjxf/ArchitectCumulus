@@ -8,6 +8,9 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
 
+/**
+ * {@code cumulus:bindings_compiler}：无配置的最小 compiler。
+ */
 public final class BindingsCompilerType implements SchemaComponentType<Compiler> {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("cumulus", "bindings_compiler");
 
@@ -23,4 +26,3 @@ public final class BindingsCompilerType implements SchemaComponentType<Compiler>
         return new BindingsCompiler();
     }
 }
-

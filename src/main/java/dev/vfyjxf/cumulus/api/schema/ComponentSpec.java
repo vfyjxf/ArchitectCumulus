@@ -9,6 +9,11 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
 
+/**
+ * 一个组件描述：{@code type + config}。
+ *
+ * <p>config 以 {@link Dynamic} 表示，便于在 JSON/NBT 等不同 ops 间复用解析逻辑。
+ */
 public record ComponentSpec(ResourceLocation type, Dynamic<?> config) {
     public static final Dynamic<?> EMPTY_CONFIG = new Dynamic<>(JsonOps.INSTANCE, new JsonObject());
 

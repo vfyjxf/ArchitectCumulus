@@ -11,6 +11,11 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * 一个资源 reload listener 示例：从资源路径加载 schema JSON 并交给 {@link ArchitectSchemaManager}。
+ *
+ * <p>注意：本仓库当前主要提供 API/骨架；在真实 mod 中你需要把该 listener 注册到合适的 reload 管道。
+ */
 public final class ArchitectSchemaReloadListener extends SimpleJsonResourceReloadListener {
     public static final String DEFAULT_PATH = "architect_cumulus/schemas";
 
@@ -32,4 +37,3 @@ public final class ArchitectSchemaReloadListener extends SimpleJsonResourceReloa
         manager.reload(jsons);
     }
 }
-

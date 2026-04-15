@@ -8,6 +8,9 @@ import dev.vfyjxf.cumulus.api.request.DataRequest;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * checker 输出。
+ */
 public record CheckReport(
         InstanceStatus status,
         List<Diagnostic> diagnostics,

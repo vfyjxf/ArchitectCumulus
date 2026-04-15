@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * binder 输出。
+ */
 public record BindReport(
         InstanceStatus status,
         List<Diagnostic> diagnostics,
@@ -29,10 +32,16 @@ public record BindReport(
         return new BindReport(InstanceStatus.OK, List.of(), List.of(), interestUpdate, Optional.of(bindings));
     }
 
+    /**
+     * 缺数据（通常应同时包含 DataRequest 与说明性诊断）。
+     */
     public static BindReport incomplete(List<DataRequest> requests, List<Diagnostic> diagnostics, InterestUpdate interestUpdate) {
         return new BindReport(InstanceStatus.INCOMPLETE, diagnostics, requests, interestUpdate, Optional.empty());
     }
 
+    /**
+     * 非法（无法生成 bindings）。
+     */
     public static BindReport error(List<Diagnostic> diagnostics, InterestUpdate interestUpdate) {
         return new BindReport(InstanceStatus.ERROR, diagnostics, List.of(), interestUpdate, Optional.empty());
     }

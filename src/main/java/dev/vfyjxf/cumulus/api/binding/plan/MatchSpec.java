@@ -12,6 +12,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * 匹配谓词描述（可组合）。
+ *
+ * <p>该谓词用于描述“一个扫描到的对象是否满足条件”。v1 默认支持：
+ * <ul>
+ *     <li>any：永真</li>
+ *     <li>id：匹配单个 id</li>
+ *     <li>tag：匹配 tag（需要底层 view 支持 {@code isInTag}）</li>
+ *     <li>all / any_of / not：逻辑组合</li>
+ * </ul>
+ *
+ * <p>注意：不同 {@link PartKind} 的匹配含义可能不同（blockId vs blockEntityType vs entityType）。
+ * common 的 {@code PlanBinder} 会按 kind 分发到不同的匹配函数。
+ */
 public sealed interface MatchSpec permits MatchSpec.Any, MatchSpec.Id, MatchSpec.Tag, MatchSpec.All, MatchSpec.AnyOf, MatchSpec.Not {
     Codec<MatchSpec> CODEC = Codec.recursive("cumulus_match_spec", self -> {
         Codec<All> allCodec = RecordCodecBuilder.create(instance -> instance.group(

@@ -40,6 +40,22 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * 一个基于 {@link BindingPlan} 的通用 binder 实现（common/dummy 用）。
+ *
+ * <p>核心语义：
+ * <ul>
+ *     <li>先计算计划的 section footprint；若 footprint 中存在未加载 section，则返回 {@code INCOMPLETE + DataRequest}</li>
+ *     <li>所有数据可用时执行扫描，把匹配到的部件绑定到 role</li>
+ *     <li>返回的 {@link InterestUpdate} 默认把 footprint 加入兴趣集（sectionsAdd），便于后续增量轮询</li>
+ * </ul>
+ *
+ * <p>实现说明（重要）：
+ * <ul>
+ *     <li>该实现偏“示例/参考”，未做生产级优化（例如实体空间索引、block 批量访问）</li>
+ *     <li>当前实现不对扫描过程进行 budget 细粒度切分；生产实现应在循环中消耗 budget 并在不足时分帧</li>
+ * </ul>
+ */
 public final class PlanBinder implements Binder {
     private static final ResourceLocation REASON_BIND_SECTION_MISSING = ResourceLocation.fromNamespaceAndPath("cumulus", "bind_section_missing");
     private static final ResourceLocation DIAG_UNSUPPORTED = ResourceLocation.fromNamespaceAndPath("cumulus", "plan_binder_unsupported");
@@ -72,10 +88,12 @@ public final class PlanBinder implements Binder {
         List<DataRequest> requests = new ArrayList<>();
         List<Diagnostic> diagnostics = new ArrayList<>();
 
+        // 先计算 footprint：这样可以一次性对缺失 sections 发出请求，并避免“扫一半才发现缺数据”。
         for (BindingOp op : plan.ops()) {
             footprint.addAll(footprint(anchorPos, op.scan()));
         }
 
+        // 缺数据：不强制加载，产出 DataRequest 交由宿主处理。
         for (SectionKey section : footprint) {
             if (world.loadState(section) == LoadState.MISSING) {
                 requests.add(DataRequest.forInstance(section, REASON_BIND_SECTION_MISSING, RequestPriority.NORMAL, requestTtl, ctx.key(), consumerId));
@@ -128,6 +146,7 @@ public final class PlanBinder implements Binder {
         int maxSectionY = SectionPos.blockToSectionCoord(Math.max(min.getY(), max.getY()));
 
         Set<SectionKey> out = new HashSet<>();
+        // 注意：sectionRange 的输出大小与扫描体积相关；生产实现可考虑进一步做裁剪/合并/预算化。
         for (int cx = minChunkX; cx <= maxChunkX; cx++) {
             for (int cz = minChunkZ; cz <= maxChunkZ; cz++) {
                 for (int sy = minSectionY; sy <= maxSectionY; sy++) {
@@ -194,6 +213,7 @@ public final class PlanBinder implements Binder {
         int maxY = Math.max(box.minY(), box.maxY());
         int maxZ = Math.max(box.minZ(), box.maxZ());
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        // 注意：这里按格扫描；生产实现应尽量减少 section() 调用次数并引入预算切分。
         for (int dx = minX; dx <= maxX; dx++) {
             for (int dy = minY; dy <= maxY; dy++) {
                 for (int dz = minZ; dz <= maxZ; dz++) {
@@ -229,6 +249,7 @@ public final class PlanBinder implements Binder {
         int maxZ = anchorPos.getZ() + Math.max(box.minZ(), box.maxZ());
         Set<SectionKey> sections = sectionRange(new BlockPos(minX, minY, minZ), new BlockPos(maxX, maxY, maxZ));
         List<PartRef> out = new ArrayList<>();
+        // 注意：实体遍历依赖 section.entities()；生产实现建议使用实体空间索引/快速筛选。
         for (SectionKey sectionKey : sections) {
             SectionView view = world.section(sectionKey);
             for (EntityView entity : view.entities()) {
@@ -258,6 +279,7 @@ public final class PlanBinder implements Binder {
 
         Set<SectionKey> sections = sectionRange(new BlockPos(minX, minY, minZ), new BlockPos(maxX, maxY, maxZ));
         List<PartRef> out = new ArrayList<>();
+        // 注意：球形筛选需要额外距离判断；生产实现可按 AABB 预筛后再做 r^2 判定。
         for (SectionKey sectionKey : sections) {
             SectionView view = world.section(sectionKey);
             for (EntityView entity : view.entities()) {

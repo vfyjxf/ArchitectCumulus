@@ -17,6 +17,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+/**
+ * 一个简单的 anchorFinder：按 {@link MatchSpec} 匹配“方块状态”作为 anchor。
+ *
+ * <p>实现策略：
+ * <ul>
+ *     <li>discover：扫描一个 section（16×16×16）内的全部方块</li>
+ *     <li>probe：只检查 anchorPos 所在的方块</li>
+ * </ul>
+ *
+ * <p>性能说明：discover 是 O(4096) 的全扫描，仅用于演示/测试；生产实现应考虑更高效的索引策略。
+ */
 public final class MatchBlockAnchorFinder implements AnchorFinder {
     private final MatchSpec match;
 
@@ -39,6 +50,7 @@ public final class MatchBlockAnchorFinder implements AnchorFinder {
 
         List<BlockPos> out = new ArrayList<>();
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        // 按 16×16×16 扫描该 section。注意：这会触碰 4096 个位置，务必配合 budget。
         for (int dx = 0; dx < 16; dx++) {
             for (int dy = 0; dy < 16; dy++) {
                 for (int dz = 0; dz < 16; dz++) {
@@ -109,4 +121,3 @@ public final class MatchBlockAnchorFinder implements AnchorFinder {
         return false;
     }
 }
-

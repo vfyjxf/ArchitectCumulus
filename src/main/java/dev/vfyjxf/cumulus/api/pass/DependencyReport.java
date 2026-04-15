@@ -8,6 +8,9 @@ import dev.vfyjxf.cumulus.api.request.DataRequest;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * 依赖声明输出。
+ */
 public record DependencyReport(
         InstanceStatus status,
         List<Diagnostic> diagnostics,

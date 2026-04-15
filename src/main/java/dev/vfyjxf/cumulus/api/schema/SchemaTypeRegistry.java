@@ -11,6 +11,12 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.Optional;
 
+/**
+ * 数据驱动组件注册表：按 typeId 查找组件工厂。
+ *
+ * <p>v2 的 schema loader 会用该 registry 把 {@link ComponentSpec} 解析成运行时组件，
+ * 从而构建 {@link dev.vfyjxf.cumulus.api.ArchitectSchema}。
+ */
 public interface SchemaTypeRegistry {
     Optional<SchemaComponentType<AnchorFinder>> anchorFinder(ResourceLocation type);
 
@@ -26,4 +32,3 @@ public interface SchemaTypeRegistry {
 
     Optional<SchemaComponentType<Exporter>> exporter(ResourceLocation type);
 }
-

@@ -4,6 +4,9 @@ import com.mojang.serialization.Codec;
 
 import java.util.Locale;
 
+/**
+ * 绑定计划中可扫描的部件类型。
+ */
 public enum PartKind {
     BLOCK,
     BLOCK_ENTITY,

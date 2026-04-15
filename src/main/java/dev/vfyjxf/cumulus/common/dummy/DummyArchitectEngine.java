@@ -61,6 +61,22 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+/**
+ * 一个用于演示/测试的引擎实现（common/dummy）。
+ *
+ * <p>目标：把 v1 的 API/流程跑通，并提供可读性强的参考实现。
+ * <p>非目标：生产级性能与完整特性（例如请求 ledger 去重/节流、并行执行、持久化缓存等）。
+ *
+ * <p>实现要点：
+ * <ul>
+ *     <li>以 {@link SectionKey} 作为 dirty 粒度</li>
+ *     <li>支持外部 {@link ChangeSet} 提示 + 内置 {@link DriverStrategy} 主动扫描</li>
+ *     <li>维护 interestIndex（section -> instances）以便 dirtySections 快速定位受影响实例</li>
+ *     <li>支持 anchor discover/probe，并在 anchor 卸载时 evict 实例</li>
+ *     <li>执行 bind/check/compile/dep/link/export 流水线，并汇总 requests/diagnostics/interest</li>
+ *     <li>维护依赖边并检测环（cycle），对环上的实例追加诊断</li>
+ * </ul>
+ */
 public final class DummyArchitectEngine implements ArchitectEngine {
     private static final ResourceLocation DIAG_DEP_CYCLE = ResourceLocation.fromNamespaceAndPath("cumulus", "dependency_cycle");
 
@@ -100,6 +116,7 @@ public final class DummyArchitectEngine implements ArchitectEngine {
         Set<SectionKey> dirtySections = new HashSet<>();
         Set<BlockPos> dirtyAnchors = new HashSet<>();
 
+        // 1) 合并外部提交的 changes（事件流）。
         while (!pendingChanges.isEmpty()) {
             ChangeSet changeSet = pendingChanges.pollFirst();
             dirtySections.addAll(changeSet.dirtySections());
@@ -107,6 +124,7 @@ public final class DummyArchitectEngine implements ArchitectEngine {
             frame.requests.addAll(changeSetToRequests(changeSet));
         }
 
+        // 2) 运行 drivers（主动扫描）：补齐无事件流时的收敛能力。
         if (!drivers.isEmpty()) {
             DriverContext driverCtx = new DriverContextImpl(ctx, world, new InstanceDirectoryView(instances));
             for (DriverStrategy driver : drivers) {
@@ -119,11 +137,16 @@ public final class DummyArchitectEngine implements ArchitectEngine {
 
         Set<InstanceKey> affected = new HashSet<>();
         Set<InstanceKey> addedThisTick = new HashSet<>();
+        // 3) 驱逐：anchor 所在 section 卸载时，移除实例（v1 选择 evict 策略）。
         evictUnloaded(frame);
+        // 4) 根据 dirtySections 发现新增 anchor（仅已加载范围内）。
         discoverAnchors(ctx, dirtySections, affected, addedThisTick);
+        // 5) 根据 dirtySections/dirtyAnchors/interestIndex 定位受影响实例。
         markAffectedByDirty(dirtySections, dirtyAnchors, affected);
+        // 6) 对既有实例进行 probe：anchor 不再存在则移除。
         probeAffected(ctx, affected, addedThisTick, frame);
 
+        // 7) 对受影响实例执行流水线并输出 deltas。
         for (InstanceKey key : affected) {
             ArchitectSchema schema = schemas.get(key.schemaId());
             if (schema == null) {
@@ -135,6 +158,7 @@ public final class DummyArchitectEngine implements ArchitectEngine {
             frame.deltas.add(addedThisTick.contains(key) ? InstanceDelta.added(next.snapshot()) : InstanceDelta.updated(next.snapshot()));
         }
 
+        // 8) 依赖环检测：把 cycle 诊断追加到相关实例（示例实现：检测到任意环就标记环上节点）。
         applyCycleDiagnostics(frame);
 
         return frame.build();
@@ -173,6 +197,7 @@ public final class DummyArchitectEngine implements ArchitectEngine {
             return;
         }
         Budget budget = ctx.budget();
+        // 对每个 schema 在 dirty section 内 discover anchors。
         for (ArchitectSchema schema : schemas.values()) {
             AnchorFinder finder = schema.anchorFinder();
             for (SectionKey section : dirtySections) {
@@ -197,6 +222,7 @@ public final class DummyArchitectEngine implements ArchitectEngine {
     }
 
     private void markAffectedByDirty(Set<SectionKey> dirtySections, Set<BlockPos> dirtyAnchors, Set<InstanceKey> affected) {
+        // dirtyAnchors：直接点名重算。
         for (BlockPos anchorPos : dirtyAnchors) {
             for (ArchitectSchema schema : schemas.values()) {
                 InstanceKey key = new InstanceKey(schema.id(), anchorPos);
@@ -205,12 +231,14 @@ public final class DummyArchitectEngine implements ArchitectEngine {
                 }
             }
         }
+        // dirtySections：通过 interestIndex 快速找到受影响实例。
         for (SectionKey section : dirtySections) {
             Set<InstanceKey> keys = interestIndex.get(section);
             if (keys != null) {
                 affected.addAll(keys);
             }
         }
+        // anchor 本身所在 section dirty 时也应重算（即使没声明 interest）。
         for (InstanceKey key : instances.keySet()) {
             if (dirtySections.contains(SectionKey.from(key.anchorPos()))) {
                 affected.add(key);
@@ -255,6 +283,7 @@ public final class DummyArchitectEngine implements ArchitectEngine {
         CollectingPassSink sink = new CollectingPassSink();
         InstanceDirectory directory = new InstanceDirectoryView(instances);
 
+        // 1) Bind：生成 bindings，并可能提出缺数据请求/兴趣集更新。
         BindReport bind = schema.binder().bind(new BindContextImpl(key, world, directory, tick.budget(), sink));
         sink.merge(bind);
         frame.requests.addAll(sink.requests());
@@ -276,6 +305,7 @@ public final class DummyArchitectEngine implements ArchitectEngine {
         BindingsView bindings = bind.bindings().get();
 
         InstanceStatus status = InstanceStatus.OK;
+        // 2) Checkers：按声明顺序执行。
         for (ArchitectSchema.NamedChecker entry : schema.checkers()) {
             CheckReport check = entry.checker().check(new CheckContextImpl(key, world, directory, tick.budget(), sink, bindings));
             sink.merge(check);
@@ -297,6 +327,7 @@ public final class DummyArchitectEngine implements ArchitectEngine {
             return new InstanceState(snapshot, Optional.of(bindings), Optional.empty(), Optional.empty(), interest);
         }
 
+        // 3) Compile：产出 compiledContext。
         CompileReport compiled = schema.compiler().compile(new CompileContextImpl(key, world, directory, tick.budget(), sink, bindings));
         sink.merge(compiled);
         status = worse(status, compiled.status());
@@ -315,6 +346,7 @@ public final class DummyArchitectEngine implements ArchitectEngine {
             return new InstanceState(snapshot, Optional.of(bindings), compiled.compiledContext(), Optional.empty(), interest);
         }
 
+        // 4) Declare deps：声明跨实例依赖边（仅声明，不读取）。
         DependencyReport deps = schema.dependencyDeclarer().declare(new DepContextImpl(key, world, directory, tick.budget(), sink, bindings, compiled.compiledContext().get()));
         sink.merge(deps);
         status = worse(status, deps.status());
@@ -334,6 +366,7 @@ public final class DummyArchitectEngine implements ArchitectEngine {
             return new InstanceState(snapshot, Optional.of(bindings), compiled.compiledContext(), Optional.empty(), interest);
         }
 
+        // 5) Link：读取依赖上下文并链接为最终上下文。
         LinkReport linked = schema.linker().link(new LinkContextImpl(key, world, directory, tick.budget(), sink, compiled.compiledContext().get()));
         sink.merge(linked);
         status = worse(status, linked.status());
@@ -342,6 +375,7 @@ public final class DummyArchitectEngine implements ArchitectEngine {
 
         Optional<ExportView> export = Optional.empty();
         if (status == InstanceStatus.OK) {
+            // 6) Export：导出数据访问视图（可选）。
             ExportReport exportReport = schema.exporter().export(new ExportContextImpl(key, world, directory, tick.budget(), sink, bindings, linked.linkedContext().orElse(compiled.compiledContext().get())));
             sink.merge(exportReport);
             status = worse(status, exportReport.status());

@@ -18,6 +18,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * INCOMPLETE 预取请求策略：遍历引擎中状态为 {@code INCOMPLETE} 的实例，
+ * 对其兴趣集（interest.sections）内缺失的 section 产出 {@link DataRequest}。
+ *
+ * <p>注意：该策略只“请求”，不“加载”。加载由宿主系统决定。
+ */
 public final class RequestingPrefetchScanDriver implements DriverStrategy {
     private static final ResourceLocation DEFAULT_REASON = ResourceLocation.fromNamespaceAndPath("cumulus", "prefetch_missing_section");
 
@@ -42,6 +48,7 @@ public final class RequestingPrefetchScanDriver implements DriverStrategy {
         Objects.requireNonNull(ctx, "ctx");
         List<DataRequest> requests = new ArrayList<>();
 
+        // 遍历所有实例，寻找 INCOMPLETE 的并对缺失 section 发请求。
         for (InstanceView view : ctx.instances().views()) {
             if (view.status() != InstanceStatus.INCOMPLETE) {
                 continue;
@@ -59,4 +66,3 @@ public final class RequestingPrefetchScanDriver implements DriverStrategy {
         return new DriverOutput(Set.of(), Set.of(), requests, ChangeCause.SCAN);
     }
 }
-

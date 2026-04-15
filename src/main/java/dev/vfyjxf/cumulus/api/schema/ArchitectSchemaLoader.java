@@ -11,10 +11,20 @@ import dev.vfyjxf.cumulus.api.pass.Linker;
 
 import java.util.Objects;
 
+/**
+ * 将 {@link ArchitectSchemaSpec} 加载为运行时 {@link dev.vfyjxf.cumulus.api.ArchitectSchema}。
+ *
+ * <p>loader 只负责按 spec 组装组件，不做额外语义校验（由各组件自行校验 config 并抛错）。
+ */
 public final class ArchitectSchemaLoader {
     private ArchitectSchemaLoader() {
     }
 
+    /**
+     * 加载一个 schema。
+     *
+     * @throws IllegalArgumentException 当 type 未注册或 config 非法时抛出
+     */
     public static ArchitectSchema load(ArchitectSchemaSpec spec, SchemaTypeRegistry registry, SchemaBuildContext ctx) {
         Objects.requireNonNull(spec, "spec");
         Objects.requireNonNull(registry, "registry");
@@ -66,4 +76,3 @@ public final class ArchitectSchemaLoader {
         return builder.build();
     }
 }
-

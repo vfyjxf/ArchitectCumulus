@@ -19,6 +19,18 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * 一个内存版 {@link PartitionAccess}（测试/演示用）。
+ *
+ * <p>特性：
+ * <ul>
+ *     <li>按 {@link SectionKey} 维护 loaded/unloaded</li>
+ *     <li>支持 block/blockEntity/entity 的最小读取</li>
+ *     <li>支持基于 id 的 tag 映射（用于 MatchSpec.Tag）</li>
+ * </ul>
+ *
+ * <p>注意：该实现不追求生产性能；其 {@code raw()} 字段通常直接返回 {@link ResourceLocation} 作为占位。
+ */
 public final class InMemoryPartitionAccess implements PartitionAccess {
     private static final BlockStateView MISSING_BLOCK = new SimpleBlockStateView(ResourceLocation.fromNamespaceAndPath("cumulus", "missing"), "missing", Set.of());
 

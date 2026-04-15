@@ -7,6 +7,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * 基于 HashMap 的默认上下文实现（用于 common/dummy 与简单场景）。
+ */
 public final class MapRuntimeContext implements RuntimeContext {
     private final Map<ContextKey<?>, Object> values;
 

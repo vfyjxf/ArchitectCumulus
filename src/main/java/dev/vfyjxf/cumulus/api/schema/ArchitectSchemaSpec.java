@@ -11,6 +11,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * 数据驱动 schema 描述（v2 骨架）。
+ *
+ * <p>该 spec 可被序列化为 JSON，并通过 {@link ArchitectSchemaLoader} + {@link SchemaTypeRegistry}
+ * 构建为运行时 {@link dev.vfyjxf.cumulus.api.ArchitectSchema}。
+ *
+ * <p>注意：本仓库当前提供的是“可落地的接口 + common 最小实现”，并不自动接入 datapack。
+ */
 public record ArchitectSchemaSpec(
         ResourceLocation id,
         ComponentSpec anchorFinder,

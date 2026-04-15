@@ -9,6 +9,19 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
 
+/**
+ * {@link BindingPlan} 的代码侧 DSL。
+ *
+ * <p>该 DSL 的目标是让 binder 的“扫描 + 匹配 + role 绑定”描述更易读。
+ *
+ * <p>示例：
+ * <pre>{@code
+ * BindingPlan plan = new BindingPlanDsl()
+ *     .role("controller").scanBoxBlocks(0,0,0, 0,0,0).matchBlockId(controllerId)
+ *     .role("nearby_entities").scanEntities(8).matchEntityType(zombieId)
+ *     .build();
+ * }</pre>
+ */
 public final class BindingPlanDsl {
     private final BindingPlan.Builder builder = BindingPlan.builder();
 
