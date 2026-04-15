@@ -1,0 +1,196 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.141'
+    id 'idea'
+    id "me.champeau.jmh" version "0.7.2"
+}
+
+tasks.named('wrapper', Wrapper).configure {
+    distributionType = Wrapper.DistributionType.BIN
+}
+
+version = mod_version
+group = mod_group_id
+
+sourceSets.main.resources {
+    srcDir('src/generated/resources')
+
+    exclude("**/*.bbmodel") // BlockBench project files
+    exclude("src/generated/**/.cache") // datagen cache files
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = "https://maven.quiltmc.org/repository/release/" }
+    maven { url = "https://jitpack.io" }
+    maven { url = "https://dvs1.progwml6.com/files/maven/" }
+    maven { url = "https://maven.blamejared.com/" }
+    maven { url = "https://modmaven.dev" }
+    maven { url = "https://maven.parchmentmc.org" }
+    maven { url = "https://maven.shedaniel.me" }
+    maven { url = "https://repo.kenzie.mx/releases" }
+    maven { url = "https://maven.tterrag.com/" }
+    maven { url = "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url = "https://maven.minecraftforge.net" }
+    maven {
+        url = "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
+}
+
+base {
+    archivesName = mod_id
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+neoForge {
+    version = project.neo_version
+//    accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    runs {
+        client {
+            client()
+            gameDirectory = project.file('runs/client')
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        server {
+            server()
+            gameDirectory = project.file('runs/server')
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        data {
+            data()
+            gameDirectory = project.file('runs/data')
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+
+        dumpClient {
+            client()
+            gameDirectory = project.file('runs/dump')
+            systemProperty 'cloudlib.dump', 'true'
+        }
+
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+            systemProperty('terminal.jline', 'true')
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+
+    unitTest {
+        enable()
+        testedMod = mods."${mod_id}"
+    }
+}
+
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
+}
+
+dependencies {
+    additionalRuntimeClasspath(api("org.eclipse.collections:eclipse-collections-api:13.0.0"))
+    jarJar("org.eclipse.collections:eclipse-collections-api:[13.0.0,)") {
+        version {
+            prefer("13.0.0")
+        }
+    }
+    additionalRuntimeClasspath(api("org.eclipse.collections:eclipse-collections:13.0.0"))
+    jarJar("org.eclipse.collections:eclipse-collections:[13.0.0,)") {
+        version {
+            prefer("13.0.0")
+        }
+    }
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
+    testImplementation "net.neoforged:testframework:${project.neo_version}"
+    testImplementation 'com.palantir.javapoet:javapoet:0.6.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    jmh "org.openjdk.jmh:jmh-core:1.37"
+    jmh "org.openjdk.jmh:jmh-generator-annprocess:1.37"
+    jmhAnnotationProcessor "org.openjdk.jmh:jmh-generator-annprocess:1.37"
+
+    testCompileOnly 'com.google.auto.service:auto-service:1.1.1'
+    testAnnotationProcessor 'com.google.auto.service:auto-service:1.1.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/repo"
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+// IDEA no longer automatically downloads sources/javadoc jars for dependencies, so we need to explicitly enable the behavior.
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
