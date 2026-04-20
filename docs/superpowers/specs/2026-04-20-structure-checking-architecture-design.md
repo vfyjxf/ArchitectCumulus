@@ -413,7 +413,7 @@ The visualization model should include stable positions, groups, bounding boxes,
 Suggested package layout:
 
 ```text
-com.<yourgroup>.architectcumulus
+dev.vfyjxf.cumulus
   api.definition
   api.component
   api.predicate
@@ -435,7 +435,9 @@ com.<yourgroup>.architectcumulus
   registry
 ```
 
-The exact group and mod id should be finalized before implementation. The current template still uses `com.example.examplemod` and `examplemod`.
+The implementation package root is `dev.vfyjxf.cumulus`. The first implementation plan must include migrating the current template package `com.example.examplemod` to this root.
+
+The mod id should be finalized in the implementation plan. Until a better id is chosen, use `cumulus` as the working mod id and update the current template value `examplemod` during project cleanup.
 
 ## Testing Strategy
 
