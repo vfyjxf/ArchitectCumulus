@@ -36,6 +36,9 @@ public record BoxComponent(
         if (target == null) {
             throw new IllegalArgumentException("Box component target must not be null");
         }
+        if (!target.captures().isEmpty()) {
+            throw new IllegalArgumentException("Box component target must not define captures");
+        }
         if (requirement == null) {
             throw new IllegalArgumentException("Box component requirement must not be null");
         }

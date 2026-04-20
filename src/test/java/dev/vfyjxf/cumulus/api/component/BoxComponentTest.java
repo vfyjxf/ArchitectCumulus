@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BoxComponentTest {
@@ -38,6 +39,16 @@ class BoxComponentTest {
         component.emit(emitted::add);
 
         assertEquals(26, emitted.size());
+        assertFalse(emitted.stream().anyMatch(point -> point.location().equals(RelativeBlockPos.of(1, 1, 1))));
+    }
+
+    @Test
+    void boxRejectsCaptureBearingTargetPatterns() {
+        assertThrows(IllegalArgumentException.class, () ->
+                Components.box("captured",
+                                RelativeBlockPos.of(0, 0, 0),
+                                RelativeBlockPos.of(1, 1, 1))
+                        .target(Targets.block().capture("controller")));
     }
 
     @Test
