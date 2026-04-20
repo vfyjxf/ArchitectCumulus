@@ -435,7 +435,7 @@ dev.vfyjxf.cumulus
   registry
 ```
 
-The implementation package root is `dev.vfyjxf.cumulus`. The first implementation plan must include migrating the current template package `com.example.examplemod` to this root.
+The implementation package root is `dev.vfyjxf.cumulus`. The first implementation plan must delete the current example template package `com.example.examplemod` and create the library structure directly under this root.
 
 The mod id should be finalized in the implementation plan. Until a better id is chosen, use `cumulus` as the working mod id and update the current template value `examplemod` during project cleanup.
 
