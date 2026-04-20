@@ -30,11 +30,13 @@ public final class StructureDefinitionCompiler {
             component.emit(points::add);
         }
 
-        return new StructureDefinition(
+        var definition = new StructureDefinition(
                 builder.id(),
                 transforms,
                 points,
                 List.of(),
                 DiagnosticMetadata.empty());
+        StructureDefinitionValidator.validate(definition);
+        return definition;
     }
 }
