@@ -11,6 +11,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class StructureDefinitionBuilderTest {
     @Test
+    void defaultsToIdentityTransform() {
+        var definition = Structures.define(ResourceLocation.parse("cumulus:marker"))
+                .point("origin", RelativeBlockPos.of(0, 0, 0), Targets.block())
+                .build();
+
+        assertEquals(1, definition.transforms().size());
+        assertEquals(Transforms.identity(), definition.transforms().get(0));
+    }
+
+    @Test
     void dslBuildsPointsComponentsCapturesAndTransforms() {
         var definition = Structures.define(ResourceLocation.parse("cumulus:machine"))
                 .transforms(Transforms.identity(), Transforms.horizontalFacing())
