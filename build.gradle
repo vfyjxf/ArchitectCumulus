@@ -107,6 +107,11 @@ neoForge {
             sourceSet(sourceSets.main)
         }
     }
+
+    unitTest {
+        testedMod = mods.getByName(mod_id)
+        enable()
+    }
 }
 
 // Sets up a dependency configuration called 'localRuntime'.
@@ -142,8 +147,6 @@ dependencies {
 
     testImplementation platform("org.junit:junit-bom:5.10.2")
     testImplementation "org.junit.jupiter:junit-jupiter"
-    testImplementation "net.neoforged:neoforge:${neo_version}"
-    testImplementation files(sourceSets.main.compileClasspath)
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
     implementation "net.neoforged:testframework:${neo_version}"
 }
