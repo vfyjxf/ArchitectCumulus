@@ -727,8 +727,9 @@ public final class Structures {
 
 - defaults transforms to `Transforms.identity()` when none are supplied;
 - emits direct points before component points;
-- copies all emitted points into `StructureDefinition`;
-- invokes `StructureDefinitionValidator.validate(definition)`.
+- copies all emitted points into `StructureDefinition`.
+
+Validation is intentionally wired in Task 6, because `StructureDefinitionValidator` is introduced there. Task 5 should not create a temporary no-op validator.
 
 - [ ] **Step 5: Run DSL test**
 
