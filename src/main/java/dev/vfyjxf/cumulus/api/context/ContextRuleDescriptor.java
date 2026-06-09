@@ -10,4 +10,18 @@ public record ContextRuleDescriptor(ResourceLocation id, Map<String, String> pro
         }
         properties = Map.copyOf(properties);
     }
+
+    public static ContextRuleDescriptor derive(String key, String source) {
+        if (key == null || key.isBlank()) {
+            throw new IllegalArgumentException("Context key must not be blank");
+        }
+        if (source == null || source.isBlank()) {
+            throw new IllegalArgumentException("Context source must not be blank");
+        }
+        return new ContextRuleDescriptor(
+                ResourceLocation.parse("cumulus:derive"),
+                Map.of(
+                        "key", key,
+                        "source", source));
+    }
 }

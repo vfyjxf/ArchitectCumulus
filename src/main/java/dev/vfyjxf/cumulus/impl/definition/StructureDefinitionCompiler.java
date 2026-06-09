@@ -1,5 +1,6 @@
 package dev.vfyjxf.cumulus.impl.definition;
 
+import dev.vfyjxf.cumulus.api.component.ComponentDescriptor;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinitionBuilder;
 import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
@@ -23,18 +24,24 @@ public final class StructureDefinitionCompiler {
         }
 
         var points = new ArrayList<StructurePointDefinition>();
+        var componentDescriptors = new ArrayList<ComponentDescriptor>();
         for (var point : builder.points()) {
             points.add(point.build());
         }
         for (var component : builder.components()) {
+            component.descriptor().ifPresent(componentDescriptors::add);
             component.emit(points::add);
         }
 
         var definition = new StructureDefinition(
                 builder.id(),
+                StructureDefinition.IR_SCHEMA_VERSION,
                 transforms,
                 points,
-                List.of(),
+                componentDescriptors,
+                builder.contextRules(),
+                builder.versions(),
+                builder.migrations(),
                 DiagnosticMetadata.empty());
         StructureDefinitionValidator.validate(definition);
         return definition;
