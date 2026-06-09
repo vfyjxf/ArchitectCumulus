@@ -2,15 +2,14 @@
 
 ArchitectCumulus is a NeoForge library for defining and validating flexible multiblock-style structures.
 
-Start here for the current `design3` work:
+Start here for the current architecture:
 
-- Design overview: `DESIGN3.md`
+- Architecture overview: `ARCHITECTURE.md`
 - Usage examples: `USAGE.md`
 - Implementation map: `IMPLEMENTATION.md`
-- Current code file list and Git note: `DESIGN3_CODE_FILES.md`
-- Full design spec: `docs/superpowers/specs/2026-06-08-architect-cumulus-design3.md`
+- Full architecture spec: `docs/superpowers/specs/2026-06-08-architect-cumulus-architecture.md`
 
-The current `design3` implementation combines the definition-focused `design2` branch with the runtime concepts from `design`:
+The current implementation combines the definition-focused `design2` branch with the runtime concepts from `design`:
 
 - immutable in-memory structure IR;
 - Java definition DSL;

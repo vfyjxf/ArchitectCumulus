@@ -1,6 +1,6 @@
-# ArchitectCumulus Design3 Usage
+# ArchitectCumulus Usage
 
-This file gives root-level usage examples for the current `design3` branch.
+This file gives root-level usage examples for the current branch.
 
 ## Define A Structure
 
@@ -79,14 +79,14 @@ The mod entry point wires `StructureEditorClientBridge` on the physical client. 
 
 ## Most Useful Tests To Read
 
-- `src/test/java/dev/vfyjxf/cumulus/api/design3/DefinitionExpansionTest.java`
-- `src/test/java/dev/vfyjxf/cumulus/impl/design3/check/StructureCheckExecutorTest.java`
-- `src/test/java/dev/vfyjxf/cumulus/impl/design3/runtime/RuntimeCheckEngineTest.java`
-- `src/test/java/dev/vfyjxf/cumulus/impl/design3/minecraft/MinecraftBuildTargetTest.java`
-- `src/test/java/dev/vfyjxf/cumulus/impl/design3/editor/GhostPreviewCompilerTest.java`
+- `src/test/java/dev/vfyjxf/cumulus/api/runtime/DefinitionExpansionTest.java`
+- `src/test/java/dev/vfyjxf/cumulus/impl/check/StructureCheckExecutorTest.java`
+- `src/test/java/dev/vfyjxf/cumulus/impl/runtime/RuntimeCheckEngineTest.java`
+- `src/test/java/dev/vfyjxf/cumulus/impl/minecraft/MinecraftBuildTargetTest.java`
+- `src/test/java/dev/vfyjxf/cumulus/impl/editor/GhostPreviewCompilerTest.java`
 
 ## Full Design
 
-Read `DESIGN3.md` first, then the full spec:
+Read `ARCHITECTURE.md` first, then the full spec:
 
-- `docs/superpowers/specs/2026-06-08-architect-cumulus-design3.md`
+- `docs/superpowers/specs/2026-06-08-architect-cumulus-architecture.md`

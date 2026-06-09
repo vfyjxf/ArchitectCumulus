@@ -1,15 +1,15 @@
 package dev.vfyjxf.cumulus;
 
 import dev.vfyjxf.cumulus.api.definition.Structures;
-import dev.vfyjxf.cumulus.impl.design3.codec.RuntimeAssetReloadListener;
-import dev.vfyjxf.cumulus.impl.design3.codec.RuntimeAssetRepository;
-import dev.vfyjxf.cumulus.impl.design3.editor.StructureEditorController;
-import dev.vfyjxf.cumulus.impl.design3.minecraft.MinecraftRuntimeEventBridge;
-import dev.vfyjxf.cumulus.impl.design3.minecraft.MinecraftRuntimeInstanceTracker;
-import dev.vfyjxf.cumulus.impl.design3.runtime.RuntimeAssetEngineBridge;
-import dev.vfyjxf.cumulus.impl.design3.runtime.RuntimeAssetReloadWiring;
-import dev.vfyjxf.cumulus.impl.design3.runtime.RuntimeCheckEngine;
-import dev.vfyjxf.cumulus.impl.design3.runtime.RuntimeCheckEngineTickDriver;
+import dev.vfyjxf.cumulus.impl.codec.RuntimeAssetReloadListener;
+import dev.vfyjxf.cumulus.impl.codec.RuntimeAssetRepository;
+import dev.vfyjxf.cumulus.impl.editor.StructureEditorController;
+import dev.vfyjxf.cumulus.impl.minecraft.MinecraftRuntimeEventBridge;
+import dev.vfyjxf.cumulus.impl.minecraft.MinecraftRuntimeInstanceTracker;
+import dev.vfyjxf.cumulus.impl.runtime.RuntimeAssetEngineBridge;
+import dev.vfyjxf.cumulus.impl.runtime.RuntimeAssetReloadWiring;
+import dev.vfyjxf.cumulus.impl.runtime.RuntimeCheckEngine;
+import dev.vfyjxf.cumulus.impl.runtime.RuntimeCheckEngineTickDriver;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -64,7 +64,7 @@ public final class Cumulus {
                 IEventBus gameEventBus,
                 StructureEditorController controller) {
             try {
-                var type = Class.forName("dev.vfyjxf.cumulus.impl.design3.editor.StructureEditorClientBridge");
+                var type = Class.forName("dev.vfyjxf.cumulus.impl.editor.StructureEditorClientBridge");
                 var bridge = type.getConstructor(StructureEditorController.class).newInstance(controller);
                 type.getMethod("register", IEventBus.class, IEventBus.class)
                         .invoke(bridge, modEventBus, gameEventBus);
