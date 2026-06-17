@@ -1,5 +1,6 @@
 package dev.vfyjxf.cumulus.impl.check;
 
+import dev.vfyjxf.cumulus.api.context.ContextRuleDescriptor;
 import dev.vfyjxf.cumulus.api.definition.PointRequirement;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
@@ -22,14 +23,17 @@ import dev.vfyjxf.cumulus.api.visualization.VisualizationElement;
 import dev.vfyjxf.cumulus.api.visualization.VisualizationModel;
 import dev.vfyjxf.cumulus.impl.StructureRuntimePlanCompiler;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 
 public final class StructureCheckExecutor {
     private static final ResourceLocation REGION_TARGET = ResourceLocation.parse("cumulus:region");
     private static final ResourceLocation CONTEXT_TARGET = ResourceLocation.parse("cumulus:context");
+    private static final ResourceLocation DERIVE_CONTEXT = ResourceLocation.parse("cumulus:derive");
     private static final List<ResourceLocation> SUPPORTED_TARGETS = List.of(
             ResourceLocation.parse("cumulus:block"),
             ResourceLocation.parse("cumulus:block_entity"),
@@ -246,6 +250,8 @@ public final class StructureCheckExecutor {
             PredicateRegistry predicateRegistry) {
         var key = new StructureInstanceKey(definition.id(), anchor);
         var contextBuilder = RuntimeStructureContext.builder(key).revision(1);
+        var contextValues = new LinkedHashMap<String, String>();
+        var resolvedTargets = new LinkedHashMap<String, ResolvedContextTarget>();
         var nodes = new ArrayList<DiagnosticNode>();
         var edges = new ArrayList<DiagnosticEdge>();
         var requests = new ArrayList<DataRequest>();
@@ -308,11 +314,15 @@ public final class StructureCheckExecutor {
                 continue;
             }
 
+            var absolute = anchor.offset(bounds.min().x(), bounds.min().y(), bounds.min().z());
             for (var capture : point.captures()) {
-                var absolute = anchor.offset(bounds.min().x(), bounds.min().y(), bounds.min().z());
-                contextBuilder.put(capture, absolute.getX() + "," + absolute.getY() + "," + absolute.getZ());
+                var resolved = new ResolvedContextTarget(format(absolute), target);
+                putContext(contextBuilder, contextValues, capture, resolved.absolutePosition());
+                resolvedTargets.put(capture, resolved);
             }
+            resolvedTargets.putIfAbsent(point.id().value(), new ResolvedContextTarget(format(absolute), target));
         }
+        applyContextRules(definition.contextRules(), contextBuilder, contextValues, resolvedTargets);
 
         var diagnostics = graph(nodes, edges);
         var status = status(nodes, requests);
@@ -439,6 +449,61 @@ public final class StructureCheckExecutor {
         return descriptors;
     }
 
+    private static void applyContextRules(
+            List<ContextRuleDescriptor> rules,
+            RuntimeStructureContext.Builder contextBuilder,
+            Map<String, String> contextValues,
+            Map<String, ResolvedContextTarget> resolvedTargets) {
+        for (var rule : rules) {
+            if (!DERIVE_CONTEXT.equals(rule.id())) {
+                continue;
+            }
+            var key = rule.properties().get("key");
+            var source = rule.properties().get("source");
+            if (key == null || key.isBlank() || source == null || source.isBlank()) {
+                continue;
+            }
+            resolveContextSource(source, contextValues, resolvedTargets)
+                    .ifPresent(value -> putContext(contextBuilder, contextValues, key, value));
+        }
+    }
+
+    private static Optional<String> resolveContextSource(
+            String source,
+            Map<String, String> contextValues,
+            Map<String, ResolvedContextTarget> resolvedTargets) {
+        var direct = contextValues.get(source);
+        if (direct != null) {
+            return Optional.of(direct);
+        }
+        var dot = source.indexOf('.');
+        if (dot <= 0 || dot == source.length() - 1) {
+            return Optional.empty();
+        }
+        var targetName = source.substring(0, dot);
+        var property = source.substring(dot + 1);
+        var resolved = resolvedTargets.get(targetName);
+        if (resolved == null) {
+            return Optional.empty();
+        }
+        if ("value".equals(property)) {
+            return Optional.of(resolved.target().value());
+        }
+        if ("position".equals(property)) {
+            return Optional.of(resolved.absolutePosition());
+        }
+        return Optional.ofNullable(resolved.target().properties().get(property));
+    }
+
+    private static void putContext(
+            RuntimeStructureContext.Builder contextBuilder,
+            Map<String, String> contextValues,
+            String key,
+            String value) {
+        contextBuilder.put(key, value);
+        contextValues.put(key, value);
+    }
+
     private static DiagnosticGraph graph(List<DiagnosticNode> nodes, List<DiagnosticEdge> edges) {
         if (nodes.isEmpty()) {
             return new DiagnosticGraph("root", List.of(), List.of());
@@ -470,6 +535,10 @@ public final class StructureCheckExecutor {
                 Integer.parseInt(parts[2]));
     }
 
+    private static String format(BlockPos pos) {
+        return pos.getX() + "," + pos.getY() + "," + pos.getZ();
+    }
+
     private record Bounds(RelativeBlockPos min, RelativeBlockPos max) {
     }
 
@@ -483,6 +552,11 @@ public final class StructureCheckExecutor {
     private record FastCandidateResult(
             InstanceStatus status,
             int entriesEvaluated) {
+    }
+
+    private record ResolvedContextTarget(
+            String absolutePosition,
+            SnapshotTarget target) {
     }
 
     @FunctionalInterface

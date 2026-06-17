@@ -64,6 +64,54 @@ substructure.<occurrenceId>.anchor_offset
 substructure.<occurrenceId>.context.<childCapture>
 ```
 
+## Convert Structure Data To Runtime Context
+
+Runtime context values are produced by successful check points and context rules:
+
+```java
+var definition = Structures.define(ResourceLocation.parse("cumulus:context_machine"))
+    .point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block()
+        .where(PredicateDescriptors.id("cumulus:controller"))
+        .capture("controller"))
+    .context(ContextRuleDescriptor.derive("facing", "controller.facing"))
+    .context(ContextRuleDescriptor.derive("controller_id", "controller.value"))
+    .build();
+```
+
+After `StructureCheckExecutor.check(...)`, `RuntimeStructureContext` contains:
+
+```text
+controller=10,64,10
+facing=north
+controller_id=cumulus:controller
+```
+
+The executable reference is `StructureCheckExecutorTest.contextRulesDeriveRuntimeContextFromMatchedTargetPropertiesAndValues`.
+
+## Complex Substructure Case
+
+`RuntimeCheckEngineTest.complexNestedSubstructureCaseConvertsStructureDataIntoRuntimeContexts` is the most complete runtime example. It covers:
+
+- parent `factory` with `left_arm`, `right_arm`, and `base` child occurrences
+- nested `arm -> tool` dependency expansion
+- block and region checks after cumulative child offsets
+- child context rules prefixed into composed root checks
+- independent child `InstanceDelta`s for arm/tool/base occurrences
+- `STATUS_AND_CONTEXT` mirroring back into the parent context
+
+The same file also shows missing child definitions, diagnostic scoping, lifecycle callbacks, ownership conflicts, repeated checks, and `fastTick`.
+
+For graph-only dependency behavior, read:
+
+- `SubstructureGraphResolverTest.resolvesNestedSubstructureGraphWithOffsetsAndDepth`
+- `SubstructureGraphResolverTest.reportsDiagnosticWhenChildDefinitionIsMissing`
+- `SubstructureGraphResolverTest.reportsDiagnosticWhenSubstructureDefinitionsContainCycle`
+
+For runtime composition behavior, read:
+
+- `SubstructureRuntimeComposerTest.composesNestedChildPointsAtCumulativeOffsets`
+- `SubstructureRuntimeComposerTest.translatesChildRegionTargetBounds`
+
 ## Compile Ghost Preview And Client Render Commands
 
 ```java

@@ -3,6 +3,7 @@ package dev.vfyjxf.cumulus.impl.runtime;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.Structures;
 import dev.vfyjxf.cumulus.api.component.Components;
+import dev.vfyjxf.cumulus.api.context.ContextRuleDescriptor;
 import dev.vfyjxf.cumulus.api.partition.SectionKey;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptors;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
@@ -25,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RuntimeCheckEngineTest {
     private static final ResourceLocation BLOCK = ResourceLocation.parse("cumulus:block");
+    private static final ResourceLocation REGION = ResourceLocation.parse("cumulus:region");
 
     @Test
     void dirtySectionsRunStructureChecksAndPublishDeltas() {
@@ -389,6 +391,88 @@ class RuntimeCheckEngineTest {
     }
 
     @Test
+    void complexNestedSubstructureCaseConvertsStructureDataIntoRuntimeContexts() {
+        var base = Structures.define(ResourceLocation.parse("cumulus:runtime_base"))
+                .point("base_controller", RelativeBlockPos.of(0, 0, 0), Targets.block()
+                        .where(PredicateDescriptors.id("cumulus:controller"))
+                        .capture("base_controller"))
+                .context(ContextRuleDescriptor.derive("base_facing", "base_controller.facing"))
+                .build();
+        var arm = Structures.define(ResourceLocation.parse("cumulus:runtime_arm_complex"))
+                .point("arm_mount", RelativeBlockPos.of(0, 0, 0), Targets.block()
+                        .where(PredicateDescriptors.id("cumulus:arm_mount"))
+                        .capture("arm_mount"))
+                .component(Components.substructure("tool", ResourceLocation.parse("cumulus:runtime_tool_complex"), RelativeBlockPos.of(1, 0, 0)))
+                .context(ContextRuleDescriptor.derive("arm_mount_value", "arm_mount.value"))
+                .build();
+        var tool = Structures.define(ResourceLocation.parse("cumulus:runtime_tool_complex"))
+                .point("tool_head", RelativeBlockPos.of(0, 0, 0), Targets.block()
+                        .where(PredicateDescriptors.id("cumulus:tool_head"))
+                        .capture("tool_head"))
+                .point("tool_region", RelativeBlockPos.of(-1, 0, 0), Targets.region(
+                        RelativeBlockPos.of(-1, 0, 0),
+                        RelativeBlockPos.of(1, 0, 0))
+                        .where(PredicateDescriptors.id("cumulus:tool_region")))
+                .context(ContextRuleDescriptor.derive("tool_head_value", "tool_head.value"))
+                .build();
+        var factory = Structures.define(ResourceLocation.parse("cumulus:runtime_factory_complex"))
+                .point("factory_core", RelativeBlockPos.of(0, 0, 0), Targets.block()
+                        .where(PredicateDescriptors.id("cumulus:factory_core"))
+                        .capture("factory_core"))
+                .component(Components.substructure("left_arm", arm.id(), RelativeBlockPos.of(2, 0, 0)))
+                .component(Components.substructure("right_arm", arm.id(), RelativeBlockPos.of(-2, 0, 0)))
+                .component(Components.substructure("base", base.id(), RelativeBlockPos.of(0, -1, 0)))
+                .context(ContextRuleDescriptor.derive("factory_core_value", "factory_core.value"))
+                .build();
+
+        var engine = new RuntimeCheckEngine()
+                .substructureSyncPolicy(SubstructureSyncPolicy.STATUS_AND_CONTEXT)
+                .register(factory)
+                .register(arm)
+                .register(tool)
+                .register(base)
+                .track(factory.id(), new BlockPos(100, 64, 100), source()
+                        .put(BLOCK, RelativeBlockPos.of(0, 0, 0), "cumulus:factory_core")
+                        .put(BLOCK, RelativeBlockPos.of(2, 0, 0), "cumulus:arm_mount")
+                        .put(BLOCK, RelativeBlockPos.of(3, 0, 0), "cumulus:tool_head")
+                        .put(REGION, RelativeBlockPos.of(2, 0, 0), RelativeBlockPos.of(4, 0, 0), "cumulus:tool_region")
+                        .put(BLOCK, RelativeBlockPos.of(-2, 0, 0), "cumulus:arm_mount")
+                        .put(BLOCK, RelativeBlockPos.of(-1, 0, 0), "cumulus:tool_head")
+                        .put(REGION, RelativeBlockPos.of(-2, 0, 0), RelativeBlockPos.of(0, 0, 0), "cumulus:tool_region")
+                        .put(BLOCK, RelativeBlockPos.of(0, -1, 0), "cumulus:controller", Map.of("facing", "north")));
+
+        engine.markDirty(new SectionKey(6, 4, 6));
+        var frame = engine.tick(90, 8);
+
+        var rootDelta = frame.deltas().stream()
+                .filter(delta -> delta.key().structureId().equals(factory.id()))
+                .findFirst()
+                .orElseThrow();
+        assertEquals("cumulus:factory_core", rootDelta.context().values().get("factory_core_value"));
+        assertEquals(InstanceStatus.VALID.name(), rootDelta.context().values()
+                .get("substructure.cumulus:runtime_factory_complex/left_arm.status"));
+        assertEquals("north", rootDelta.context().values()
+                .get("substructure.cumulus:runtime_factory_complex/base.context.base_facing"));
+
+        var leftArmDelta = frame.deltas().stream()
+                .filter(delta -> delta.key().structureId().equals(arm.id()))
+                .filter(delta -> delta.key().anchor().equals(new BlockPos(102, 64, 100)))
+                .findFirst()
+                .orElseThrow();
+        assertEquals("cumulus:arm_mount", leftArmDelta.context().values().get("arm_mount_value"));
+        assertEquals("cumulus:runtime_factory_complex/left_arm", leftArmDelta.context().values().get("parent_occurrence"));
+
+        var toolDelta = frame.deltas().stream()
+                .filter(delta -> delta.key().structureId().equals(tool.id()))
+                .filter(delta -> delta.key().anchor().equals(new BlockPos(103, 64, 100)))
+                .findFirst()
+                .orElseThrow();
+        assertEquals("cumulus:tool_head", toolDelta.context().values().get("tool_head_value"));
+        assertEquals("cumulus:runtime_factory_complex/left_arm/tool", toolDelta.context().values().get("parent_occurrence"));
+        assertEquals("103,64,100", toolDelta.context().values().get("tool_head"));
+    }
+
+    @Test
     void unresolvedSubstructureDefinitionsInvalidateBeforeSnapshotReads() {
         var anchor = new BlockPos(0, 64, 0);
         var parent = Structures.define(ResourceLocation.parse("cumulus:runtime_parent_missing_child"))
@@ -480,7 +564,24 @@ class RuntimeCheckEngineTest {
         private final Map<Key, SnapshotTarget> targets = new LinkedHashMap<>();
 
         BuilderSource put(ResourceLocation targetType, RelativeBlockPos pos, String value) {
-            targets.put(new Key(targetType, pos, pos), new SnapshotTarget(value, Map.of()));
+            return put(targetType, pos, value, Map.of());
+        }
+
+        BuilderSource put(ResourceLocation targetType, RelativeBlockPos pos, String value, Map<String, String> properties) {
+            return put(targetType, pos, pos, value, properties);
+        }
+
+        BuilderSource put(ResourceLocation targetType, RelativeBlockPos min, RelativeBlockPos max, String value) {
+            return put(targetType, min, max, value, Map.of());
+        }
+
+        BuilderSource put(
+                ResourceLocation targetType,
+                RelativeBlockPos min,
+                RelativeBlockPos max,
+                String value,
+                Map<String, String> properties) {
+            targets.put(new Key(targetType, min, max), new SnapshotTarget(value, properties));
             return this;
         }
 

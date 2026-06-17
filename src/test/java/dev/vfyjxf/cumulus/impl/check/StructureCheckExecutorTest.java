@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.impl.check;
 
 import dev.vfyjxf.cumulus.api.component.Components;
+import dev.vfyjxf.cumulus.api.context.ContextRuleDescriptor;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.Structures;
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
@@ -108,6 +109,32 @@ class StructureCheckExecutorTest {
         var result = StructureCheckExecutor.check(definition, new BlockPos(0, 0, 0), snapshot);
 
         assertEquals(InstanceStatus.VALID, result.status());
+    }
+
+    @Test
+    void contextRulesDeriveRuntimeContextFromMatchedTargetPropertiesAndValues() {
+        var definition = Structures.define(ResourceLocation.parse("cumulus:context_machine"))
+                .point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block()
+                        .where(PredicateDescriptors.id("cumulus:controller"))
+                        .capture("controller"))
+                .point("inventory", RelativeBlockPos.of(1, 0, 0), Targets.blockEntity()
+                        .where(PredicateDescriptors.id("cumulus:item_handler")))
+                .context(ContextRuleDescriptor.derive("facing", "controller.facing"))
+                .context(ContextRuleDescriptor.derive("controller_id", "controller.value"))
+                .context(ContextRuleDescriptor.derive("inventory_position", "inventory.position"))
+                .build();
+        var snapshot = InMemoryTargetSnapshot.builder()
+                .block(RelativeBlockPos.of(0, 0, 0), "cumulus:controller", Map.of("facing", "north"))
+                .blockEntity(RelativeBlockPos.of(1, 0, 0), "cumulus:item_handler")
+                .build();
+
+        var result = StructureCheckExecutor.check(definition, new BlockPos(10, 64, 10), snapshot);
+
+        assertEquals(InstanceStatus.VALID, result.status());
+        assertEquals("10,64,10", result.context().values().get("controller"));
+        assertEquals("north", result.context().values().get("facing"));
+        assertEquals("cumulus:controller", result.context().values().get("controller_id"));
+        assertEquals("11,64,10", result.context().values().get("inventory_position"));
     }
 
     @Test

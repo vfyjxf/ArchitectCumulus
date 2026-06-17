@@ -54,6 +54,8 @@ public final class SubstructureRuntimeComposer {
             if (node.occurrenceId().equals(graph.root().occurrenceId())) {
                 contextRules.addAll(definition.contextRules());
                 components.addAll(definition.components());
+            } else {
+                contextRules.addAll(translateContextRules(definition.contextRules(), node.occurrenceId()));
             }
         }
 
@@ -86,6 +88,33 @@ public final class SubstructureRuntimeComposer {
                     offsetsByOccurrence.get(node.occurrenceId())));
         }
         return List.copyOf(occurrences);
+    }
+
+    private static List<ContextRuleDescriptor> translateContextRules(
+            List<ContextRuleDescriptor> rules,
+            String occurrenceId) {
+        var translated = new ArrayList<ContextRuleDescriptor>();
+        for (var rule : rules) {
+            var properties = new LinkedHashMap<>(rule.properties());
+            var key = properties.get("key");
+            if (key != null && !key.isBlank()) {
+                properties.put("key", occurrenceId + "/" + key);
+            }
+            var source = properties.get("source");
+            if (source != null && !source.isBlank()) {
+                properties.put("source", prefixSource(occurrenceId, source));
+            }
+            translated.add(new ContextRuleDescriptor(rule.id(), properties));
+        }
+        return translated;
+    }
+
+    private static String prefixSource(String occurrenceId, String source) {
+        var dot = source.indexOf('.');
+        if (dot <= 0 || dot == source.length() - 1) {
+            return occurrenceId + "/" + source;
+        }
+        return occurrenceId + "/" + source.substring(0, dot) + "." + source.substring(dot + 1);
     }
 
     private static StructurePointDefinition translatePoint(
