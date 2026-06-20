@@ -8,8 +8,8 @@ import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
 import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
 import dev.vfyjxf.cumulus.api.definition.StructurePointId;
 import dev.vfyjxf.cumulus.api.target.TargetDescriptor;
-import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.target.types.RegionTargetType;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 
 import net.minecraft.resources.ResourceLocation;
 

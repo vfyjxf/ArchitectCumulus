@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.api.context.plan;
 
 import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
+
 import java.util.List;
 
 /**
@@ -19,8 +20,8 @@ import java.util.List;
  * }</pre>
  */
 public record PhaseResult(
-        List<StructurePointDefinition> extraPoints,
-        List<CountConstraint> constraints) {
+                List<StructurePointDefinition> extraPoints,
+                List<CountConstraint> constraints) {
 
     public PhaseResult {
         extraPoints = extraPoints == null ? List.of() : List.copyOf(extraPoints);

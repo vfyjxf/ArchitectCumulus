@@ -2,8 +2,10 @@ package dev.vfyjxf.cumulus.api.context.plan;
 
 import dev.vfyjxf.cumulus.api.context.CheckContext;
 import dev.vfyjxf.cumulus.api.transform.TransformDescriptor;
-import java.util.Objects;
+
 import net.minecraft.core.BlockPos;
+
+import java.util.Objects;
 
 /**
  * Data access handed to a {@link CheckPhase} at evaluation time. Combines:

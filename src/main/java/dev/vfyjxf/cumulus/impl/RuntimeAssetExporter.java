@@ -5,8 +5,8 @@ import dev.vfyjxf.cumulus.api.datagen.DataDrivenStructureAsset;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
 import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptor;
-import dev.vfyjxf.cumulus.api.transform.TransformDescriptor;
 import dev.vfyjxf.cumulus.api.target.types.RegionTargetType;
+import dev.vfyjxf.cumulus.api.transform.TransformDescriptor;
 
 import net.minecraft.resources.ResourceLocation;
 

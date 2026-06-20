@@ -3,17 +3,14 @@ package dev.vfyjxf.cumulus.api.context.plan.stdlib;
 import dev.vfyjxf.cumulus.api.component.Axis;
 import dev.vfyjxf.cumulus.api.component.StructureComponent;
 import dev.vfyjxf.cumulus.api.context.plan.CheckPhase;
+import dev.vfyjxf.cumulus.api.context.plan.PhaseContext;
 import dev.vfyjxf.cumulus.api.context.plan.PhaseResult;
 import dev.vfyjxf.cumulus.api.definition.PointRequirement;
-import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
 import dev.vfyjxf.cumulus.api.definition.StructurePointId;
-import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticMetadata;
-import dev.vfyjxf.cumulus.api.target.TargetPattern;
 import dev.vfyjxf.cumulus.api.types.ContextKey;
+
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Standard library of {@link CheckPhase} factories.
@@ -35,8 +32,7 @@ import java.util.Set;
  */
 public final class CheckPhases {
 
-    private CheckPhases() {
-    }
+    private CheckPhases() {}
 
     /**
      * Create a {@link CheckPhase} that repeats a template component along an
@@ -59,13 +55,7 @@ public final class CheckPhases {
      * @param max        maximum layers to probe; must be ≥ min
      * @param outKey     context key to store the matched layer count
      */
-    public static CheckPhase repeatRange(
-            String namePrefix,
-            StructureComponent template,
-            Axis axis,
-            int min,
-            int max,
-            ContextKey<Integer> outKey) {
+    public static CheckPhase repeatRange(String namePrefix, StructureComponent template, Axis axis, int min, int max, ContextKey<Integer> outKey) {
         if (min < 1) {
             throw new IllegalArgumentException("repeatRange min must be >= 1");
         }
@@ -95,7 +85,7 @@ public final class CheckPhases {
         }
 
         @Override
-        public PhaseResult evaluate(dev.vfyjxf.cumulus.api.context.plan.PhaseContext ctx) {
+        public PhaseResult evaluate(PhaseContext ctx) {
             // Emit the template's points at each layer offset
             var points = new ArrayList<StructurePointDefinition>();
             for (int layer = 0; layer < max; layer++) {
@@ -106,14 +96,14 @@ public final class CheckPhases {
                 template.emit(p -> {
                     var shifted = axis.shift(p.location(), offset);
                     collected.add(new StructurePointDefinition(
-                            new StructurePointId(namePrefix + "_L" + layerIndex + "_" + p.id().value()),
-                            shifted,
-                            p.target(),
-                            p.predicates(),
-                            requirement,
-                            p.captures(),
-                            p.groups(),
-                            p.diagnostics()));
+                                    new StructurePointId(namePrefix + "_L" + layerIndex + "_" + p.id().value()),
+                                    shifted,
+                                    p.target(),
+                                    p.predicates(),
+                                    requirement,
+                                    p.captures(),
+                                    p.groups(),
+                                    p.diagnostics()));
                 });
                 points.addAll(collected);
             }

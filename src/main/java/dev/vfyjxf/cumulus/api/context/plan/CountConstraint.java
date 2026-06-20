@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.api.context.plan;
 
 import dev.vfyjxf.cumulus.api.predicate.StructurePredicate;
+
 import java.util.Objects;
 
 /**
@@ -17,9 +18,9 @@ import java.util.Objects;
  * }</pre>
  */
 public record CountConstraint(
-        StructurePredicate filter,
-        int min,
-        int max) {
+                StructurePredicate filter,
+                int min,
+                int max) {
 
     public CountConstraint {
         Objects.requireNonNull(filter, "filter must not be null");

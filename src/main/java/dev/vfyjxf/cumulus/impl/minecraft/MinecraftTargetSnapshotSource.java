@@ -1,14 +1,14 @@
 package dev.vfyjxf.cumulus.impl.minecraft;
 
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
-import dev.vfyjxf.cumulus.impl.check.SnapshotTarget;
-import dev.vfyjxf.cumulus.impl.check.TargetSnapshotSource;
-import dev.vfyjxf.cumulus.api.target.types.BlockTargetType;
 import dev.vfyjxf.cumulus.api.target.types.BlockEntityTargetType;
+import dev.vfyjxf.cumulus.api.target.types.BlockTargetType;
+import dev.vfyjxf.cumulus.api.target.types.CapabilityTargetType;
 import dev.vfyjxf.cumulus.api.target.types.EntityTargetType;
 import dev.vfyjxf.cumulus.api.target.types.FluidTargetType;
-import dev.vfyjxf.cumulus.api.target.types.CapabilityTargetType;
 import dev.vfyjxf.cumulus.api.target.types.RegionTargetType;
+import dev.vfyjxf.cumulus.impl.check.SnapshotTarget;
+import dev.vfyjxf.cumulus.impl.check.TargetSnapshotSource;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;

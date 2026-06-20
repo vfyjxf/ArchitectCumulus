@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.api.context;
 
 import dev.vfyjxf.cumulus.api.types.ContextKey;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -110,8 +111,7 @@ public final class ContextMap {
             Objects.requireNonNull(value, "value must not be null");
             if (!key.type().isInstance(value)) {
                 throw new ClassCastException(
-                        "ContextKey '" + key.name() + "' expects " + key.type().getName()
-                                + " but got " + value.getClass().getName());
+                                "ContextKey '" + key.name() + "' expects " + key.type().getName() + " but got " + value.getClass().getName());
             }
             entries.put(key, value);
             return this;
@@ -123,8 +123,7 @@ public final class ContextMap {
             Objects.requireNonNull(value, "value must not be null");
             if (!key.type().isInstance(value)) {
                 throw new ClassCastException(
-                        "ContextKey '" + key.name() + "' expects " + key.type().getName()
-                                + " but got " + value.getClass().getName());
+                                "ContextKey '" + key.name() + "' expects " + key.type().getName() + " but got " + value.getClass().getName());
             }
             entries.put(key, value);
             return this;
@@ -194,8 +193,10 @@ public final class ContextMap {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ContextMap that)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof ContextMap that))
+            return false;
         return entries.equals(that.entries);
     }
 

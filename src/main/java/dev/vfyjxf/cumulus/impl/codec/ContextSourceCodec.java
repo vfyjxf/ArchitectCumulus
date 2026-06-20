@@ -56,8 +56,7 @@ public final class ContextSourceCodec {
                 var field = String.valueOf(wire.getOrDefault("field", "value"));
                 yield switch (field) {
                     case "position" -> new CaptureSource(point, CaptureField.position());
-                    case "property" -> new CaptureSource(point, CaptureField.property(
-                                    String.valueOf(wire.get("property"))));
+                    case "property" -> new CaptureSource(point, CaptureField.property(String.valueOf(wire.get("property"))));
                     default -> new CaptureSource(point, CaptureField.value());
                 };
             }

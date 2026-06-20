@@ -4,8 +4,8 @@ import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticMetadata;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptor;
 import dev.vfyjxf.cumulus.api.target.TargetPattern;
 import dev.vfyjxf.cumulus.api.target.Targets;
+
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -45,7 +45,8 @@ public final class PartPattern {
 
     private PartPattern(String name, TargetPattern target, PointRequirement requirement, Set<String> groups) {
         this.name = Objects.requireNonNull(name, "PartPattern name must not be null");
-        if (name.isBlank()) throw new IllegalArgumentException("PartPattern name must not be blank");
+        if (name.isBlank())
+            throw new IllegalArgumentException("PartPattern name must not be blank");
         this.target = Objects.requireNonNull(target, "PartPattern target must not be null");
         this.requirement = Objects.requireNonNull(requirement, "PartPattern requirement must not be null");
         this.groups = Set.copyOf(groups);
@@ -165,14 +166,14 @@ public final class PartPattern {
      */
     public StructurePointDefinition toPoint(String id, RelativeBlockPos pos) {
         return new StructurePointDefinition(
-                new StructurePointId(id),
-                pos,
-                target.target(),
-                target.predicates(),
-                requirement,
-                target.captures(),
-                groups,
-                DiagnosticMetadata.empty());
+                        new StructurePointId(id),
+                        pos,
+                        target.target(),
+                        target.predicates(),
+                        requirement,
+                        target.captures(),
+                        groups,
+                        DiagnosticMetadata.empty());
     }
 
     @Override

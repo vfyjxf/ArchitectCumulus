@@ -1,7 +1,8 @@
 package dev.vfyjxf.cumulus.impl.build;
 
-import net.minecraft.resources.ResourceLocation;
 import dev.vfyjxf.cumulus.api.target.types.CapabilityTargetType;
+
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

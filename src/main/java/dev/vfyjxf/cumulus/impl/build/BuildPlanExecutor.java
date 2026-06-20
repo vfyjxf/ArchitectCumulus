@@ -5,14 +5,14 @@ import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticEvidence;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticGraph;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticNode;
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
-import dev.vfyjxf.cumulus.impl.RuntimePlanEntry;
-import dev.vfyjxf.cumulus.impl.StructureRuntimePlan;
-import dev.vfyjxf.cumulus.api.target.types.BlockTargetType;
 import dev.vfyjxf.cumulus.api.target.types.BlockEntityTargetType;
+import dev.vfyjxf.cumulus.api.target.types.BlockTargetType;
+import dev.vfyjxf.cumulus.api.target.types.CapabilityTargetType;
 import dev.vfyjxf.cumulus.api.target.types.EntityTargetType;
 import dev.vfyjxf.cumulus.api.target.types.FluidTargetType;
-import dev.vfyjxf.cumulus.api.target.types.CapabilityTargetType;
 import dev.vfyjxf.cumulus.api.target.types.RegionTargetType;
+import dev.vfyjxf.cumulus.impl.RuntimePlanEntry;
+import dev.vfyjxf.cumulus.impl.StructureRuntimePlan;
 
 import net.minecraft.resources.ResourceLocation;
 

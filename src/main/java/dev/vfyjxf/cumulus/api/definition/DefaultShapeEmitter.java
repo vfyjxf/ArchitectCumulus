@@ -13,8 +13,7 @@ public final class DefaultShapeEmitter implements ShapeEmitter {
 
     public static final DefaultShapeEmitter instance = new DefaultShapeEmitter();
 
-    private DefaultShapeEmitter() {
-    }
+    private DefaultShapeEmitter() {}
 
     @Override
     public void emit(PartPattern[][][] shape, ShapeEmitterContext ctx) {

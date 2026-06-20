@@ -25,7 +25,6 @@ import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
 import dev.vfyjxf.cumulus.api.target.TargetTypes;
 import dev.vfyjxf.cumulus.api.target.types.ContextTargetType;
-import dev.vfyjxf.cumulus.api.target.types.RegionTargetType;
 import dev.vfyjxf.cumulus.api.transform.Transforms;
 import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.visualization.VisualizationElement;
@@ -43,6 +42,7 @@ import java.util.Map;
 public final class StructureCheckExecutor {
     private static final ResourceLocation regionTarget = ResourceLocation.parse("cumulus:region");
     private static final ResourceLocation contextTarget = ResourceLocation.parse("cumulus:context");
+
     // Typed dispatch: use TargetTypes registry instead of hardcoded ResourceLocation list
     private static boolean isSupportedTarget(ResourceLocation typeId) {
         return TargetTypes.isRegistered(typeId);
@@ -228,8 +228,7 @@ public final class StructureCheckExecutor {
         var entries = candidate == null ? fallbackEntries(definition) : candidate.entries();
         var transform = candidate == null ? null : candidate.transform();
         for (var entry : entries) {
-            matchPoint(entry.point(), new Bounds(entry.min(), entry.max()), definition, anchor, snapshot,
-                    predicateRegistry, checkCtx, nodes, edges, requests, visualization, matchedPoints);
+            matchPoint(entry.point(), new Bounds(entry.min(), entry.max()), definition, anchor, snapshot, predicateRegistry, checkCtx, nodes, edges, requests, visualization, matchedPoints);
         }
         applyContextRules(definition.contextRules(), checkCtx);
 
@@ -237,7 +236,7 @@ public final class StructureCheckExecutor {
         if (definition.checkPhase() != null) {
             var matchResults = new MatchResults(matchedPoints);
             var phaseCtx = new PhaseContext(matchResults, checkCtx, anchor,
-                    transform != null ? transform : Transforms.identity());
+                            transform != null ? transform : Transforms.identity());
             PhaseResult phaseResult;
             try {
                 phaseResult = definition.checkPhase().evaluate(phaseCtx);
@@ -250,8 +249,7 @@ public final class StructureCheckExecutor {
             // Match extra points
             for (var extraPoint : phaseResult.extraPoints()) {
                 var extraBounds = new Bounds(extraPoint.location(), extraPoint.location());
-                matchPoint(extraPoint, extraBounds, definition, anchor, snapshot,
-                        predicateRegistry, checkCtx, nodes, edges, requests, visualization, matchedPoints);
+                matchPoint(extraPoint, extraBounds, definition, anchor, snapshot, predicateRegistry, checkCtx, nodes, edges, requests, visualization, matchedPoints);
             }
             // Verify count constraints
             var finalMatches = new MatchResults(matchedPoints);
@@ -259,14 +257,13 @@ public final class StructureCheckExecutor {
                 int count = (int) finalMatches.count(constraint.filter());
                 if (!constraint.isSatisfied(count)) {
                     nodes.add(new DiagnosticNode(
-                            "constraint_violation",
-                            Severity.error,
-                            "Count constraint violated: expected " + constraint.min() + "~" + constraint.max()
-                                    + " matching points, got " + count,
-                            "diagnostic.cumulus.constraint_violation",
-                            List.of(),
-                            "runtime/check/constraint",
-                            List.of()));
+                                    "constraint_violation",
+                                    Severity.error,
+                                    "Count constraint violated: expected " + constraint.min() + "~" + constraint.max() + " matching points, got " + count,
+                                    "diagnostic.cumulus.constraint_violation",
+                                    List.of(),
+                                    "runtime/check/constraint",
+                                    List.of()));
                     if (nodes.size() > 1) {
                         edges.add(new DiagnosticEdge("root", "constraint_violation", "caused_by"));
                     }
@@ -290,13 +287,7 @@ public final class StructureCheckExecutor {
      * downstream phases/operations. Shared by static entries and dynamic
      * CheckPhase expansion.
      */
-    private static void matchPoint(
-            StructurePointDefinition point, Bounds bounds,
-            StructureDefinition definition, BlockPos anchor, InMemoryTargetSnapshot snapshot,
-            PredicateRegistry predicateRegistry, CheckContext checkCtx,
-            List<DiagnosticNode> nodes, List<DiagnosticEdge> edges,
-            List<DataRequest> requests, List<VisualizationElement> visualization,
-            List<MatchedPoint> matchedPoints) {
+    private static void matchPoint(StructurePointDefinition point, Bounds bounds, StructureDefinition definition, BlockPos anchor, InMemoryTargetSnapshot snapshot, PredicateRegistry predicateRegistry, CheckContext checkCtx, List<DiagnosticNode> nodes, List<DiagnosticEdge> edges, List<DataRequest> requests, List<VisualizationElement> visualization, List<MatchedPoint> matchedPoints) {
         if (!isSupportedTarget(point.target().typeId())) {
             if (point.requirement() == PointRequirement.optional) {
                 return;

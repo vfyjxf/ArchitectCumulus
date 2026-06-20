@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.api.predicate;
 
 import dev.vfyjxf.cumulus.api.context.plan.MatchedPoint;
+
 import java.util.function.Predicate;
 
 /**

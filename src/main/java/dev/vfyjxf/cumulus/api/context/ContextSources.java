@@ -1,7 +1,7 @@
 package dev.vfyjxf.cumulus.api.context;
 
-import dev.vfyjxf.cumulus.api.context.sources.CaptureSource;
 import dev.vfyjxf.cumulus.api.context.sources.CaptureField;
+import dev.vfyjxf.cumulus.api.context.sources.CaptureSource;
 import dev.vfyjxf.cumulus.api.context.sources.ContextRefSource;
 import dev.vfyjxf.cumulus.api.context.sources.LiteralSource;
 import dev.vfyjxf.cumulus.api.definition.StructurePointId;
@@ -46,8 +46,7 @@ public final class ContextSources {
             return source;
         }
         throw new IllegalArgumentException(
-                        "Cannot prefix ContextSource of type " + source.getClass().getName()
-                                + "; implement a prefix helper or use a built-in source type");
+                        "Cannot prefix ContextSource of type " + source.getClass().getName() + "; implement a prefix helper or use a built-in source type");
     }
 
     public record CaptureBuilder(StructurePointId point) {

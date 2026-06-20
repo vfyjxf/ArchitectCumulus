@@ -15,6 +15,7 @@ import java.util.Optional;
  * }</pre>
  */
 public record DiagnosticMetadata(Map<String, String> properties) {
+
     public DiagnosticMetadata {
         properties = Map.copyOf(properties);
     }

@@ -1,5 +1,7 @@
 package dev.vfyjxf.cumulus.api.definition;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -12,7 +14,7 @@ public final class ShapeEmitterContext {
     private final Consumer<StructurePointDefinition> sink;
 
     public ShapeEmitterContext(Consumer<StructurePointDefinition> sink) {
-        this.sink = java.util.Objects.requireNonNull(sink, "sink must not be null");
+        this.sink = Objects.requireNonNull(sink, "sink must not be null");
     }
 
     /**
@@ -42,7 +44,7 @@ public final class ShapeEmitterContext {
     /**
      * Convenience: create a context that feeds into a list-based consumer.
      */
-    public static ShapeEmitterContext toList(java.util.List<StructurePointDefinition> list) {
+    public static ShapeEmitterContext toList(List<StructurePointDefinition> list) {
         return new ShapeEmitterContext(list::add);
     }
 }

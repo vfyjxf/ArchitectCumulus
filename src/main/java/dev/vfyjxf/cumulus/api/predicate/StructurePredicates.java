@@ -15,8 +15,7 @@ import dev.vfyjxf.cumulus.api.context.plan.MatchedPoint;
  */
 public final class StructurePredicates {
 
-    private StructurePredicates() {
-    }
+    private StructurePredicates() {}
 
     /** Match points whose primary value (block id) equals {@code blockId}. */
     public static StructurePredicate id(String blockId) {

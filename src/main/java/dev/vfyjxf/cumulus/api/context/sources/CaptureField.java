@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.api.context.sources;
 
 import dev.vfyjxf.cumulus.api.context.CheckContext;
+
 import java.util.Objects;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Objects;
  * pattern-match for serialization without probe-testing.
  */
 public sealed interface CaptureField
-        permits CaptureField.Value, CaptureField.Position, CaptureField.Property {
+                permits CaptureField.Value, CaptureField.Position, CaptureField.Property {
 
     String extract(CheckContext.ResolvedTarget target);
 

@@ -1,8 +1,5 @@
 package dev.vfyjxf.cumulus.api.context.plan;
 
-import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
-import java.util.List;
-
 /**
  * Validation hook inserted between static point matching and context-plan
  * operation execution. Now unified with {@link EvaluationPhase} — this

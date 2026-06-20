@@ -1,8 +1,9 @@
 package dev.vfyjxf.cumulus.api.definition;
 
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.Optional;
 import java.util.function.Function;
-import net.minecraft.resources.ResourceLocation;
 
 public final class Structures {
     private static final StructureDefinitionRegistry GLOBAL_REGISTRY = new StructureDefinitionRegistry();
@@ -67,9 +68,7 @@ public final class Structures {
      *                 compiled {@link StructureDefinition} (typically by
      *                 calling {@code .build()} on it)
      */
-    public static StructureDefinition define(
-            String id,
-            Function<StructureDefinitionBuilder, StructureDefinition> recipe) {
+    public static StructureDefinition define(String id, Function<StructureDefinitionBuilder, StructureDefinition> recipe) {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("Structure id must not be blank");
         }

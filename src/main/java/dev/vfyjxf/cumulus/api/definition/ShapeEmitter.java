@@ -1,7 +1,5 @@
 package dev.vfyjxf.cumulus.api.definition;
 
-import java.util.function.Consumer;
-
 /**
  * Expands a {@code PartPattern[][][]}} shape matrix into
  * {@link StructurePointDefinition}s. The default implementation

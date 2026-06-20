@@ -7,9 +7,7 @@ import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
  * and other axial-repeat operations.
  */
 public enum Axis {
-    x,
-    y,
-    z;
+    x, y, z;
 
     /** Shift a relative position by {@code amount} along this axis. */
     public RelativeBlockPos shift(RelativeBlockPos pos, int amount) {

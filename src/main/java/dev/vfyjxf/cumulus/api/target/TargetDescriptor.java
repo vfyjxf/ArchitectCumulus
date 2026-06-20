@@ -3,6 +3,7 @@ package dev.vfyjxf.cumulus.api.target;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Map;
+import java.util.Optional;
 
 public record TargetDescriptor(ResourceLocation typeId, Map<String, String> properties) {
     public TargetDescriptor {
@@ -17,7 +18,7 @@ public record TargetDescriptor(ResourceLocation typeId, Map<String, String> prop
      * {@link TargetType} via {@link TargetTypes#maybeFromId}. Returns empty
      * for unregistered ids (e.g. custom types not yet registered).
      */
-    public java.util.Optional<TargetType> type() {
+    public Optional<TargetType> type() {
         return TargetTypes.maybeFromId(typeId);
     }
 

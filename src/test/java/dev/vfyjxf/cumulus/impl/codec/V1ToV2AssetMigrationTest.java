@@ -3,8 +3,6 @@ package dev.vfyjxf.cumulus.impl.codec;
 import dev.vfyjxf.cumulus.api.context.ContextRuleDescriptor;
 import dev.vfyjxf.cumulus.api.context.ContextSources;
 import dev.vfyjxf.cumulus.api.context.sources.CaptureSource;
-import dev.vfyjxf.cumulus.api.context.sources.CaptureSource;
-import dev.vfyjxf.cumulus.api.context.sources.CaptureSource;
 import dev.vfyjxf.cumulus.api.context.sources.ContextRefSource;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.Structures;

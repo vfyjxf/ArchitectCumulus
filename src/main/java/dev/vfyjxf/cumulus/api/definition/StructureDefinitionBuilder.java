@@ -14,7 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 
 public final class StructureDefinitionBuilder {
     private final ResourceLocation id;
