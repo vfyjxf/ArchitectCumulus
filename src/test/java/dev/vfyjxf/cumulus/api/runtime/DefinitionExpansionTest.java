@@ -3,7 +3,8 @@ package dev.vfyjxf.cumulus.api.runtime;
 import dev.vfyjxf.cumulus.api.component.Components;
 import dev.vfyjxf.cumulus.api.context.ContextRuleDescriptor;
 import dev.vfyjxf.cumulus.api.context.ContextSources;
-import dev.vfyjxf.cumulus.api.context.sources.CapturePropertySource;
+import dev.vfyjxf.cumulus.api.context.sources.CaptureField;
+import dev.vfyjxf.cumulus.api.context.sources.CaptureSource;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.Structures;
 import dev.vfyjxf.cumulus.api.migration.MigrationDescriptor;
@@ -91,8 +92,8 @@ class DefinitionExpansionTest {
 
         assertEquals(1, definition.contextRules().size());
         assertEquals("facing", definition.contextRules().get(0).targetKey().name());
-        assertEquals("controller", ((CapturePropertySource) definition.contextRules().get(0).source()).point().value());
-        assertEquals("facing", ((CapturePropertySource) definition.contextRules().get(0).source()).property());
+        assertEquals("controller", ((CaptureSource) definition.contextRules().get(0).source()).point().value());
+        assertEquals("facing", ((CaptureField.Property) ((CaptureSource) definition.contextRules().get(0).source()).field()).name());
 
         assertEquals(1, definition.versions().size());
         assertEquals(2, definition.versions().get(0).version());

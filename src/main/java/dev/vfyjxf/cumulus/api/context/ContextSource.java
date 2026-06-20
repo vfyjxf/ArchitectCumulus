@@ -9,9 +9,9 @@ import java.util.Optional;
  * <p>The type parameter {@code T} declares the value type this source produces.
  * Built-in sources:
  * <ul>
- *   <li>{@link dev.vfyjxf.cumulus.api.context.sources.CapturePropertySource} implements {@code ContextSource<String>}</li>
- *   <li>{@link dev.vfyjxf.cumulus.api.context.sources.CaptureValueSource} implements {@code ContextSource<String>}</li>
- *   <li>{@link dev.vfyjxf.cumulus.api.context.sources.CapturePositionSource} implements {@code ContextSource<String>}</li>
+ *   <li>{@link dev.vfyjxf.cumulus.api.context.sources.CaptureSource} implements {@code ContextSource<String>}</li>
+ *   <li>{@link dev.vfyjxf.cumulus.api.context.sources.CaptureSource} implements {@code ContextSource<String>}</li>
+ *   <li>{@link dev.vfyjxf.cumulus.api.context.sources.CaptureSource} implements {@code ContextSource<String>}</li>
  *   <li>{@link dev.vfyjxf.cumulus.api.context.sources.ContextRefSource ContextRefSource&lt;T&gt;} implements {@code ContextSource<T>}</li>
  *   <li>{@link dev.vfyjxf.cumulus.api.context.sources.LiteralSource LiteralSource&lt;T&gt;} implements {@code ContextSource<T>}</li>
  * </ul>

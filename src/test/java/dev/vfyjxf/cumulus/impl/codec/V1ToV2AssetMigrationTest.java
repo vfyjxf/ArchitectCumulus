@@ -2,9 +2,9 @@ package dev.vfyjxf.cumulus.impl.codec;
 
 import dev.vfyjxf.cumulus.api.context.ContextRuleDescriptor;
 import dev.vfyjxf.cumulus.api.context.ContextSources;
-import dev.vfyjxf.cumulus.api.context.sources.CapturePositionSource;
-import dev.vfyjxf.cumulus.api.context.sources.CapturePropertySource;
-import dev.vfyjxf.cumulus.api.context.sources.CaptureValueSource;
+import dev.vfyjxf.cumulus.api.context.sources.CaptureSource;
+import dev.vfyjxf.cumulus.api.context.sources.CaptureSource;
+import dev.vfyjxf.cumulus.api.context.sources.CaptureSource;
 import dev.vfyjxf.cumulus.api.context.sources.ContextRefSource;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.Structures;
@@ -41,13 +41,13 @@ class V1ToV2AssetMigrationTest {
     @Test
     void legacySourceParserConvertsDottedExpressionsToTypedSources() {
         var source = LegacySourceParser.parse("controller.facing");
-        assertEquals(CapturePropertySource.class, source.getClass());
+        assertEquals(CaptureSource.class, source.getClass());
 
         var valueSource = LegacySourceParser.parse("controller.value");
-        assertEquals(CaptureValueSource.class, valueSource.getClass());
+        assertEquals(CaptureSource.class, valueSource.getClass());
 
         var posSource = LegacySourceParser.parse("controller.position");
-        assertEquals(CapturePositionSource.class, posSource.getClass());
+        assertEquals(CaptureSource.class, posSource.getClass());
 
         var refSource = LegacySourceParser.parse("some_key");
         assertEquals(ContextRefSource.class, refSource.getClass());

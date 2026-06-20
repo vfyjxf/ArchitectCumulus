@@ -1,8 +1,7 @@
 package dev.vfyjxf.cumulus.api.context;
 
-import dev.vfyjxf.cumulus.api.context.sources.CapturePositionSource;
-import dev.vfyjxf.cumulus.api.context.sources.CapturePropertySource;
-import dev.vfyjxf.cumulus.api.context.sources.CaptureValueSource;
+import dev.vfyjxf.cumulus.api.context.sources.CaptureSource;
+import dev.vfyjxf.cumulus.api.context.sources.CaptureField;
 import dev.vfyjxf.cumulus.api.context.sources.ContextRefSource;
 import dev.vfyjxf.cumulus.api.context.sources.LiteralSource;
 import dev.vfyjxf.cumulus.api.definition.StructurePointId;
@@ -34,18 +33,10 @@ public final class ContextSources {
             return source;
         }
         var prefix = occurrenceId + "/";
-        if (source instanceof CapturePropertySource cps) {
-            return new CapturePropertySource(
-                            new StructurePointId(prefix + cps.point().value()),
-                            cps.property());
-        }
-        if (source instanceof CaptureValueSource cvs) {
-            return new CaptureValueSource(
-                            new StructurePointId(prefix + cvs.point().value()));
-        }
-        if (source instanceof CapturePositionSource cps) {
-            return new CapturePositionSource(
-                            new StructurePointId(prefix + cps.point().value()));
+        if (source instanceof CaptureSource cs) {
+            return new CaptureSource(
+                            new StructurePointId(prefix + cs.point().value()),
+                            cs.field());
         }
         if (source instanceof ContextRefSource<?> crs) {
             return new ContextRefSource(
@@ -55,20 +46,21 @@ public final class ContextSources {
             return source;
         }
         throw new IllegalArgumentException(
-                        "Cannot prefix ContextSource of type " + source.getClass().getName() + "; implement a prefix helper or use a built-in source type");
+                        "Cannot prefix ContextSource of type " + source.getClass().getName()
+                                + "; implement a prefix helper or use a built-in source type");
     }
 
     public record CaptureBuilder(StructurePointId point) {
-        public CapturePropertySource property(String name) {
-            return new CapturePropertySource(point, name);
+        public CaptureSource property(String name) {
+            return new CaptureSource(point, CaptureField.property(name));
         }
 
-        public CaptureValueSource value() {
-            return new CaptureValueSource(point);
+        public CaptureSource value() {
+            return new CaptureSource(point, CaptureField.value());
         }
 
-        public CapturePositionSource position() {
-            return new CapturePositionSource(point);
+        public CaptureSource position() {
+            return new CaptureSource(point, CaptureField.position());
         }
     }
 }
