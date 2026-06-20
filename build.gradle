@@ -5,6 +5,7 @@ plugins {
     id 'idea'
     id 'jacoco'
     id 'com.diffplug.spotless' version '6.25.0'
+    id 'cumulus.no-inline-fqn'
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -244,51 +245,3 @@ spotless {
     }
 }
 
-// ── No-inline-FQN check ────────────────────────────────────────────────────
-// Style rule: types from java(.util/.lang/.io/.stream/.function), net.minecraft,
-// net.neoforged, and dev.vfyjxf must be referenced by their simple name with an
-// explicit import — never inline as a fully-qualified name. This keeps tests and
-// production code uniform and grep-friendly. Legit exceptions (string literals
-// like Class.forName("..."), and javadoc {@link ...}) are excluded.
-tasks.register('checkNoInlineFqn') {
-    group = 'verification'
-    description = 'Fails if any non-import, non-comment, non-string code references a known type by fully-qualified name.'
-    inputs.dir 'src/main/java'
-    inputs.dir 'src/test/java'
-    doLast {
-        def typePattern = ~/(?m)\b(?:java\.(?:util|lang|io|stream|function)|net\.minecraft|net\.neoforged|dev\.vfyjxf)(?:\.[a-z][\w]*)*\.[A-Z][A-Za-z0-9_]*/
-        def stringPattern = ~/"(?:[^"\\]|\\.)*"/
-        def offenses = []
-        fileTree(dir: 'src', includes: ['**/*.java']).each { f ->
-            def inBlock = false
-            f.eachLine { line, idx ->
-                def stripped = line.trim()
-                if (inBlock) {
-                    if (stripped.contains('*/')) inBlock = false
-                    return
-                }
-                if (stripped.startsWith('/*')) {
-                    if (!stripped.contains('*/')) inBlock = true
-                    return
-                }
-                if (stripped.startsWith('//') || stripped.startsWith('*') || stripped.startsWith('/**') || stripped.startsWith('import ')) {
-                    return
-                }
-                def masked = line.replaceAll(stringPattern, '""')
-                if (masked =~ typePattern) {
-                    offenses << "${f.path}:${idx + 1}: ${line.trim()}"
-                }
-            }
-        }
-        if (!offenses.isEmpty()) {
-            def msg = "Found ${offenses.size()} inline fully-qualified type reference(s).\n" +
-                "Import the type and use its simple name instead.\n" +
-                offenses.collect { "  $it" }.join('\n')
-            throw new GradleException(msg)
-        }
-    }
-}
-
-tasks.named('check').configure {
-    dependsOn 'checkNoInlineFqn'
-}

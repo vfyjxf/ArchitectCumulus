@@ -1,0 +1,23 @@
+// Conventions plugin(s) for the ArchitectCumulus build.
+// Lives in buildSrc so the main build.gradle stays declarative.
+plugins {
+    id 'groovy'
+    id 'java-gradle-plugin'
+}
+
+repositories {
+    gradlePluginPortal()
+}
+
+dependencies {
+    implementation localGroovy()
+}
+
+gradlePlugin {
+    plugins {
+        noInlineFqn {
+            id = 'cumulus.no-inline-fqn'
+            implementationClass = 'dev.vfyjxf.cumulus.build.NoInlineFqnPlugin'
+        }
+    }
+}
