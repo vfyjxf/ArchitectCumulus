@@ -3,8 +3,10 @@ package dev.vfyjxf.cumulus.api.target.types;
 import dev.vfyjxf.cumulus.api.target.TargetProperties;
 import dev.vfyjxf.cumulus.api.target.TargetType;
 import dev.vfyjxf.cumulus.api.types.ContextKey;
-import java.util.Objects;
+
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.Objects;
 
 /**
  * Target category: an externally-injected context value (not a world target).
@@ -15,8 +17,7 @@ public final class ContextTargetType implements TargetType {
     public static final ResourceLocation id = ResourceLocation.parse("cumulus:context");
     public static final ContextTargetType instance = new ContextTargetType();
 
-    private ContextTargetType() {
-    }
+    private ContextTargetType() {}
 
     @Override
     public ResourceLocation id() {

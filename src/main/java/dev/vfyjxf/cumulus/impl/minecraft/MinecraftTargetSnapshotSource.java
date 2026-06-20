@@ -3,11 +3,7 @@ package dev.vfyjxf.cumulus.impl.minecraft;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.impl.check.SnapshotTarget;
 import dev.vfyjxf.cumulus.impl.check.TargetSnapshotSource;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -17,7 +13,14 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.capabilities.BlockCapability;
+
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
 
 public final class MinecraftTargetSnapshotSource implements TargetSnapshotSource {
     private static final ResourceLocation block = ResourceLocation.parse("cumulus:block");
@@ -43,10 +46,7 @@ public final class MinecraftTargetSnapshotSource implements TargetSnapshotSource
         this.context = Map.copyOf(context);
     }
 
-    public static MinecraftTargetSnapshotSource fromLevel(
-            BlockPos anchor,
-            LevelAccessor level,
-            Map<String, String> context) {
+    public static MinecraftTargetSnapshotSource fromLevel(BlockPos anchor, LevelAccessor level, Map<String, String> context) {
         if (level == null) {
             throw new IllegalArgumentException("Level must not be null");
         }
@@ -59,11 +59,7 @@ public final class MinecraftTargetSnapshotSource implements TargetSnapshotSource
     }
 
     @Override
-    public Optional<SnapshotTarget> target(
-            ResourceLocation targetType,
-            RelativeBlockPos min,
-            RelativeBlockPos max,
-            Map<String, String> targetProperties) {
+    public Optional<SnapshotTarget> target(ResourceLocation targetType, RelativeBlockPos min, RelativeBlockPos max, Map<String, String> targetProperties) {
         if (targetType == null) {
             throw new IllegalArgumentException("Target type must not be null");
         }
@@ -85,18 +81,13 @@ public final class MinecraftTargetSnapshotSource implements TargetSnapshotSource
             return Optional.ofNullable(reader.blockEntity(absoluteMin));
         }
         if (entity.equals(targetType)) {
-            return reader.entities(absoluteMin, absoluteMax).stream()
-                    .min(Comparator.comparing(SnapshotTarget::value))
-                    .map(target -> new SnapshotTarget(target.value(), target.properties()));
+            return reader.entities(absoluteMin, absoluteMax).stream().min(Comparator.comparing(SnapshotTarget::value)).map(target -> new SnapshotTarget(target.value(), target.properties()));
         }
         if (fluid.equals(targetType)) {
             return Optional.ofNullable(reader.fluid(absoluteMin));
         }
         if (capability.equals(targetType)) {
-            return Optional.ofNullable(reader.capability(
-                    absoluteMin,
-                    targetProperties.getOrDefault("name", ""),
-                    targetProperties));
+            return Optional.ofNullable(reader.capability(absoluteMin, targetProperties.getOrDefault("name", ""), targetProperties));
         }
         if (region.equals(targetType)) {
             return region(absoluteMin, absoluteMax);
@@ -127,11 +118,7 @@ public final class MinecraftTargetSnapshotSource implements TargetSnapshotSource
                 }
             }
         }
-        var dominant = counts.entrySet().stream()
-                .max(Map.Entry.<String, Integer>comparingByValue()
-                        .thenComparing(Map.Entry.comparingByKey(Comparator.reverseOrder())))
-                .orElseThrow()
-                .getKey();
+        var dominant = counts.entrySet().stream().max(Map.Entry.<String, Integer>comparingByValue().thenComparing(Map.Entry.comparingByKey(Comparator.reverseOrder()))).orElseThrow().getKey();
         var properties = new LinkedHashMap<String, String>();
         properties.put("volume", Integer.toString(volume));
         for (var entry : counts.entrySet()) {
@@ -141,14 +128,8 @@ public final class MinecraftTargetSnapshotSource implements TargetSnapshotSource
     }
 
     private boolean boundsLoaded(BlockPos min, BlockPos max) {
-        return reader.isLoaded(new BlockPos(min.getX(), min.getY(), min.getZ()))
-                && reader.isLoaded(new BlockPos(min.getX(), min.getY(), max.getZ()))
-                && reader.isLoaded(new BlockPos(min.getX(), max.getY(), min.getZ()))
-                && reader.isLoaded(new BlockPos(min.getX(), max.getY(), max.getZ()))
-                && reader.isLoaded(new BlockPos(max.getX(), min.getY(), min.getZ()))
-                && reader.isLoaded(new BlockPos(max.getX(), min.getY(), max.getZ()))
-                && reader.isLoaded(new BlockPos(max.getX(), max.getY(), min.getZ()))
-                && reader.isLoaded(new BlockPos(max.getX(), max.getY(), max.getZ()));
+        return reader.isLoaded(new BlockPos(min.getX(), min.getY(), min.getZ())) && reader.isLoaded(new BlockPos(min.getX(), min.getY(), max.getZ())) && reader.isLoaded(new BlockPos(min.getX(), max.getY(), min.getZ())) && reader.isLoaded(new BlockPos(min.getX(), max.getY(), max.getZ())) && reader.isLoaded(new BlockPos(
+                        max.getX(), min.getY(), min.getZ())) && reader.isLoaded(new BlockPos(max.getX(), min.getY(), max.getZ())) && reader.isLoaded(new BlockPos(max.getX(), max.getY(), min.getZ())) && reader.isLoaded(new BlockPos(max.getX(), max.getY(), max.getZ()));
     }
 
     private BlockPos absolute(RelativeBlockPos relative) {
@@ -199,23 +180,16 @@ public final class MinecraftTargetSnapshotSource implements TargetSnapshotSource
                 return null;
             }
             var id = BuiltInRegistries.FLUID.getKey(state.getType());
-            return new SnapshotTarget(id.toString(), Map.of(
-                    "amount", Integer.toString(state.getAmount()),
-                    "source", Boolean.toString(state.isSource())));
+            return new SnapshotTarget(id.toString(), Map.of("amount", Integer.toString(state.getAmount()), "source", Boolean.toString(state.isSource())));
         }
 
         @Override
         public java.util.List<SnapshotTarget> entities(BlockPos min, BlockPos max) {
             var box = new AABB(min.getX(), min.getY(), min.getZ(), max.getX() + 1.0, max.getY() + 1.0, max.getZ() + 1.0);
-            return level.getEntities((Entity) null, box, entity -> true).stream()
-                    .map(entity -> {
-                        var id = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
-                        return new SnapshotTarget(id.toString(), Map.of(
-                                "uuid", entity.getStringUUID()));
-                    })
-                    .sorted(Comparator.comparing(SnapshotTarget::value)
-                            .thenComparing(target -> target.properties().getOrDefault("uuid", "")))
-                    .toList();
+            return level.getEntities((Entity) null, box, entity -> true).stream().map(entity -> {
+                var id = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+                return new SnapshotTarget(id.toString(), Map.of("uuid", entity.getStringUUID()));
+            }).sorted(Comparator.comparing(SnapshotTarget::value).thenComparing(target -> target.properties().getOrDefault("uuid", ""))).toList();
         }
 
         @Override
@@ -223,19 +197,12 @@ public final class MinecraftTargetSnapshotSource implements TargetSnapshotSource
             if (!(level instanceof Level concreteLevel)) {
                 return null;
             }
-            return capabilityResolvers.resolve(
-                    new MinecraftCapabilityResolvers.CapabilityLookup() {
-                        @Override
-                        public <T, C extends @Nullable Object> T get(
-                                BlockCapability<T, C> capability,
-                                BlockPos capabilityPos,
-                                C context) {
-                            return concreteLevel.getCapability(capability, capabilityPos, context);
-                        }
-                    },
-                    pos,
-                    capabilityName,
-                    targetProperties);
+            return capabilityResolvers.resolve(new MinecraftCapabilityResolvers.CapabilityLookup() {
+                @Override
+                public <T, C extends @Nullable Object> T get(BlockCapability<T, C> capability, BlockPos capabilityPos, C context) {
+                    return concreteLevel.getCapability(capability, capabilityPos, context);
+                }
+            }, pos, capabilityName, targetProperties);
         }
 
         private static String blockId(BlockEntity blockEntity) {

@@ -4,12 +4,13 @@ import dev.vfyjxf.cumulus.api.definition.PointRequirement;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticMetadata;
 import dev.vfyjxf.cumulus.api.target.Targets;
-import java.util.Set;
+
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Set;
+
 public final class Components {
-    private Components() {
-    }
+    private Components() {}
 
     public static PointComponent point(String name, RelativeBlockPos location) {
         return new PointComponent(name, location, Targets.block(), PointRequirement.required, Set.of(), DiagnosticMetadata.empty());

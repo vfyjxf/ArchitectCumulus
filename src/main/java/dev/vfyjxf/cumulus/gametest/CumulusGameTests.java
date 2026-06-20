@@ -4,6 +4,7 @@ import dev.vfyjxf.cumulus.Cumulus;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.Structures;
 import dev.vfyjxf.cumulus.api.target.Targets;
+
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -17,16 +18,13 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import net.neoforged.testframework.gametest.DynamicStructureTemplates;
 import net.neoforged.testframework.gametest.StructureTemplateBuilder;
 
-@EventBusSubscriber(modid = Cumulus.MODID)
-@GameTestHolder(Cumulus.MODID)
+@EventBusSubscriber(modid = Cumulus.modId)
+@GameTestHolder(Cumulus.modId)
 public final class CumulusGameTests {
-    private static final ResourceLocation templateId = ResourceLocation.fromNamespaceAndPath(
-            Cumulus.MODID,
-            "definitiondslbuildsinsidegametest");
+    private static final ResourceLocation templateId = ResourceLocation.fromNamespaceAndPath(Cumulus.modId, "definitiondslbuildsinsidegametest");
     private static final DynamicStructureTemplates templates = new DynamicStructureTemplates();
 
-    private CumulusGameTests() {
-    }
+    private CumulusGameTests() {}
 
     @SubscribeEvent
     private static void registerDynamicTemplates(ServerAboutToStartEvent event) {
@@ -44,9 +42,7 @@ public final class CumulusGameTests {
     @GameTest
     @PrefixGameTestTemplate(false)
     public static void definitionDslBuildsInsideGameTest(GameTestHelper helper) {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:gametest_smoke"))
-                .point("origin", RelativeBlockPos.of(0, 0, 0), Targets.block())
-                .build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:gametest_smoke")).point("origin", RelativeBlockPos.of(0, 0, 0), Targets.block()).build();
 
         if (definition.points().size() != 1) {
             throw new GameTestAssertException("Expected one structure point");

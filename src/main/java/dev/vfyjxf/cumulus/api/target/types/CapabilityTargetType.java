@@ -2,7 +2,7 @@ package dev.vfyjxf.cumulus.api.target.types;
 
 import dev.vfyjxf.cumulus.api.target.TargetProperties;
 import dev.vfyjxf.cumulus.api.target.TargetType;
-import java.util.Objects;
+
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -14,8 +14,7 @@ public final class CapabilityTargetType implements TargetType {
     public static final ResourceLocation id = ResourceLocation.parse("cumulus:capability");
     public static final CapabilityTargetType instance = new CapabilityTargetType();
 
-    private CapabilityTargetType() {
-    }
+    private CapabilityTargetType() {}
 
     @Override
     public ResourceLocation id() {

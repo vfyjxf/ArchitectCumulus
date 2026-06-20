@@ -5,9 +5,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public record ExportedRuntimeAsset(
-        String resourcePath,
-        Map<String, Object> values,
-        String serialized) {
+                String resourcePath,
+                Map<String, Object> values,
+                String serialized) {
     public ExportedRuntimeAsset {
         if (resourcePath == null || resourcePath.isBlank()) {
             throw new IllegalArgumentException("Exported asset resource path must not be blank");

@@ -1,10 +1,11 @@
 package dev.vfyjxf.cumulus.api.diagnostic;
 
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
 
 /**
  * Registry of all known {@link DiagnosticCode}s. Built-in codes are pre-registered
@@ -32,8 +33,7 @@ public final class DiagnosticCodes {
         }
     }
 
-    private DiagnosticCodes() {
-    }
+    private DiagnosticCodes() {}
 
     /**
      * Register a custom code. Re-registering the same id replaces the entry.
@@ -61,8 +61,8 @@ public final class DiagnosticCodes {
             return existing;
         }
         return new SimpleDiagnosticCode(
-                id,
-                Severity.warn,
-                "diagnostic.unknown." + id.getNamespace() + "." + id.getPath().replace('/', '.'));
+                        id,
+                        Severity.warn,
+                        "diagnostic.unknown." + id.getNamespace() + "." + id.getPath().replace('/', '.'));
     }
 }

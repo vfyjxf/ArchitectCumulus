@@ -4,9 +4,9 @@ import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
 
 public record CheckPlanEntry(
-        StructurePointDefinition point,
-        RelativeBlockPos min,
-        RelativeBlockPos max) {
+                StructurePointDefinition point,
+                RelativeBlockPos min,
+                RelativeBlockPos max) {
     public CheckPlanEntry {
         if (point == null) {
             throw new IllegalArgumentException("Check plan point must not be null");

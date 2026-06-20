@@ -1,11 +1,12 @@
 package dev.vfyjxf.cumulus.api.ownership;
 
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
 
 public final class StructureClaimIndex {
     private final Map<ResourceLocation, List<PartClaim>> claimsByPart = new HashMap<>();

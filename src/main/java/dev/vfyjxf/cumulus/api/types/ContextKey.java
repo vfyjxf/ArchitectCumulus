@@ -1,9 +1,10 @@
 package dev.vfyjxf.cumulus.api.types;
 
-import java.util.Objects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.Objects;
 
 /**
  * Strongly-typed identifier for a single entry inside {@code RuntimeStructureContext}.
@@ -16,10 +17,10 @@ import net.minecraft.resources.ResourceLocation;
  * <h2>Definition (mod-side, once)</h2>
  * <pre>{@code
  * public final class ModContextKeys {
- *     public static final ContextKey<BlockPos>     CONTROLLER = ContextKey.blockPos("controller");
- *     public static final ContextKey<Direction>    FACING     = ContextKey.direction("facing");
- *     public static final ContextKey<Integer>      TIER      = ContextKey.integer("tier");
- *     public static final ContextKey<ResourceLocation> CONTROLLER_ID =
+ *     public static final ContextKey<BlockPos>     controller = ContextKey.blockPos("controller");
+ *     public static final ContextKey<Direction>    facing     = ContextKey.direction("facing");
+ *     public static final ContextKey<Integer>      tier       = ContextKey.integer("tier");
+ *     public static final ContextKey<ResourceLocation> controllerId =
  *         ContextKey.resourceLocation("controller_id");
  * }
  * }</pre>
@@ -28,11 +29,11 @@ import net.minecraft.resources.ResourceLocation;
  * <pre>{@code
  * // authoring — derive "facing" from controller.facing block-state property
  * .context(ContextRuleDescriptor.derive(
- *     ModContextKeys.FACING,
- *     ContextSources.capture(CONTROLLER_POINT).property("facing")))
+ *     ModContextKeys.facing,
+ *     ContextSources.capture("controller").property("facing")))
  *
  * // machine logic — typed read, no casting
- * Direction facing = ctx.get(ModContextKeys.FACING).orElse(Direction.NORTH);
+ * Direction facing = ctx.get(ModContextKeys.facing).orElse(Direction.NORTH);
  * }</pre>
  *
  * <p>Keys are value-equal when both {@link #name()} and {@link #type()} match.
@@ -112,8 +113,7 @@ public record ContextKey<T>(String name, Class<T> type) {
         }
         if (!type.isInstance(value)) {
             throw new ClassCastException(
-                "ContextKey '" + name + "' expects " + type.getName()
-                    + " but got " + value.getClass().getName());
+                            "ContextKey '" + name + "' expects " + type.getName() + " but got " + value.getClass().getName());
         }
         return (T) value;
     }

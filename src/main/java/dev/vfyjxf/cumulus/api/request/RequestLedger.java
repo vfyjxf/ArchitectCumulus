@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.api.request;
 
 import dev.vfyjxf.cumulus.api.partition.SectionKey;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -29,12 +30,7 @@ public final class RequestLedger {
             accepted.add(request);
         }
 
-        accepted.sort(Comparator
-                .comparing(DataRequest::priority).reversed()
-                .thenComparing(request -> request.section().x())
-                .thenComparing(request -> request.section().y())
-                .thenComparing(request -> request.section().z())
-                .thenComparing(DataRequest::consumerId));
+        accepted.sort(Comparator.comparing(DataRequest::priority).reversed().thenComparing(request -> request.section().x()).thenComparing(request -> request.section().y()).thenComparing(request -> request.section().z()).thenComparing(DataRequest::consumerId));
         if (accepted.size() <= maxRequests) {
             return List.copyOf(accepted);
         }
@@ -42,9 +38,9 @@ public final class RequestLedger {
     }
 
     private record RequestKey(
-            SectionKey section,
-            RequestReason reason,
-            String consumerId) {
+                    SectionKey section,
+                    RequestReason reason,
+                    String consumerId) {
         private static RequestKey from(DataRequest request) {
             return new RequestKey(request.section(), request.reason(), request.consumerId());
         }

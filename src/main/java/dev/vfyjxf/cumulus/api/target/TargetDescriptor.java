@@ -1,7 +1,8 @@
 package dev.vfyjxf.cumulus.api.target;
 
-import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.Map;
 
 public record TargetDescriptor(ResourceLocation typeId, Map<String, String> properties) {
     public TargetDescriptor {

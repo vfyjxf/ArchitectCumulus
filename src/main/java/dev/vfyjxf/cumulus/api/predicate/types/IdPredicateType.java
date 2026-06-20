@@ -2,8 +2,10 @@ package dev.vfyjxf.cumulus.api.predicate.types;
 
 import dev.vfyjxf.cumulus.api.predicate.PredicateProperties;
 import dev.vfyjxf.cumulus.api.predicate.PredicateType;
-import java.util.Objects;
+
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.Objects;
 
 /** Predicate: target's id matches exactly (block id, entity id, fluid id, etc.). */
 public final class IdPredicateType implements PredicateType {
@@ -11,8 +13,7 @@ public final class IdPredicateType implements PredicateType {
     public static final ResourceLocation id = ResourceLocation.parse("cumulus:id");
     public static final IdPredicateType instance = new IdPredicateType();
 
-    private IdPredicateType() {
-    }
+    private IdPredicateType() {}
 
     @Override
     public ResourceLocation id() {

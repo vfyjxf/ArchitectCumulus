@@ -1,11 +1,12 @@
 package dev.vfyjxf.cumulus.impl.codec;
 
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
 
 public final class RuntimeAssetRepository {
     private final Map<ResourceLocation, LoadedRuntimeAsset> assetsById = new LinkedHashMap<>();
@@ -31,8 +32,7 @@ public final class RuntimeAssetRepository {
         assetsById.clear();
         assetsById.putAll(nextById);
         assetsByDefinition.clear();
-        nextByDefinition.forEach((definition, assets) ->
-                assetsByDefinition.put(definition, List.copyOf(assets)));
+        nextByDefinition.forEach((definition, assets) -> assetsByDefinition.put(definition, List.copyOf(assets)));
     }
 
     public synchronized List<LoadedRuntimeAsset> assets() {

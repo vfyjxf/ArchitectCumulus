@@ -1,16 +1,17 @@
 package dev.vfyjxf.cumulus.test;
 
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptor;
-import java.util.Map;
+
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.Map;
 
 /**
  * Test-only helpers for building legacy-shape descriptors.
  */
 public final class TestHelpers {
 
-    private TestHelpers() {
-    }
+    private TestHelpers() {}
 
     /**
      * Build a {@link PredicateDescriptor} that mirrors the legacy v1
@@ -32,7 +33,7 @@ public final class TestHelpers {
     /** Build a predicate from a single id value (most common legacy case). */
     public static PredicateDescriptor legacyIdPredicate(String id) {
         return new PredicateDescriptor(
-                ResourceLocation.parse("cumulus:id"),
-                Map.of("id", id));
+                        ResourceLocation.parse("cumulus:id"),
+                        Map.of("id", id));
     }
 }

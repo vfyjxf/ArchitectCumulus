@@ -6,6 +6,7 @@ import dev.vfyjxf.cumulus.api.target.types.ContextTargetType;
 import dev.vfyjxf.cumulus.api.target.types.EntityTargetType;
 import dev.vfyjxf.cumulus.api.target.types.RegionTargetType;
 import dev.vfyjxf.cumulus.api.target.types.UnknownTargetType;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -27,8 +28,7 @@ final class PropertyExtractor {
     private static final String anyId = "cumulus:any";
     private static final String emptyNbt = "{}";
 
-    private PropertyExtractor() {
-    }
+    private PropertyExtractor() {}
 
     static Map<String, String> extract(TargetProperties props) {
         if (props instanceof CustomTargetProperties ctp) {

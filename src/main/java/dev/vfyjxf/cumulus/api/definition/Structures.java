@@ -1,13 +1,13 @@
 package dev.vfyjxf.cumulus.api.definition;
 
 import net.minecraft.resources.ResourceLocation;
+
 import java.util.Optional;
 
 public final class Structures {
     private static final StructureDefinitionRegistry GLOBAL_REGISTRY = new StructureDefinitionRegistry();
 
-    private Structures() {
-    }
+    private Structures() {}
 
     public static StructureDefinitionBuilder define(ResourceLocation id) {
         return new StructureDefinitionBuilder(id);

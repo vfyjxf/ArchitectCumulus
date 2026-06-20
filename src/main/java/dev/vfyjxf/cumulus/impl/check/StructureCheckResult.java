@@ -5,14 +5,15 @@ import dev.vfyjxf.cumulus.api.request.DataRequest;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.RuntimeStructureContext;
 import dev.vfyjxf.cumulus.api.visualization.VisualizationModel;
+
 import java.util.List;
 
 public record StructureCheckResult(
-        InstanceStatus status,
-        RuntimeStructureContext context,
-        DiagnosticGraph diagnostics,
-        VisualizationModel visualization,
-        List<DataRequest> requests) {
+                InstanceStatus status,
+                RuntimeStructureContext context,
+                DiagnosticGraph diagnostics,
+                VisualizationModel visualization,
+                List<DataRequest> requests) {
     public StructureCheckResult {
         if (status == null) {
             throw new IllegalArgumentException("Check status must not be null");

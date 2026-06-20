@@ -2,10 +2,12 @@ package dev.vfyjxf.cumulus.impl.minecraft;
 
 import dev.vfyjxf.cumulus.api.partition.SectionKey;
 import dev.vfyjxf.cumulus.impl.runtime.RuntimeCheckEngine;
-import java.util.Map;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelAccessor;
+
+import java.util.Map;
 
 public final class MinecraftRuntimeInstanceTracker {
     private final RuntimeCheckEngine engine;
@@ -17,19 +19,11 @@ public final class MinecraftRuntimeInstanceTracker {
         this.engine = engine;
     }
 
-    public void track(
-            ResourceLocation definitionId,
-            BlockPos anchor,
-            LevelAccessor level,
-            Map<String, String> context) {
+    public void track(ResourceLocation definitionId, BlockPos anchor, LevelAccessor level, Map<String, String> context) {
         engine.track(definitionId, anchor, MinecraftTargetSnapshotSource.fromLevel(anchor, level, context));
     }
 
-    public void track(
-            ResourceLocation definitionId,
-            BlockPos anchor,
-            LevelTargetReader reader,
-            Map<String, String> context) {
+    public void track(ResourceLocation definitionId, BlockPos anchor, LevelTargetReader reader, Map<String, String> context) {
         engine.track(definitionId, anchor, new MinecraftTargetSnapshotSource(anchor, reader, context));
     }
 

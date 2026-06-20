@@ -1,11 +1,13 @@
 package dev.vfyjxf.cumulus.api.diagnostic;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import net.minecraft.resources.ResourceLocation;
+
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import net.minecraft.resources.ResourceLocation;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Verifies the open {@link DiagnosticCode} / {@link DiagnosticCodes} registry
@@ -16,15 +18,9 @@ class CustomDiagnosticCodeTest {
     @Test
     void standardDiagnosticCodesArePreRegistered() {
         // All 17 standard codes resolve via registry lookup
-        assertEquals(
-                StandardDiagnosticCodes.missingTarget,
-                DiagnosticCodes.fromId(ResourceLocation.parse("cumulus:missing_target")));
-        assertEquals(
-                StandardDiagnosticCodes.predicateFailed,
-                DiagnosticCodes.fromId(ResourceLocation.parse("cumulus:predicate_failed")));
-        assertEquals(
-                StandardDiagnosticCodes.sharedPartConflict,
-                DiagnosticCodes.fromId(ResourceLocation.parse("cumulus:shared_part_conflict")));
+        assertEquals(StandardDiagnosticCodes.missingTarget, DiagnosticCodes.fromId(ResourceLocation.parse("cumulus:missing_target")));
+        assertEquals(StandardDiagnosticCodes.predicateFailed, DiagnosticCodes.fromId(ResourceLocation.parse("cumulus:predicate_failed")));
+        assertEquals(StandardDiagnosticCodes.sharedPartConflict, DiagnosticCodes.fromId(ResourceLocation.parse("cumulus:shared_part_conflict")));
     }
 
     @Test
@@ -40,9 +36,9 @@ class CustomDiagnosticCodeTest {
     @Test
     void customDiagnosticCodeCanBeRegisteredAndResolved() {
         var custom = new SimpleDiagnosticCode(
-                ResourceLocation.parse("mymod:custom_test_code"),
-                Severity.info,
-                "diagnostic.mymod.custom_test_code");
+                        ResourceLocation.parse("mymod:custom_test_code"),
+                        Severity.info,
+                        "diagnostic.mymod.custom_test_code");
         DiagnosticCodes.register(custom);
         assertEquals(custom, DiagnosticCodes.fromId(custom.id()));
     }
@@ -50,13 +46,13 @@ class CustomDiagnosticCodeTest {
     @Test
     void diagnosticNodeStoresSeverityAndLocalizationKey() {
         var node = new DiagnosticNode(
-                "test_node",
-                Severity.error,
-                "missing block",
-                "diagnostic.cumulus.missing_target",
-                List.<DiagnosticEvidence>of(),
-                "test/point",
-                List.<FixHint>of());
+                        "test_node",
+                        Severity.error,
+                        "missing block",
+                        "diagnostic.cumulus.missing_target",
+                        List.<DiagnosticEvidence>of(),
+                        "test/point",
+                        List.<FixHint>of());
         assertEquals(Severity.error, node.severity());
         assertEquals("diagnostic.cumulus.missing_target", node.localizationKey());
         assertEquals("test_node", node.id());

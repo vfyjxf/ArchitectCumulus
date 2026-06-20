@@ -10,6 +10,7 @@ import dev.vfyjxf.cumulus.api.diagnostic.Severity;
 import dev.vfyjxf.cumulus.api.migration.MigrationDescriptor;
 import dev.vfyjxf.cumulus.api.runtime.RuntimeStructureContext;
 import dev.vfyjxf.cumulus.api.types.ContextKey;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -20,14 +21,9 @@ import java.util.Optional;
 public final class StructureContextMigrationExecutor {
     private static final String renameContext = "rename_context";
 
-    private StructureContextMigrationExecutor() {
-    }
+    private StructureContextMigrationExecutor() {}
 
-    public static MigrationResult migrate(
-            StructureDefinition definition,
-            RuntimeStructureContext context,
-            int currentVersion,
-            int targetVersion) {
+    public static MigrationResult migrate(StructureDefinition definition, RuntimeStructureContext context, int currentVersion, int targetVersion) {
         if (definition == null) {
             throw new IllegalArgumentException("Structure definition must not be null");
         }
@@ -57,16 +53,8 @@ public final class StructureContextMigrationExecutor {
         return new MigrationResult(targetVersion, migrated, path, emptyDiagnostics());
     }
 
-    private static List<MigrationDescriptor> migrationPath(
-            StructureDefinition definition,
-            int currentVersion,
-            int targetVersion) {
-        var migrations = definition.migrations().stream()
-                .sorted(Comparator
-                        .comparingInt(MigrationDescriptor::fromVersion)
-                        .thenComparingInt(MigrationDescriptor::toVersion)
-                        .thenComparing(migration -> migration.migrationId().toString()))
-                .toList();
+    private static List<MigrationDescriptor> migrationPath(StructureDefinition definition, int currentVersion, int targetVersion) {
+        var migrations = definition.migrations().stream().sorted(Comparator.comparingInt(MigrationDescriptor::fromVersion).thenComparingInt(MigrationDescriptor::toVersion).thenComparing(migration -> migration.migrationId().toString())).toList();
         var path = new ArrayList<MigrationDescriptor>();
         var version = currentVersion;
         while (version < targetVersion) {
@@ -80,17 +68,8 @@ public final class StructureContextMigrationExecutor {
         return path;
     }
 
-    private static MigrationDescriptor nextStep(
-            List<MigrationDescriptor> migrations,
-            int version,
-            int targetVersion) {
-        return migrations.stream()
-                .filter(migration -> migration.fromVersion() == version)
-                .filter(migration -> migration.toVersion() <= targetVersion)
-                .min(Comparator
-                        .comparingInt(MigrationDescriptor::toVersion)
-                        .thenComparing(migration -> migration.migrationId().toString()))
-                .orElse(null);
+    private static MigrationDescriptor nextStep(List<MigrationDescriptor> migrations, int version, int targetVersion) {
+        return migrations.stream().filter(migration -> migration.fromVersion() == version).filter(migration -> migration.toVersion() <= targetVersion).min(Comparator.comparingInt(MigrationDescriptor::toVersion).thenComparing(migration -> migration.migrationId().toString())).orElse(null);
     }
 
     private static void apply(MigrationDescriptor migration, Map<ContextKey<?>, Object> values) {
@@ -132,25 +111,14 @@ public final class StructureContextMigrationExecutor {
         return builder.build();
     }
 
-    private static MigrationPathException missingPath(
-            StructureDefinition definition,
-            int currentVersion,
-            int targetVersion,
-            int missingFromVersion) {
-        var message = "No migration path from version " + currentVersion
-                + " to " + targetVersion
-                + " for " + definition.id();
+    private static MigrationPathException missingPath(StructureDefinition definition, int currentVersion, int targetVersion, int missingFromVersion) {
+        var message = "No migration path from version " + currentVersion + " to " + targetVersion + " for " + definition.id();
         var descriptors = new LinkedHashMap<String, String>();
         descriptors.put("definition", definition.id().toString());
         descriptors.put("from", String.valueOf(currentVersion));
         descriptors.put("to", String.valueOf(targetVersion));
         descriptors.put("missing_from", String.valueOf(missingFromVersion));
-        return new MigrationPathException(message, diagnostics(
-                "missing-migration-path",
-                "Structure migration path is incomplete",
-                "diagnostic.cumulus.missing_migration_path",
-                "MISSING_MIGRATION_PATH",
-                descriptors));
+        return new MigrationPathException(message, diagnostics("missing-migration-path", "Structure migration path is incomplete", "diagnostic.cumulus.missing_migration_path", "MISSING_MIGRATION_PATH", descriptors));
     }
 
     private static MigrationPathException unsupportedMigration(MigrationDescriptor migration, String message) {
@@ -159,46 +127,30 @@ public final class StructureContextMigrationExecutor {
         descriptors.put("from", String.valueOf(migration.fromVersion()));
         descriptors.put("to", String.valueOf(migration.toVersion()));
         descriptors.putAll(migration.properties());
-        return new MigrationPathException(message, diagnostics(
-                "unsupported-migration",
-                "Structure migration descriptor is unsupported",
-                "diagnostic.cumulus.unsupported_migration",
-                "UNSUPPORTED_MIGRATION",
-                descriptors));
+        return new MigrationPathException(message, diagnostics("unsupported-migration", "Structure migration descriptor is unsupported", "diagnostic.cumulus.unsupported_migration", "UNSUPPORTED_MIGRATION", descriptors));
     }
 
-    private static DiagnosticGraph diagnostics(
-            String nodeId,
-            String message,
-            String localizationKey,
-            String detail,
-            Map<String, String> descriptors) {
+    private static DiagnosticGraph diagnostics(String nodeId, String message, String localizationKey, String detail, Map<String, String> descriptors) {
         var root = new DiagnosticNode(
-                "root",
-                Severity.error,
-                "Structure migration failed",
-                "diagnostic.cumulus.structure_migration_failed",
-                List.of(),
-                "runtime/migration",
-                List.of());
-        var node = new DiagnosticNode(
-                nodeId,
-                Severity.error,
-                message,
-                localizationKey,
-                List.of(DiagnosticEvidence.relative(
-                        RelativeBlockPos.of(0, 0, 0),
-                        "cumulus:migration",
-                        "cumulus:migration",
+                        "root",
+                        Severity.error,
+                        "Structure migration failed",
+                        "diagnostic.cumulus.structure_migration_failed",
+                        List.of(),
                         "runtime/migration",
-                        detail,
-                        descriptors)),
-                "runtime/migration/" + nodeId,
-                List.of());
+                        List.of());
+        var node = new DiagnosticNode(
+                        nodeId,
+                        Severity.error,
+                        message,
+                        localizationKey,
+                        List.of(DiagnosticEvidence.relative(RelativeBlockPos.of(0, 0, 0), "cumulus:migration", "cumulus:migration", "runtime/migration", detail, descriptors)),
+                        "runtime/migration/" + nodeId,
+                        List.of());
         return new DiagnosticGraph(
-                "root",
-                List.of(root, node),
-                List.of(new DiagnosticEdge("root", nodeId, "caused_by")));
+                        "root",
+                        List.of(root, node),
+                        List.of(new DiagnosticEdge("root", nodeId, "caused_by")));
     }
 
     private static DiagnosticGraph emptyDiagnostics() {

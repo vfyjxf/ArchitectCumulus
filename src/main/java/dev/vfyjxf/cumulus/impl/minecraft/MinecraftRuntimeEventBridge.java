@@ -1,10 +1,11 @@
 package dev.vfyjxf.cumulus.impl.minecraft;
 
-import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.level.BlockEvent;
+
+import java.util.Map;
 
 public final class MinecraftRuntimeEventBridge {
     private final MinecraftRuntimeInstanceTracker tracker;

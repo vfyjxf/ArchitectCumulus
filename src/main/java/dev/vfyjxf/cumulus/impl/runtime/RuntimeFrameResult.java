@@ -3,21 +3,22 @@ package dev.vfyjxf.cumulus.impl.runtime;
 import dev.vfyjxf.cumulus.api.request.DataRequest;
 import dev.vfyjxf.cumulus.api.runtime.InstanceDelta;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
+
 import java.util.List;
 
 public record RuntimeFrameResult(
-        int tick,
-        List<StructureInstanceKey> checked,
-        List<InstanceDelta> deltas,
-        List<DataRequest> requests,
-        int remainingQueued,
-        List<RuntimeFastCheck> fastChecks) {
+                int tick,
+                List<StructureInstanceKey> checked,
+                List<InstanceDelta> deltas,
+                List<DataRequest> requests,
+                int remainingQueued,
+                List<RuntimeFastCheck> fastChecks) {
     public RuntimeFrameResult(
-            int tick,
-            List<StructureInstanceKey> checked,
-            List<InstanceDelta> deltas,
-            List<DataRequest> requests,
-            int remainingQueued) {
+                    int tick,
+                    List<StructureInstanceKey> checked,
+                    List<InstanceDelta> deltas,
+                    List<DataRequest> requests,
+                    int remainingQueued) {
         this(tick, checked, deltas, requests, remainingQueued, List.of());
     }
 

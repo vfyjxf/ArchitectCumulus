@@ -3,29 +3,27 @@ package dev.vfyjxf.cumulus.impl.substructure;
 import dev.vfyjxf.cumulus.api.component.ComponentDescriptor;
 import dev.vfyjxf.cumulus.api.context.ContextRuleDescriptor;
 import dev.vfyjxf.cumulus.api.context.ContextSources;
-import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
 import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
 import dev.vfyjxf.cumulus.api.definition.StructurePointId;
 import dev.vfyjxf.cumulus.api.target.TargetDescriptor;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
+
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
 
 public final class SubstructureRuntimeComposer {
     private static final ResourceLocation regionTarget = ResourceLocation.parse("cumulus:region");
 
-    private SubstructureRuntimeComposer() {
-    }
+    private SubstructureRuntimeComposer() {}
 
-    public static StructureDefinition compose(
-            ResourceLocation rootDefinitionId,
-            Map<ResourceLocation, StructureDefinition> definitionsById,
-            SubstructureGraph graph) {
+    public static StructureDefinition compose(ResourceLocation rootDefinitionId, Map<ResourceLocation, StructureDefinition> definitionsById, SubstructureGraph graph) {
         if (rootDefinitionId == null) {
             throw new IllegalArgumentException("Root definition id must not be null");
         }
@@ -62,15 +60,15 @@ public final class SubstructureRuntimeComposer {
         }
 
         return new StructureDefinition(
-                rootDefinition.id(),
-                rootDefinition.schemaVersion(),
-                rootDefinition.transforms(),
-                points,
-                components,
-                contextRules,
-                rootDefinition.versions(),
-                rootDefinition.migrations(),
-                rootDefinition.diagnostics());
+                        rootDefinition.id(),
+                        rootDefinition.schemaVersion(),
+                        rootDefinition.transforms(),
+                        points,
+                        components,
+                        contextRules,
+                        rootDefinition.versions(),
+                        rootDefinition.migrations(),
+                        rootDefinition.diagnostics());
     }
 
     public static List<RuntimeSubstructureOccurrence> occurrences(SubstructureGraph graph) {
@@ -84,17 +82,15 @@ public final class SubstructureRuntimeComposer {
                 continue;
             }
             occurrences.add(new RuntimeSubstructureOccurrence(
-                    node.occurrenceId(),
-                    node.definitionId(),
-                    node.parentOccurrenceId(),
-                    offsetsByOccurrence.get(node.occurrenceId())));
+                            node.occurrenceId(),
+                            node.definitionId(),
+                            node.parentOccurrenceId(),
+                            offsetsByOccurrence.get(node.occurrenceId())));
         }
         return List.copyOf(occurrences);
     }
 
-    private static List<ContextRuleDescriptor<?>> translateContextRules(
-            List<ContextRuleDescriptor<?>> rules,
-            String occurrenceId) {
+    private static List<ContextRuleDescriptor<?>> translateContextRules(List<ContextRuleDescriptor<?>> rules, String occurrenceId) {
         var translated = new ArrayList<ContextRuleDescriptor<?>>();
         for (var rule : rules) {
             translated.add(translateRule(rule, occurrenceId));
@@ -118,38 +114,28 @@ public final class SubstructureRuntimeComposer {
         return occurrenceId + "/" + source.substring(0, dot) + "." + source.substring(dot + 1);
     }
 
-    private static StructurePointDefinition translatePoint(
-            StructurePointDefinition point,
-            SubstructureGraphNode node,
-            RelativeBlockPos offset,
-            String rootOccurrenceId) {
+    private static StructurePointDefinition translatePoint(StructurePointDefinition point, SubstructureGraphNode node, RelativeBlockPos offset, String rootOccurrenceId) {
         var translatedLocation = translate(point.location(), offset);
         var translatedTarget = translateTarget(point.target(), offset);
         return new StructurePointDefinition(
-                new StructurePointId(pointId(node, point, rootOccurrenceId)),
-                translatedLocation,
-                translatedTarget,
-                point.predicates(),
-                point.requirement(),
-                translatedCaptures(node, point, rootOccurrenceId),
-                translatedGroups(node, point, rootOccurrenceId),
-                point.diagnostics());
+                        new StructurePointId(pointId(node, point, rootOccurrenceId)),
+                        translatedLocation,
+                        translatedTarget,
+                        point.predicates(),
+                        point.requirement(),
+                        translatedCaptures(node, point, rootOccurrenceId),
+                        translatedGroups(node, point, rootOccurrenceId),
+                        point.diagnostics());
     }
 
-    private static String pointId(
-            SubstructureGraphNode node,
-            StructurePointDefinition point,
-            String rootOccurrenceId) {
+    private static String pointId(SubstructureGraphNode node, StructurePointDefinition point, String rootOccurrenceId) {
         if (node.occurrenceId().equals(rootOccurrenceId)) {
             return point.id().value();
         }
         return node.occurrenceId() + "/" + point.id().value();
     }
 
-    private static LinkedHashSet<String> translatedCaptures(
-            SubstructureGraphNode node,
-            StructurePointDefinition point,
-            String rootOccurrenceId) {
+    private static LinkedHashSet<String> translatedCaptures(SubstructureGraphNode node, StructurePointDefinition point, String rootOccurrenceId) {
         var captures = new LinkedHashSet<String>();
         for (var capture : point.captures()) {
             if (node.occurrenceId().equals(rootOccurrenceId)) {
@@ -161,10 +147,7 @@ public final class SubstructureRuntimeComposer {
         return captures;
     }
 
-    private static LinkedHashSet<String> translatedGroups(
-            SubstructureGraphNode node,
-            StructurePointDefinition point,
-            String rootOccurrenceId) {
+    private static LinkedHashSet<String> translatedGroups(SubstructureGraphNode node, StructurePointDefinition point, String rootOccurrenceId) {
         var groups = new LinkedHashSet<String>();
         for (var group : point.groups()) {
             if (node.occurrenceId().equals(rootOccurrenceId)) {
@@ -208,10 +191,7 @@ public final class SubstructureRuntimeComposer {
     }
 
     private static RelativeBlockPos translate(RelativeBlockPos position, RelativeBlockPos offset) {
-        return RelativeBlockPos.of(
-                position.x() + offset.x(),
-                position.y() + offset.y(),
-                position.z() + offset.z());
+        return RelativeBlockPos.of(position.x() + offset.x(), position.y() + offset.y(), position.z() + offset.z());
     }
 
     private static RelativeBlockPos parsePos(String value) {
@@ -222,9 +202,6 @@ public final class SubstructureRuntimeComposer {
         if (parts.length != 3) {
             throw new IllegalArgumentException("Relative position must have x,y,z parts");
         }
-        return RelativeBlockPos.of(
-                Integer.parseInt(parts[0]),
-                Integer.parseInt(parts[1]),
-                Integer.parseInt(parts[2]));
+        return RelativeBlockPos.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
     }
 }

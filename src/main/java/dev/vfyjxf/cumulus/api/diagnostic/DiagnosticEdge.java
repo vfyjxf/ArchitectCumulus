@@ -1,9 +1,9 @@
 package dev.vfyjxf.cumulus.api.diagnostic;
 
 public record DiagnosticEdge(
-        String fromNodeId,
-        String toNodeId,
-        String relation) {
+                String fromNodeId,
+                String toNodeId,
+                String relation) {
     public DiagnosticEdge {
         if (fromNodeId == null || fromNodeId.isBlank()) {
             throw new IllegalArgumentException("Diagnostic edge source must not be blank");

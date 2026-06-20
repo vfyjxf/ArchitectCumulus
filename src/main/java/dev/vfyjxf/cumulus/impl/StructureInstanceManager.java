@@ -17,17 +17,19 @@ import dev.vfyjxf.cumulus.api.request.RequestReason;
 import dev.vfyjxf.cumulus.api.runtime.InstanceDelta;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.RuntimeStructureContext;
-import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.impl.check.InMemoryTargetSnapshot;
 import dev.vfyjxf.cumulus.impl.check.StructureCheckExecutor;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 
 public final class StructureInstanceManager {
     private final Map<ResourceLocation, StructureRuntimePlan> plansById = new HashMap<>();
@@ -49,22 +51,17 @@ public final class StructureInstanceManager {
         var requests = new ArrayList<DataRequest>();
         for (var section : sortedSections(plan, anchor)) {
             requests.add(new DataRequest(
-                    section,
-                    RequestReason.prefetchIncompleteInstance,
-                    RequestPriority.normal,
-                    20,
-                    definitionId + "/footprint"));
+                            section,
+                            RequestReason.prefetchIncompleteInstance,
+                            RequestPriority.normal,
+                            20,
+                            definitionId + "/footprint"));
         }
         return new EngineFrame(List.of(new InstanceDelta(key, InstanceStatus.incomplete, context)), requests);
     }
 
     private static List<SectionKey> sortedSections(StructureRuntimePlan plan, BlockPos anchor) {
-        return plan.footprintSections(anchor).stream()
-                .sorted(Comparator
-                        .comparing(SectionKey::x)
-                        .thenComparing(SectionKey::y)
-                        .thenComparing(SectionKey::z))
-                .toList();
+        return plan.footprintSections(anchor).stream().sorted(Comparator.comparing(SectionKey::x).thenComparing(SectionKey::y).thenComparing(SectionKey::z)).toList();
     }
 
     public EngineFrame publishContext(ResourceLocation definitionId, BlockPos anchor, Map<ContextKey<?>, Object> values) {
@@ -83,11 +80,7 @@ public final class StructureInstanceManager {
         return check(definition, anchor, snapshot, List.of());
     }
 
-    public EngineFrame check(
-            StructureDefinition definition,
-            BlockPos anchor,
-            InMemoryTargetSnapshot snapshot,
-            List<PartClaim> claims) {
+    public EngineFrame check(StructureDefinition definition, BlockPos anchor, InMemoryTargetSnapshot snapshot, List<PartClaim> claims) {
         if (definition == null) {
             throw new IllegalArgumentException("Structure definition must not be null");
         }
@@ -101,8 +94,8 @@ public final class StructureInstanceManager {
         if (result.status() != InstanceStatus.valid) {
             diagnosticsByKey.put(key, result.diagnostics());
             return new EngineFrame(
-                    List.of(new InstanceDelta(key, result.status(), result.context())),
-                    result.requests());
+                            List.of(new InstanceDelta(key, result.status(), result.context())),
+                            result.requests());
         }
 
         var conflict = firstConflict(key, claims);
@@ -116,8 +109,8 @@ public final class StructureInstanceManager {
         }
 
         return new EngineFrame(
-                List.of(new InstanceDelta(key, status, result.context())),
-                result.requests());
+                        List.of(new InstanceDelta(key, status, result.context())),
+                        result.requests());
     }
 
     public DiagnosticGraph diagnostics(StructureInstanceKey key) {
@@ -147,36 +140,25 @@ public final class StructureInstanceManager {
         var existing = conflict.existing();
         var attempted = conflict.attempted();
         var root = new DiagnosticNode(
-                "root",
-                Severity.error,
-                "Structure ownership conflict",
-                "diagnostic.cumulus.structure_ownership_conflict",
-                List.of(),
-                "runtime/ownership",
-                List.of());
+                        "root",
+                        Severity.error,
+                        "Structure ownership conflict",
+                        "diagnostic.cumulus.structure_ownership_conflict",
+                        List.of(),
+                        "runtime/ownership",
+                        List.of());
         var conflictNode = new DiagnosticNode(
-                "ownership-conflict",
-                Severity.error,
-                "Part ownership conflict",
-                "diagnostic.cumulus.ownership_conflict",
-                List.of(DiagnosticEvidence.relative(
-                        RelativeBlockPos.of(0, 0, 0),
-                        attempted.partId().toString(),
-                        "cumulus:ownership",
-                        attempted.partId().toString(),
-                        "OWNERSHIP_CONFLICT",
-                        Map.of(
-                                "part", attempted.partId().toString(),
-                                "existing.owner", existing.owner().toString(),
-                                "existing.mode", existing.mode().name(),
-                                "attempted.owner", attempted.owner().toString(),
-                                "attempted.mode", attempted.mode().name()))),
-                "runtime/ownership/" + attempted.partId(),
-                List.of());
+                        "ownership-conflict",
+                        Severity.error,
+                        "Part ownership conflict",
+                        "diagnostic.cumulus.ownership_conflict",
+                        List.of(DiagnosticEvidence.relative(RelativeBlockPos.of(0, 0, 0), attempted.partId().toString(), "cumulus:ownership", attempted.partId().toString(), "OWNERSHIP_CONFLICT", Map.of("part", attempted.partId().toString(), "existing.owner", existing.owner().toString(), "existing.mode", existing.mode().name(), "attempted.owner", attempted.owner().toString(), "attempted.mode", attempted.mode().name()))),
+                        "runtime/ownership/" + attempted.partId(),
+                        List.of());
         return new DiagnosticGraph(
-                "root",
-                List.of(root, conflictNode),
-                List.of(new DiagnosticEdge("root", "ownership-conflict", "caused_by")));
+                        "root",
+                        List.of(root, conflictNode),
+                        List.of(new DiagnosticEdge("root", "ownership-conflict", "caused_by")));
     }
 
     private static DiagnosticGraph emptyDiagnostics() {

@@ -6,10 +6,13 @@ import dev.vfyjxf.cumulus.api.definition.Structures;
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
 import dev.vfyjxf.cumulus.api.target.Targets;
 import dev.vfyjxf.cumulus.impl.StructureRuntimePlanCompiler;
-import java.util.List;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,18 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class GhostPreviewCompilerTest {
     @Test
     void previewTranslatesRuntimePlanEntriesToAbsoluteRegions() {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:preview_machine"))
-                .point("controller", RelativeBlockPos.of(1, 0, -1), Targets.block()
-                        .property("block", "minecraft:furnace"))
-                .component(Components.region(
-                                "frame",
-                                RelativeBlockPos.of(0, 0, 0),
-                                RelativeBlockPos.of(1, 1, 0))
-                        .target(Targets.region(
-                                        RelativeBlockPos.of(0, 0, 0),
-                                        RelativeBlockPos.of(1, 1, 0))
-                                .property("block", "minecraft:stone")))
-                .build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:preview_machine")).point("controller", RelativeBlockPos.of(1, 0, -1), Targets.block().property("block", "minecraft:furnace")).component(Components.region("frame", RelativeBlockPos.of(0, 0, 0), RelativeBlockPos.of(1, 1, 0)).target(Targets.region(RelativeBlockPos.of(0, 0, 0), RelativeBlockPos.of(1, 1, 0)).property("block", "minecraft:stone"))).build();
         var plan = StructureRuntimePlanCompiler.compile(definition);
 
         var preview = GhostPreviewCompiler.fromPlan(plan, new BlockPos(10, 64, 10));
@@ -50,23 +42,15 @@ class GhostPreviewCompilerTest {
 
     @Test
     void editorSessionSelectionAndAnchorAreReflectedInPreview() {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:editable_machine"))
-                .point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block())
-                .point("port", RelativeBlockPos.of(2, 0, 0), Targets.block())
-                .build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:editable_machine")).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block()).point("port", RelativeBlockPos.of(2, 0, 0), Targets.block()).build();
         var plan = StructureRuntimePlanCompiler.compile(definition);
 
-        var session = StructureEditorSession.start(plan, BlockPos.ZERO)
-                .select("port")
-                .moveAnchor(new BlockPos(5, 70, 5));
+        var session = StructureEditorSession.start(plan, BlockPos.ZERO).select("port").moveAnchor(new BlockPos(5, 70, 5));
         var preview = session.preview();
 
         assertEquals("port", session.selectedElementId().orElseThrow());
         assertEquals(new BlockPos(5, 70, 5), preview.anchor());
-        var selected = preview.elements().stream()
-                .filter(element -> element.id().equals("port"))
-                .findFirst()
-                .orElseThrow();
+        var selected = preview.elements().stream().filter(element -> element.id().equals("port")).findFirst().orElseThrow();
         assertEquals(new BlockPos(7, 70, 5), selected.min());
         assertEquals(Severity.warn, selected.severity());
         assertEquals(100, selected.priority());
@@ -74,21 +58,13 @@ class GhostPreviewCompilerTest {
 
     @Test
     void renderPlanOrdersSelectedElementsLastAndMapsSeverityToColors() {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:renderable_preview"))
-                .point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block())
-                .point("port", RelativeBlockPos.of(2, 0, 0), Targets.block())
-                .build();
-        var preview = StructureEditorSession.start(
-                        StructureRuntimePlanCompiler.compile(definition),
-                        new BlockPos(4, 64, 4))
-                .select("port")
-                .preview();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:renderable_preview")).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block()).point("port", RelativeBlockPos.of(2, 0, 0), Targets.block()).build();
+        var preview = StructureEditorSession.start(StructureRuntimePlanCompiler.compile(definition), new BlockPos(4, 64, 4)).select("port").preview();
 
         var renderPlan = GhostPreviewRenderPlan.fromPreview(preview);
 
         assertEquals(2, renderPlan.commands().size());
-        assertEquals(List.of("controller", "port"),
-                renderPlan.commands().stream().map(GhostPreviewRenderCommand::elementId).toList());
+        assertEquals(List.of("controller", "port"), renderPlan.commands().stream().map(GhostPreviewRenderCommand::elementId).toList());
         var normal = renderPlan.commands().getFirst();
         assertEquals(GhostPreviewRenderStyle.info, normal.style());
         assertEquals(0.25F, normal.alpha());
@@ -102,10 +78,7 @@ class GhostPreviewCompilerTest {
 
     @Test
     void editorControllerTogglesSessionsAndCyclesSelection() {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:controlled_preview"))
-                .point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block())
-                .point("port", RelativeBlockPos.of(2, 0, 0), Targets.block())
-                .build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:controlled_preview")).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block()).point("port", RelativeBlockPos.of(2, 0, 0), Targets.block()).build();
         var plan = StructureRuntimePlanCompiler.compile(definition);
         var controller = new StructureEditorController();
 

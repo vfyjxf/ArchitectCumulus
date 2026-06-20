@@ -4,11 +4,13 @@ import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.Structures;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptors;
 import dev.vfyjxf.cumulus.api.target.Targets;
+
 import net.minecraft.SharedConstants;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.testframework.junit.EphemeralTestServerProvider;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,10 +32,7 @@ class CumulusMinecraftEnvironmentTest {
 
     @Test
     void dslAcceptsMinecraftResourceLocations(MinecraftServer server) {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:stone_marker"))
-                .point("stone", RelativeBlockPos.of(0, 0, 0), Targets.block()
-                        .where(PredicateDescriptors.id("minecraft:stone")))
-                .build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:stone_marker")).point("stone", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("minecraft:stone"))).build();
 
         assertEquals(ResourceLocation.parse("cumulus:stone_marker"), definition.id());
     }

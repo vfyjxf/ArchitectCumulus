@@ -3,6 +3,7 @@ package dev.vfyjxf.cumulus.api.transform;
 import dev.vfyjxf.cumulus.api.transform.types.HorizontalFacingTransformType;
 import dev.vfyjxf.cumulus.api.transform.types.IdentityTransformType;
 import dev.vfyjxf.cumulus.api.transform.types.UnknownTransformType;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -12,8 +13,7 @@ import java.util.Map;
  */
 public final class TransformPropertyExtractor {
 
-    private TransformPropertyExtractor() {
-    }
+    private TransformPropertyExtractor() {}
 
     public static Map<String, String> extract(TransformProperties props) {
         var map = new LinkedHashMap<String, String>();
@@ -24,9 +24,7 @@ public final class TransformPropertyExtractor {
         return Map.copyOf(map);
     }
 
-    public static TransformProperties buildProps(
-            TransformType type,
-            Map<String, String> properties) {
+    public static TransformProperties buildProps(TransformType type, Map<String, String> properties) {
         if (type instanceof IdentityTransformType) {
             return new IdentityTransformType.Props();
         }

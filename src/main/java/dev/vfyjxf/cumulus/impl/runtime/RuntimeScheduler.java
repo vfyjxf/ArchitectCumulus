@@ -7,6 +7,9 @@ import dev.vfyjxf.cumulus.api.request.RequestLedger;
 import dev.vfyjxf.cumulus.api.runtime.InstanceDelta;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
 import dev.vfyjxf.cumulus.impl.StructureRuntimePlan;
+
+import net.minecraft.core.BlockPos;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -15,7 +18,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import net.minecraft.core.BlockPos;
 
 public final class RuntimeScheduler {
     private final Map<StructureInstanceKey, RegisteredInstance> instances = new LinkedHashMap<>();
@@ -70,13 +72,7 @@ public final class RuntimeScheduler {
         if (affected == null) {
             return;
         }
-        affected.stream()
-                .sorted(Comparator
-                        .comparing((StructureInstanceKey key) -> key.structureId().toString())
-                        .thenComparingInt(key -> key.anchor().getX())
-                        .thenComparingInt(key -> key.anchor().getY())
-                        .thenComparingInt(key -> key.anchor().getZ()))
-                .forEach(this::enqueueRegistered);
+        affected.stream().sorted(Comparator.comparing((StructureInstanceKey key) -> key.structureId().toString()).thenComparingInt(key -> key.anchor().getX()).thenComparingInt(key -> key.anchor().getY()).thenComparingInt(key -> key.anchor().getZ())).forEach(this::enqueueRegistered);
     }
 
     public void enqueue(StructureInstanceKey instance) {
@@ -138,11 +134,7 @@ public final class RuntimeScheduler {
         return sections;
     }
 
-    private static void addSections(
-            Set<SectionKey> sections,
-            BlockPos anchor,
-            RelativeBlockPos min,
-            RelativeBlockPos max) {
+    private static void addSections(Set<SectionKey> sections, BlockPos anchor, RelativeBlockPos min, RelativeBlockPos max) {
         var minSection = SectionKey.fromBlock(anchor.offset(min.x(), min.y(), min.z()));
         var maxSection = SectionKey.fromBlock(anchor.offset(max.x(), max.y(), max.z()));
         var minX = Math.min(minSection.x(), maxSection.x());
@@ -161,8 +153,8 @@ public final class RuntimeScheduler {
     }
 
     private record RegisteredInstance(
-            StructureRuntimePlan plan,
-            Set<SectionKey> sections) {
+                    StructureRuntimePlan plan,
+                    Set<SectionKey> sections) {
         private RegisteredInstance {
             sections = Set.copyOf(sections);
         }

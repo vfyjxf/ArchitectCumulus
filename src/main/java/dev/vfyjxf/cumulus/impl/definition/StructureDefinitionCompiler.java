@@ -7,12 +7,12 @@ import dev.vfyjxf.cumulus.api.definition.StructureDefinitionBuilder;
 import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticMetadata;
 import dev.vfyjxf.cumulus.api.transform.Transforms;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public final class StructureDefinitionCompiler {
-    private StructureDefinitionCompiler() {
-    }
+    private StructureDefinitionCompiler() {}
 
     public static StructureDefinition compile(StructureDefinitionBuilder builder) {
         if (builder == null) {
@@ -35,15 +35,15 @@ public final class StructureDefinitionCompiler {
         }
 
         var definition = new StructureDefinition(
-                builder.id(),
-                StructureDefinition.IR_SCHEMA_VERSION,
-                transforms,
-                points,
-                componentDescriptors,
-                castContextRules(builder.contextRules()),
-                builder.versions(),
-                builder.migrations(),
-                DiagnosticMetadata.empty());
+                        builder.id(),
+                        StructureDefinition.irSchemaVersion,
+                        transforms,
+                        points,
+                        componentDescriptors,
+                        castContextRules(builder.contextRules()),
+                        builder.versions(),
+                        builder.migrations(),
+                        DiagnosticMetadata.empty());
         StructureDefinitionValidator.validate(definition);
         return definition;
     }

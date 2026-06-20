@@ -15,22 +15,17 @@ import dev.vfyjxf.cumulus.api.types.ContextKey;
  */
 public final class WellKnownContextKeys {
 
-    private WellKnownContextKeys() {
-    }
+    private WellKnownContextKeys() {}
 
     /** Occurrence id of the parent structure (e.g. {@code "factory#0"}). */
-    public static final ContextKey<String> parentOccurrence =
-        ContextKey.string("parent_occurrence");
+    public static final ContextKey<String> parentOccurrence = ContextKey.string("parent_occurrence");
 
     /** Definition id of the parent structure. */
-    public static final ContextKey<String> parentStructure =
-        ContextKey.string("parent_structure");
+    public static final ContextKey<String> parentStructure = ContextKey.string("parent_structure");
 
     /** Absolute anchor position of the parent structure. */
-    public static final ContextKey<String> parentAnchor =
-        ContextKey.string("parent_anchor");
+    public static final ContextKey<String> parentAnchor = ContextKey.string("parent_anchor");
 
     /** Last computed status of the parent structure. */
-    public static final ContextKey<String> parentStatus =
-        ContextKey.string("parent_status");
+    public static final ContextKey<String> parentStatus = ContextKey.string("parent_status");
 }

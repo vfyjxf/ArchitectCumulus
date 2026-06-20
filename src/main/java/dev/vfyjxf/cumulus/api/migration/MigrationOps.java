@@ -1,9 +1,11 @@
 package dev.vfyjxf.cumulus.api.migration;
 
 import dev.vfyjxf.cumulus.api.types.ContextKey;
+
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.Objects;
 import java.util.function.Function;
-import net.minecraft.resources.ResourceLocation;
 
 /**
  * Built-in {@link MigrationOp} factories. Use these in DSL authoring:
@@ -22,8 +24,7 @@ import net.minecraft.resources.ResourceLocation;
  */
 public final class MigrationOps {
 
-    private MigrationOps() {
-    }
+    private MigrationOps() {}
 
     /** Move the value at {@code from} to {@code to}. No-op if {@code from} is absent. */
     public static MigrationOp rename(ContextKey<?> from, ContextKey<?> to) {
@@ -137,16 +138,15 @@ public final class MigrationOps {
 
         @Override
         public void apply(MutableRuntimeContext ctx) {
-            var current = ctx.<T>get(key)
-                    .orElseThrow(() -> new IllegalStateException(
+            var current = ctx.<T>get(key).orElseThrow(() -> new IllegalStateException(
                             "TransformValueOp: missing key '" + key.name() + "'"));
             ctx.put(key, transform.apply(current));
         }
     }
 
     public record CustomOp(
-            ResourceLocation id,
-            java.util.function.Consumer<MutableRuntimeContext> action) implements MigrationOp {
+                    ResourceLocation id,
+                    java.util.function.Consumer<MutableRuntimeContext> action) implements MigrationOp {
         public CustomOp {
             Objects.requireNonNull(id, "custom op id must not be null");
             Objects.requireNonNull(action, "custom op action must not be null");

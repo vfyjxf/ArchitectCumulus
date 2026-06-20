@@ -1,8 +1,8 @@
 package dev.vfyjxf.cumulus.impl.minecraft;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 
 public interface EntityBuildWriter {

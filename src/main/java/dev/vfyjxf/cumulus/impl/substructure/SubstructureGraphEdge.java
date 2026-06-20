@@ -1,14 +1,15 @@
 package dev.vfyjxf.cumulus.impl.substructure;
 
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
+
 import net.minecraft.resources.ResourceLocation;
 
 public record SubstructureGraphEdge(
-        String parentOccurrenceId,
-        String childOccurrenceId,
-        String componentName,
-        ResourceLocation childDefinitionId,
-        RelativeBlockPos anchorOffset) {
+                String parentOccurrenceId,
+                String childOccurrenceId,
+                String componentName,
+                ResourceLocation childDefinitionId,
+                RelativeBlockPos anchorOffset) {
     public SubstructureGraphEdge {
         if (parentOccurrenceId == null || parentOccurrenceId.isBlank()) {
             throw new IllegalArgumentException("Substructure parent occurrence id must not be blank");

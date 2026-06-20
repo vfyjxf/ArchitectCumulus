@@ -3,10 +3,10 @@ package dev.vfyjxf.cumulus.api.diagnostic;
 import java.util.Map;
 
 public record FixHint(
-        String action,
-        String target,
-        String componentPath,
-        Map<String, String> properties) {
+                String action,
+                String target,
+                String componentPath,
+                Map<String, String> properties) {
     public FixHint {
         if (action == null || action.isBlank()) {
             throw new IllegalArgumentException("Fix action must not be blank");

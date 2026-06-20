@@ -1,7 +1,8 @@
 package dev.vfyjxf.cumulus.impl.minecraft;
 
-import java.util.Map;
 import net.minecraft.core.BlockPos;
+
+import java.util.Map;
 
 public interface CapabilityBuildWriter {
     boolean canWrite(String capabilityName, String operation);

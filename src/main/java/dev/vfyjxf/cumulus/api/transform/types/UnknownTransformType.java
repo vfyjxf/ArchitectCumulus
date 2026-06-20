@@ -2,9 +2,11 @@ package dev.vfyjxf.cumulus.api.transform.types;
 
 import dev.vfyjxf.cumulus.api.transform.TransformProperties;
 import dev.vfyjxf.cumulus.api.transform.TransformType;
+
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.Map;
 import java.util.Objects;
-import net.minecraft.resources.ResourceLocation;
 
 /**
  * Fallback transform type for ids not registered in

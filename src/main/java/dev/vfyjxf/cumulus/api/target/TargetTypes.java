@@ -7,12 +7,14 @@ import dev.vfyjxf.cumulus.api.target.types.ContextTargetType;
 import dev.vfyjxf.cumulus.api.target.types.EntityTargetType;
 import dev.vfyjxf.cumulus.api.target.types.FluidTargetType;
 import dev.vfyjxf.cumulus.api.target.types.RegionTargetType;
+
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
 
 /**
  * Registry of all known {@link TargetType}s. Built-in types are pre-registered;
@@ -32,20 +34,12 @@ public final class TargetTypes {
     private static final Map<ResourceLocation, TargetType> entries = new LinkedHashMap<>();
 
     static {
-        for (var type : List.of(
-                BlockTargetType.instance,
-                BlockEntityTargetType.instance,
-                EntityTargetType.instance,
-                FluidTargetType.instance,
-                CapabilityTargetType.instance,
-                ContextTargetType.instance,
-                RegionTargetType.instance)) {
+        for (var type : List.of(BlockTargetType.instance, BlockEntityTargetType.instance, EntityTargetType.instance, FluidTargetType.instance, CapabilityTargetType.instance, ContextTargetType.instance, RegionTargetType.instance)) {
             entries.put(type.id(), type);
         }
     }
 
-    private TargetTypes() {
-    }
+    private TargetTypes() {}
 
     /** Register a custom target type. Re-registering replaces the entry. */
     public static synchronized void register(TargetType type) {
@@ -66,7 +60,7 @@ public final class TargetTypes {
      */
     public static TargetType fromId(ResourceLocation id) {
         return maybeFromId(id).orElseThrow(() -> new IllegalArgumentException(
-                "Unknown TargetType: " + id));
+                        "Unknown TargetType: " + id));
     }
 
     /** True if a type is registered under this id. */

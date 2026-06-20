@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.impl.runtime;
 
 import dev.vfyjxf.cumulus.impl.codec.RuntimeAssetReloadListener;
+
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 

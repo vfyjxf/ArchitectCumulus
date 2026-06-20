@@ -3,12 +3,15 @@ package dev.vfyjxf.cumulus.impl.minecraft;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.impl.build.BuildAction;
 import dev.vfyjxf.cumulus.impl.build.BuildActionKind;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+
+import org.junit.jupiter.api.Test;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -17,8 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class MinecraftBuildTargetTest {
     @Test
     void appliesPointBlockActionAtAnchorOffsetAndIsIdempotent() {
-        var writer = new FakeBlockBuildWriter()
-                .known("minecraft:furnace");
+        var writer = new FakeBlockBuildWriter().known("minecraft:furnace");
         var target = new MinecraftBuildTarget(new BlockPos(10, 64, 10), writer);
         var action = blockAction("controller", "minecraft:furnace", RelativeBlockPos.of(1, 0, -1));
 
@@ -33,41 +35,34 @@ class MinecraftBuildTargetTest {
 
     @Test
     void expandsRegionActionIntoDeterministicBlockWrites() {
-        var writer = new FakeBlockBuildWriter()
-                .known("minecraft:stone");
+        var writer = new FakeBlockBuildWriter().known("minecraft:stone");
         var target = new MinecraftBuildTarget(BlockPos.ZERO, writer);
         var action = new BuildAction(
-                "frame",
-                BuildActionKind.region,
-                ResourceLocation.parse("cumulus:region"),
-                RelativeBlockPos.of(0, 0, 0),
-                RelativeBlockPos.of(1, 1, 0),
-                Map.of("block", "minecraft:stone"));
+                        "frame",
+                        BuildActionKind.region,
+                        ResourceLocation.parse("cumulus:region"),
+                        RelativeBlockPos.of(0, 0, 0),
+                        RelativeBlockPos.of(1, 1, 0),
+                        Map.of("block", "minecraft:stone"));
 
         target.apply(action);
 
-        assertEquals(List.of(
-                        new BlockPos(0, 0, 0),
-                        new BlockPos(0, 1, 0),
-                        new BlockPos(1, 0, 0),
-                        new BlockPos(1, 1, 0)),
-                writer.writes());
+        assertEquals(List.of(new BlockPos(0, 0, 0), new BlockPos(0, 1, 0), new BlockPos(1, 0, 0), new BlockPos(1, 1, 0)), writer.writes());
         assertTrue(target.contains(action));
     }
 
     @Test
     void appliesFluidActionThroughFluidWriterAndIsIdempotent() {
         var blockWriter = new FakeBlockBuildWriter();
-        var fluidWriter = new FakeFluidBuildWriter()
-                .known("minecraft:water");
+        var fluidWriter = new FakeFluidBuildWriter().known("minecraft:water");
         var target = new MinecraftBuildTarget(BlockPos.ZERO, blockWriter, fluidWriter);
         var action = new BuildAction(
-                "water",
-                BuildActionKind.point,
-                ResourceLocation.parse("cumulus:fluid"),
-                RelativeBlockPos.of(0, 1, 0),
-                RelativeBlockPos.of(0, 1, 0),
-                Map.of("fluid", "minecraft:water"));
+                        "water",
+                        BuildActionKind.point,
+                        ResourceLocation.parse("cumulus:fluid"),
+                        RelativeBlockPos.of(0, 1, 0),
+                        RelativeBlockPos.of(0, 1, 0),
+                        Map.of("fluid", "minecraft:water"));
 
         assertFalse(target.contains(action));
         target.apply(action);
@@ -81,19 +76,15 @@ class MinecraftBuildTargetTest {
 
     @Test
     void appliesCapabilityBackingBlockActionThroughBlockWriterAndIsIdempotent() {
-        var blockWriter = new FakeBlockBuildWriter()
-                .known("minecraft:furnace");
+        var blockWriter = new FakeBlockBuildWriter().known("minecraft:furnace");
         var target = new MinecraftBuildTarget(BlockPos.ZERO, blockWriter);
         var action = new BuildAction(
-                "energy",
-                BuildActionKind.point,
-                ResourceLocation.parse("cumulus:capability"),
-                RelativeBlockPos.of(0, 1, 0),
-                RelativeBlockPos.of(0, 1, 0),
-                Map.of(
-                        "name", "energy",
-                        "block", "minecraft:furnace",
-                        "side", "north"));
+                        "energy",
+                        BuildActionKind.point,
+                        ResourceLocation.parse("cumulus:capability"),
+                        RelativeBlockPos.of(0, 1, 0),
+                        RelativeBlockPos.of(0, 1, 0),
+                        Map.of("name", "energy", "block", "minecraft:furnace", "side", "north"));
 
         assertFalse(target.contains(action));
         target.apply(action);
@@ -106,16 +97,15 @@ class MinecraftBuildTargetTest {
 
     @Test
     void capabilityActionWithoutBackingBlockDoesNotPlaceDefaultBlock() {
-        var blockWriter = new FakeBlockBuildWriter()
-                .known("minecraft:air");
+        var blockWriter = new FakeBlockBuildWriter().known("minecraft:air");
         var target = new MinecraftBuildTarget(BlockPos.ZERO, blockWriter);
         var action = new BuildAction(
-                "energy",
-                BuildActionKind.point,
-                ResourceLocation.parse("cumulus:capability"),
-                RelativeBlockPos.of(0, 0, 0),
-                RelativeBlockPos.of(0, 0, 0),
-                Map.of("name", "energy"));
+                        "energy",
+                        BuildActionKind.point,
+                        ResourceLocation.parse("cumulus:capability"),
+                        RelativeBlockPos.of(0, 0, 0),
+                        RelativeBlockPos.of(0, 0, 0),
+                        Map.of("name", "energy"));
 
         assertFalse(target.contains(action));
         target.apply(action);
@@ -125,20 +115,15 @@ class MinecraftBuildTargetTest {
 
     @Test
     void capabilityMutationActionIsUnsupportedWithoutCapabilityWriter() {
-        var blockWriter = new FakeBlockBuildWriter()
-                .known("minecraft:furnace");
+        var blockWriter = new FakeBlockBuildWriter().known("minecraft:furnace");
         var target = new MinecraftBuildTarget(BlockPos.ZERO, blockWriter);
         var action = new BuildAction(
-                "energy",
-                BuildActionKind.point,
-                ResourceLocation.parse("cumulus:capability"),
-                RelativeBlockPos.of(0, 0, 0),
-                RelativeBlockPos.of(0, 0, 0),
-                Map.of(
-                        "name", "energy",
-                        "operation", "insert",
-                        "resource", "minecraft:coal",
-                        "amount", "8"));
+                        "energy",
+                        BuildActionKind.point,
+                        ResourceLocation.parse("cumulus:capability"),
+                        RelativeBlockPos.of(0, 0, 0),
+                        RelativeBlockPos.of(0, 0, 0),
+                        Map.of("name", "energy", "operation", "insert", "resource", "minecraft:coal", "amount", "8"));
 
         assertFalse(target.supports(action));
         assertFalse(target.contains(action));
@@ -150,26 +135,21 @@ class MinecraftBuildTargetTest {
     @Test
     void appliesCapabilityMutationActionThroughCapabilityWriterAndIsIdempotent() {
         var blockWriter = new FakeBlockBuildWriter();
-        var capabilityWriter = new FakeCapabilityBuildWriter()
-                .known("energy");
+        var capabilityWriter = new FakeCapabilityBuildWriter().known("energy");
         var target = new MinecraftBuildTarget(
-                BlockPos.ZERO,
-                blockWriter,
-                new FakeFluidBuildWriter(),
-                new FakeBlockEntityBuildWriter(),
-                new FakeEntityBuildWriter(),
-                capabilityWriter);
+                        BlockPos.ZERO,
+                        blockWriter,
+                        new FakeFluidBuildWriter(),
+                        new FakeBlockEntityBuildWriter(),
+                        new FakeEntityBuildWriter(),
+                        capabilityWriter);
         var action = new BuildAction(
-                "energy",
-                BuildActionKind.point,
-                ResourceLocation.parse("cumulus:capability"),
-                RelativeBlockPos.of(0, 1, 0),
-                RelativeBlockPos.of(0, 1, 0),
-                Map.of(
-                        "name", "energy",
-                        "operation", "insert",
-                        "resource", "minecraft:coal",
-                        "amount", "8"));
+                        "energy",
+                        BuildActionKind.point,
+                        ResourceLocation.parse("cumulus:capability"),
+                        RelativeBlockPos.of(0, 1, 0),
+                        RelativeBlockPos.of(0, 1, 0),
+                        Map.of("name", "energy", "operation", "insert", "resource", "minecraft:coal", "amount", "8"));
 
         assertTrue(target.supports(action));
         assertFalse(target.contains(action));
@@ -178,39 +158,28 @@ class MinecraftBuildTargetTest {
         target.apply(action);
 
         assertEquals(List.of(new BlockPos(0, 1, 0)), capabilityWriter.writes());
-        assertEquals(Map.of(
-                        "operation", "insert",
-                        "resource", "minecraft:coal",
-                        "amount", "8"),
-                capabilityWriter.mutations().get(new BlockPos(0, 1, 0) + "|energy"));
+        assertEquals(Map.of("operation", "insert", "resource", "minecraft:coal", "amount", "8"), capabilityWriter.mutations().get(new BlockPos(0, 1, 0) + "|energy"));
         assertTrue(blockWriter.writes().isEmpty());
     }
 
     @Test
     void appliesCapabilityBackingBlockAndMutationInOneAction() {
-        var blockWriter = new FakeBlockBuildWriter()
-                .known("minecraft:furnace");
-        var capabilityWriter = new FakeCapabilityBuildWriter()
-                .known("energy");
+        var blockWriter = new FakeBlockBuildWriter().known("minecraft:furnace");
+        var capabilityWriter = new FakeCapabilityBuildWriter().known("energy");
         var target = new MinecraftBuildTarget(
-                BlockPos.ZERO,
-                blockWriter,
-                new FakeFluidBuildWriter(),
-                new FakeBlockEntityBuildWriter(),
-                new FakeEntityBuildWriter(),
-                capabilityWriter);
+                        BlockPos.ZERO,
+                        blockWriter,
+                        new FakeFluidBuildWriter(),
+                        new FakeBlockEntityBuildWriter(),
+                        new FakeEntityBuildWriter(),
+                        capabilityWriter);
         var action = new BuildAction(
-                "energy",
-                BuildActionKind.point,
-                ResourceLocation.parse("cumulus:capability"),
-                RelativeBlockPos.of(0, 1, 0),
-                RelativeBlockPos.of(0, 1, 0),
-                Map.of(
-                        "name", "energy",
-                        "block", "minecraft:furnace",
-                        "operation", "insert",
-                        "resource", "minecraft:coal",
-                        "amount", "8"));
+                        "energy",
+                        BuildActionKind.point,
+                        ResourceLocation.parse("cumulus:capability"),
+                        RelativeBlockPos.of(0, 1, 0),
+                        RelativeBlockPos.of(0, 1, 0),
+                        Map.of("name", "energy", "block", "minecraft:furnace", "operation", "insert", "resource", "minecraft:coal", "amount", "8"));
 
         assertFalse(target.contains(action));
         target.apply(action);
@@ -225,19 +194,15 @@ class MinecraftBuildTargetTest {
     void appliesBlockEntityActionWithNbtAndIsIdempotent() {
         var blockWriter = new FakeBlockBuildWriter();
         var fluidWriter = new FakeFluidBuildWriter();
-        var blockEntityWriter = new FakeBlockEntityBuildWriter()
-                .known("minecraft:furnace", "minecraft:furnace");
+        var blockEntityWriter = new FakeBlockEntityBuildWriter().known("minecraft:furnace", "minecraft:furnace");
         var target = new MinecraftBuildTarget(BlockPos.ZERO, blockWriter, fluidWriter, blockEntityWriter);
         var action = new BuildAction(
-                "controller",
-                BuildActionKind.point,
-                ResourceLocation.parse("cumulus:block_entity"),
-                RelativeBlockPos.of(2, 0, 0),
-                RelativeBlockPos.of(2, 0, 0),
-                Map.of(
-                        "block", "minecraft:furnace",
-                        "block_entity", "minecraft:furnace",
-                        "nbt", "{Items:[]}"));
+                        "controller",
+                        BuildActionKind.point,
+                        ResourceLocation.parse("cumulus:block_entity"),
+                        RelativeBlockPos.of(2, 0, 0),
+                        RelativeBlockPos.of(2, 0, 0),
+                        Map.of("block", "minecraft:furnace", "block_entity", "minecraft:furnace", "nbt", "{Items:[]}"));
 
         assertFalse(target.contains(action));
         target.apply(action);
@@ -255,23 +220,20 @@ class MinecraftBuildTargetTest {
         var blockWriter = new FakeBlockBuildWriter();
         var fluidWriter = new FakeFluidBuildWriter();
         var blockEntityWriter = new FakeBlockEntityBuildWriter();
-        var entityWriter = new FakeEntityBuildWriter()
-                .known("minecraft:villager");
+        var entityWriter = new FakeEntityBuildWriter().known("minecraft:villager");
         var target = new MinecraftBuildTarget(
-                new BlockPos(10, 64, 10),
-                blockWriter,
-                fluidWriter,
-                blockEntityWriter,
-                entityWriter);
+                        new BlockPos(10, 64, 10),
+                        blockWriter,
+                        fluidWriter,
+                        blockEntityWriter,
+                        entityWriter);
         var action = new BuildAction(
-                "worker",
-                BuildActionKind.point,
-                ResourceLocation.parse("cumulus:entity"),
-                RelativeBlockPos.of(0, 1, -1),
-                RelativeBlockPos.of(0, 1, -1),
-                Map.of(
-                        "entity", "minecraft:villager",
-                        "nbt", "{NoAI:1b}"));
+                        "worker",
+                        BuildActionKind.point,
+                        ResourceLocation.parse("cumulus:entity"),
+                        RelativeBlockPos.of(0, 1, -1),
+                        RelativeBlockPos.of(0, 1, -1),
+                        Map.of("entity", "minecraft:villager", "nbt", "{NoAI:1b}"));
 
         assertFalse(target.contains(action));
         target.apply(action);
@@ -287,30 +249,25 @@ class MinecraftBuildTargetTest {
 
     @Test
     void entityNbtPatchComparisonIgnoresDefaultSavedFields() {
-        assertTrue(EntityBuildWriter.containsAuthoredNbt(
-                "{Air:300s,NoAI:1b,Pos:[0.5d,65.0d,9.5d],Rotation:[0.0f,0.0f],UUID:[I;1,2,3,4]}",
-                "{NoAI:1b}"));
-        assertFalse(EntityBuildWriter.containsAuthoredNbt(
-                "{Air:300s,NoAI:0b}",
-                "{NoAI:1b}"));
+        assertTrue(EntityBuildWriter.containsAuthoredNbt("{Air:300s,NoAI:1b,Pos:[0.5d,65.0d,9.5d],Rotation:[0.0f,0.0f],UUID:[I;1,2,3,4]}", "{NoAI:1b}"));
+        assertFalse(EntityBuildWriter.containsAuthoredNbt("{Air:300s,NoAI:0b}", "{NoAI:1b}"));
     }
 
     @Test
     void entityActionWithoutEntityIdDoesNotUseDefaultSpawnType() {
-        var entityWriter = new FakeEntityBuildWriter()
-                .known("minecraft:item");
+        var entityWriter = new FakeEntityBuildWriter().known("minecraft:item");
         var target = new MinecraftBuildTarget(
-                BlockPos.ZERO,
-                new FakeBlockBuildWriter(),
-                new FakeFluidBuildWriter(),
-                new FakeBlockEntityBuildWriter(),
-                entityWriter);
+                        BlockPos.ZERO,
+                        new FakeBlockBuildWriter(),
+                        new FakeFluidBuildWriter(),
+                        new FakeBlockEntityBuildWriter(),
+                        entityWriter);
         var action = new BuildAction(
-                "worker",
-                BuildActionKind.point,
-                ResourceLocation.parse("cumulus:entity"),
-                RelativeBlockPos.of(0, 0, 0),
-                RelativeBlockPos.of(0, 0, 0));
+                        "worker",
+                        BuildActionKind.point,
+                        ResourceLocation.parse("cumulus:entity"),
+                        RelativeBlockPos.of(0, 0, 0),
+                        RelativeBlockPos.of(0, 0, 0));
 
         assertFalse(target.contains(action));
         target.apply(action);
@@ -320,15 +277,14 @@ class MinecraftBuildTargetTest {
 
     @Test
     void refusesUnsupportedTargetsAndUnknownBlockIds() {
-        var writer = new FakeBlockBuildWriter()
-                .known("minecraft:stone");
+        var writer = new FakeBlockBuildWriter().known("minecraft:stone");
         var target = new MinecraftBuildTarget(BlockPos.ZERO, writer);
         var unsupported = new BuildAction(
-                "fluid",
-                BuildActionKind.point,
-                ResourceLocation.parse("cumulus:fluid"),
-                RelativeBlockPos.of(0, 0, 0),
-                RelativeBlockPos.of(0, 0, 0));
+                        "fluid",
+                        BuildActionKind.point,
+                        ResourceLocation.parse("cumulus:fluid"),
+                        RelativeBlockPos.of(0, 0, 0),
+                        RelativeBlockPos.of(0, 0, 0));
         var unknown = blockAction("missing", "cumulus:missing_block", RelativeBlockPos.of(0, 0, 0));
 
         assertFalse(target.contains(unsupported));
@@ -341,12 +297,12 @@ class MinecraftBuildTargetTest {
 
     private static BuildAction blockAction(String id, String blockId, RelativeBlockPos pos) {
         return new BuildAction(
-                id,
-                BuildActionKind.point,
-                ResourceLocation.parse("cumulus:block"),
-                pos,
-                pos,
-                Map.of("block", blockId));
+                        id,
+                        BuildActionKind.point,
+                        ResourceLocation.parse("cumulus:block"),
+                        pos,
+                        pos,
+                        Map.of("block", blockId));
     }
 
     private static final class FakeBlockBuildWriter implements BlockBuildWriter {
@@ -457,22 +413,12 @@ class MinecraftBuildTargetTest {
         }
 
         @Override
-        public boolean hasBlockEntity(
-                BlockPos pos,
-                ResourceLocation blockId,
-                ResourceLocation blockEntityId,
-                String nbt) {
-            return blockId.equals(blocks.get(pos))
-                    && blockEntityId.equals(blockEntities.get(pos))
-                    && nbt.equals(this.nbt.get(pos));
+        public boolean hasBlockEntity(BlockPos pos, ResourceLocation blockId, ResourceLocation blockEntityId, String nbt) {
+            return blockId.equals(blocks.get(pos)) && blockEntityId.equals(blockEntities.get(pos)) && nbt.equals(this.nbt.get(pos));
         }
 
         @Override
-        public boolean setBlockEntity(
-                BlockPos pos,
-                ResourceLocation blockId,
-                ResourceLocation blockEntityId,
-                String nbt) {
+        public boolean setBlockEntity(BlockPos pos, ResourceLocation blockId, ResourceLocation blockEntityId, String nbt) {
             if (!canWrite(blockId, blockEntityId) || hasBlockEntity(pos, blockId, blockEntityId, nbt)) {
                 return false;
             }
@@ -557,8 +503,7 @@ class MinecraftBuildTargetTest {
 
         @Override
         public boolean mutate(BlockPos pos, String capabilityName, Map<String, String> mutation) {
-            if (!canWrite(capabilityName, mutation.getOrDefault("operation", ""))
-                    || hasMutation(pos, capabilityName, mutation)) {
+            if (!canWrite(capabilityName, mutation.getOrDefault("operation", "")) || hasMutation(pos, capabilityName, mutation)) {
                 return false;
             }
             mutations.put(key(pos, capabilityName), Map.copyOf(mutation));

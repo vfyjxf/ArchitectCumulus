@@ -1,12 +1,12 @@
 package dev.vfyjxf.cumulus.api.predicate;
 
-import java.util.Map;
-import java.util.TreeMap;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 public final class PredicateDescriptors {
-    private PredicateDescriptors() {
-    }
+    private PredicateDescriptors() {}
 
     public static PredicateDescriptor id(String id) {
         return new PredicateDescriptor(ResourceLocation.parse(id), Map.of());
@@ -19,9 +19,7 @@ public final class PredicateDescriptors {
         if (value == null) {
             throw new IllegalArgumentException("Predicate property value must not be null");
         }
-        return new PredicateDescriptor(ResourceLocation.parse("cumulus:property"), Map.of(
-                "key", key,
-                "value", value));
+        return new PredicateDescriptor(ResourceLocation.parse("cumulus:property"), Map.of("key", key, "value", value));
     }
 
     public static PredicateDescriptor fromSerialized(Map<String, String> values) {

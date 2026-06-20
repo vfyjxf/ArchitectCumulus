@@ -1,10 +1,13 @@
 package dev.vfyjxf.cumulus.api.definition;
 
 import dev.vfyjxf.cumulus.api.target.Targets;
+
+import net.minecraft.resources.ResourceLocation;
+
+import org.junit.jupiter.api.Test;
+
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -12,9 +15,7 @@ class StructureDefinitionRegistryTest {
     @Test
     void registersDefinitionsForIdOnlyRuntimeAssetResolution() {
         var registry = new StructureDefinitionRegistry();
-        var definition = Structures.define(ResourceLocation.parse("cumulus:registry_machine"))
-                .point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block())
-                .build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:registry_machine")).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block()).build();
 
         assertEquals(Optional.empty(), registry.resolve(definition.id()));
 
@@ -26,9 +27,7 @@ class StructureDefinitionRegistryTest {
 
     @Test
     void structuresConvenienceApiRegistersDefinitionsInGlobalRegistry() {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:global_registry_machine"))
-                .point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block())
-                .build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:global_registry_machine")).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block()).build();
 
         Structures.register(definition);
 

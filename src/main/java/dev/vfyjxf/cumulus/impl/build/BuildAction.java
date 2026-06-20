@@ -1,16 +1,18 @@
 package dev.vfyjxf.cumulus.impl.build;
 
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
-import java.util.Map;
+
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Map;
+
 public record BuildAction(
-        String id,
-        BuildActionKind kind,
-        ResourceLocation targetType,
-        RelativeBlockPos min,
-        RelativeBlockPos max,
-        Map<String, String> properties) {
+                String id,
+                BuildActionKind kind,
+                ResourceLocation targetType,
+                RelativeBlockPos min,
+                RelativeBlockPos max,
+                Map<String, String> properties) {
     public BuildAction {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("Build action id must not be blank");
@@ -28,11 +30,11 @@ public record BuildAction(
     }
 
     public BuildAction(
-            String id,
-            BuildActionKind kind,
-            ResourceLocation targetType,
-            RelativeBlockPos min,
-            RelativeBlockPos max) {
+                    String id,
+                    BuildActionKind kind,
+                    ResourceLocation targetType,
+                    RelativeBlockPos min,
+                    RelativeBlockPos max) {
         this(id, kind, targetType, min, max, Map.of());
     }
 }

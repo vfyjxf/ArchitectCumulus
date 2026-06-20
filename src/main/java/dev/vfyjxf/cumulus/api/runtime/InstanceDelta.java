@@ -1,9 +1,9 @@
 package dev.vfyjxf.cumulus.api.runtime;
 
 public record InstanceDelta(
-        StructureInstanceKey key,
-        InstanceStatus status,
-        RuntimeStructureContext context) {
+                StructureInstanceKey key,
+                InstanceStatus status,
+                RuntimeStructureContext context) {
     public InstanceDelta {
         if (key == null) {
             throw new IllegalArgumentException("Instance key must not be null");

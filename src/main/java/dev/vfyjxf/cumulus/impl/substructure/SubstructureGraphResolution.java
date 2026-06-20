@@ -1,11 +1,12 @@
 package dev.vfyjxf.cumulus.impl.substructure;
 
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticGraph;
+
 import java.util.Optional;
 
 public record SubstructureGraphResolution(
-        Optional<SubstructureGraph> graph,
-        DiagnosticGraph diagnostics) {
+                Optional<SubstructureGraph> graph,
+                DiagnosticGraph diagnostics) {
     public SubstructureGraphResolution {
         if (graph == null) {
             throw new IllegalArgumentException("Substructure graph optional must not be null");
@@ -24,7 +25,6 @@ public record SubstructureGraphResolution(
     }
 
     public boolean hasErrors() {
-        return diagnostics.nodes().stream().anyMatch(node -> node.severity().ordinal()
-                >= dev.vfyjxf.cumulus.api.diagnostic.Severity.error.ordinal());
+        return diagnostics.nodes().stream().anyMatch(node -> node.severity().ordinal() >= dev.vfyjxf.cumulus.api.diagnostic.Severity.error.ordinal());
     }
 }

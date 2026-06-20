@@ -8,25 +8,24 @@ import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticEvidence;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticGraph;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticNode;
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
+
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
 
 public final class SubstructureGraphResolver {
     private static final ResourceLocation substructureComponent = ResourceLocation.parse("cumulus:substructure");
     private static final String rootNodeId = "root";
     private static final RelativeBlockPos rootOffset = RelativeBlockPos.of(0, 0, 0);
 
-    private SubstructureGraphResolver() {
-    }
+    private SubstructureGraphResolver() {}
 
-    public static SubstructureGraphResolution resolve(
-            ResourceLocation rootDefinitionId,
-            Collection<StructureDefinition> definitions) {
+    public static SubstructureGraphResolution resolve(ResourceLocation rootDefinitionId, Collection<StructureDefinition> definitions) {
         if (definitions == null) {
             throw new IllegalArgumentException("Substructure definitions must not be null");
         }
@@ -40,9 +39,7 @@ public final class SubstructureGraphResolver {
         return resolve(rootDefinitionId, definitionsById);
     }
 
-    public static SubstructureGraphResolution resolve(
-            ResourceLocation rootDefinitionId,
-            Map<ResourceLocation, StructureDefinition> definitionsById) {
+    public static SubstructureGraphResolution resolve(ResourceLocation rootDefinitionId, Map<ResourceLocation, StructureDefinition> definitionsById) {
         if (rootDefinitionId == null) {
             throw new IllegalArgumentException("Substructure root definition id must not be null");
         }
@@ -60,12 +57,12 @@ public final class SubstructureGraphResolver {
         var nodes = new ArrayList<SubstructureGraphNode>();
         var edges = new ArrayList<SubstructureGraphEdge>();
         var root = new SubstructureGraphNode(
-                rootDefinitionId.toString(),
-                rootDefinitionId,
-                null,
-                rootDefinitionId.toString(),
-                rootOffset,
-                0);
+                        rootDefinitionId.toString(),
+                        rootDefinitionId,
+                        null,
+                        rootDefinitionId.toString(),
+                        rootOffset,
+                        0);
         nodes.add(root);
 
         resolveChildren(rootDefinition, root, definitionsById, nodes, edges, new ArrayDeque<>(List.of(rootDefinitionId)), diagnostics);
@@ -75,14 +72,7 @@ public final class SubstructureGraphResolver {
         return SubstructureGraphResolution.resolved(new SubstructureGraph(root, nodes, edges), diagnostics.toGraph());
     }
 
-    private static void resolveChildren(
-            StructureDefinition parentDefinition,
-            SubstructureGraphNode parentNode,
-            Map<ResourceLocation, StructureDefinition> definitionsById,
-            List<SubstructureGraphNode> nodes,
-            List<SubstructureGraphEdge> edges,
-            ArrayDeque<ResourceLocation> definitionStack,
-            DiagnosticAccumulator diagnostics) {
+    private static void resolveChildren(StructureDefinition parentDefinition, SubstructureGraphNode parentNode, Map<ResourceLocation, StructureDefinition> definitionsById, List<SubstructureGraphNode> nodes, List<SubstructureGraphEdge> edges, ArrayDeque<ResourceLocation> definitionStack, DiagnosticAccumulator diagnostics) {
         for (var component : parentDefinition.components()) {
             if (!substructureComponent.equals(component.typeId())) {
                 continue;
@@ -103,19 +93,19 @@ public final class SubstructureGraphResolver {
             }
 
             var childNode = new SubstructureGraphNode(
-                    childOccurrenceId,
-                    childDefinitionId,
-                    parentNode.occurrenceId(),
-                    component.name(),
-                    anchorOffset,
-                    parentNode.depth() + 1);
+                            childOccurrenceId,
+                            childDefinitionId,
+                            parentNode.occurrenceId(),
+                            component.name(),
+                            anchorOffset,
+                            parentNode.depth() + 1);
             nodes.add(childNode);
             edges.add(new SubstructureGraphEdge(
-                    parentNode.occurrenceId(),
-                    childOccurrenceId,
-                    component.name(),
-                    childDefinitionId,
-                    anchorOffset));
+                            parentNode.occurrenceId(),
+                            childOccurrenceId,
+                            component.name(),
+                            childDefinitionId,
+                            anchorOffset));
 
             definitionStack.addLast(childDefinitionId);
             resolveChildren(childDefinition, childNode, definitionsById, nodes, edges, definitionStack, diagnostics);
@@ -153,10 +143,7 @@ public final class SubstructureGraphResolver {
         if (parts.length != 3) {
             throw new IllegalArgumentException("Relative position must have x,y,z parts");
         }
-        return RelativeBlockPos.of(
-                Integer.parseInt(parts[0]),
-                Integer.parseInt(parts[1]),
-                Integer.parseInt(parts[2]));
+        return RelativeBlockPos.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
     }
 
     private static final class DiagnosticAccumulator {
@@ -165,62 +152,38 @@ public final class SubstructureGraphResolver {
 
         private DiagnosticAccumulator() {
             nodes.add(new DiagnosticNode(
-                    rootNodeId,
-                    Severity.error,
-                    "Substructure graph could not be resolved",
-                    "diagnostic.cumulus.substructure_resolution_failed",
-                    List.of(),
-                    "substructures",
-                    List.of()));
+                            rootNodeId,
+                            Severity.error,
+                            "Substructure graph could not be resolved",
+                            "diagnostic.cumulus.substructure_resolution_failed",
+                            List.of(),
+                            "substructures",
+                            List.of()));
         }
 
         private void addMissingRoot(ResourceLocation rootDefinitionId) {
             addChild(new DiagnosticNode(
-                    "missing-root-definition",
-                    Severity.error,
-                    "Root structure definition is missing",
-                    "diagnostic.cumulus.missing_root_definition",
-                    List.of(DiagnosticEvidence.relative(
-                            rootOffset,
-                            rootDefinitionId.toString(),
-                            "cumulus:substructure_graph",
-                            rootDefinitionId.toString(),
-                            "MISSING_ROOT_DEFINITION",
-                            Map.of("missing.definition", rootDefinitionId.toString()))),
-                    "substructures/" + rootDefinitionId,
-                    List.of()));
+                            "missing-root-definition",
+                            Severity.error,
+                            "Root structure definition is missing",
+                            "diagnostic.cumulus.missing_root_definition",
+                            List.of(DiagnosticEvidence.relative(rootOffset, rootDefinitionId.toString(), "cumulus:substructure_graph", rootDefinitionId.toString(), "MISSING_ROOT_DEFINITION", Map.of("missing.definition", rootDefinitionId.toString()))),
+                            "substructures/" + rootDefinitionId,
+                            List.of()));
         }
 
-        private void addMissingChild(
-                String childOccurrenceId,
-                ComponentDescriptor component,
-                ResourceLocation childDefinitionId,
-                RelativeBlockPos anchorOffset) {
+        private void addMissingChild(String childOccurrenceId, ComponentDescriptor component, ResourceLocation childDefinitionId, RelativeBlockPos anchorOffset) {
             addChild(new DiagnosticNode(
-                    "missing-child-definition",
-                    Severity.error,
-                    "Substructure child definition is missing",
-                    "diagnostic.cumulus.missing_substructure_definition",
-                    List.of(DiagnosticEvidence.relative(
-                            anchorOffset,
-                            childDefinitionId.toString(),
-                            substructureComponent.toString(),
-                            childOccurrenceId,
-                            "MISSING_SUBSTRUCTURE_DEFINITION",
-                            Map.of(
-                                    "component", component.name(),
-                                    "missing.definition", childDefinitionId.toString(),
-                                    "anchor_offset", anchorOffset.asString()))),
-                    "substructures/" + childOccurrenceId,
-                    List.of()));
+                            "missing-child-definition",
+                            Severity.error,
+                            "Substructure child definition is missing",
+                            "diagnostic.cumulus.missing_substructure_definition",
+                            List.of(DiagnosticEvidence.relative(anchorOffset, childDefinitionId.toString(), substructureComponent.toString(), childOccurrenceId, "MISSING_SUBSTRUCTURE_DEFINITION", Map.of("component", component.name(), "missing.definition", childDefinitionId.toString(), "anchor_offset", anchorOffset.asString()))),
+                            "substructures/" + childOccurrenceId,
+                            List.of()));
         }
 
-        private void addCycle(
-                String childOccurrenceId,
-                ComponentDescriptor component,
-                RelativeBlockPos anchorOffset,
-                ArrayDeque<ResourceLocation> definitionStack,
-                ResourceLocation repeatedDefinitionId) {
+        private void addCycle(String childOccurrenceId, ComponentDescriptor component, RelativeBlockPos anchorOffset, ArrayDeque<ResourceLocation> definitionStack, ResourceLocation repeatedDefinitionId) {
             var cycle = new ArrayList<String>();
             var inCycle = false;
             for (var definitionId : definitionStack) {
@@ -233,28 +196,17 @@ public final class SubstructureGraphResolver {
             }
             cycle.add(repeatedDefinitionId.toString());
             addChild(new DiagnosticNode(
-                    "substructure-cycle",
-                    Severity.error,
-                    "Substructure definitions contain a cycle",
-                    "diagnostic.cumulus.substructure_cycle",
-                    List.of(DiagnosticEvidence.relative(
-                            anchorOffset,
-                            repeatedDefinitionId.toString(),
-                            substructureComponent.toString(),
-                            childOccurrenceId,
-                            "SUBSTRUCTURE_CYCLE",
-                            Map.of(
-                                    "component", component.name(),
-                                    "cycle", String.join(" -> ", cycle),
-                                    "anchor_offset", anchorOffset.asString()))),
-                    "substructures/" + childOccurrenceId,
-                    List.of()));
+                            "substructure-cycle",
+                            Severity.error,
+                            "Substructure definitions contain a cycle",
+                            "diagnostic.cumulus.substructure_cycle",
+                            List.of(DiagnosticEvidence.relative(anchorOffset, repeatedDefinitionId.toString(), substructureComponent.toString(), childOccurrenceId, "SUBSTRUCTURE_CYCLE", Map.of("component", component.name(), "cycle", String.join(" -> ", cycle), "anchor_offset", anchorOffset.asString()))),
+                            "substructures/" + childOccurrenceId,
+                            List.of()));
         }
 
         private boolean hasErrors() {
-            return nodes.stream()
-                    .filter(node -> !node.id().equals(rootNodeId))
-                    .anyMatch(node -> node.severity().ordinal() >= Severity.error.ordinal());
+            return nodes.stream().filter(node -> !node.id().equals(rootNodeId)).anyMatch(node -> node.severity().ordinal() >= Severity.error.ordinal());
         }
 
         private DiagnosticGraph toGraph() {

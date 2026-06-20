@@ -1,11 +1,13 @@
 package dev.vfyjxf.cumulus.impl.codec;
 
 import dev.vfyjxf.cumulus.api.types.ContextKey;
-import java.util.Map;
-import java.util.Objects;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Codec helper for {@link ContextKey}. Round-trips the typed key through a
@@ -19,24 +21,13 @@ import net.minecraft.resources.ResourceLocation;
 public final class ContextKeyCodec {
 
     /** Wire aliases for common value types. Stable across refactors. */
-    private static final Map<String, Class<?>> primitiveAliases = Map.of(
-            "string", String.class,
-            "int", Integer.class,
-            "long", Long.class,
-            "boolean", Boolean.class,
-            "double", Double.class,
-            "block_pos", BlockPos.class,
-            "direction", Direction.class,
-            "resource_location", ResourceLocation.class);
+    private static final Map<String, Class<?>> primitiveAliases = Map.of("string", String.class, "int", Integer.class, "long", Long.class, "boolean", Boolean.class, "double", Double.class, "block_pos", BlockPos.class, "direction", Direction.class, "resource_location", ResourceLocation.class);
 
-    private ContextKeyCodec() {
-    }
+    private ContextKeyCodec() {}
 
     public static Map<String, String> serialize(ContextKey<?> key) {
         Objects.requireNonNull(key, "ContextKey must not be null");
-        return Map.of(
-                "name", key.name(),
-                "type", aliasFor(key.type()));
+        return Map.of("name", key.name(), "type", aliasFor(key.type()));
     }
 
     public static ContextKey<?> deserialize(Map<String, String> wire) {
@@ -56,7 +47,7 @@ public final class ContextKeyCodec {
                 type = Class.forName(typeAlias);
             } catch (ClassNotFoundException e) {
                 throw new IllegalArgumentException(
-                        "Unknown ContextKey value type: " + typeAlias, e);
+                                "Unknown ContextKey value type: " + typeAlias, e);
             }
         }
         return ContextKey.of(name, type);

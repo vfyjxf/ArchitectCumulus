@@ -1,14 +1,13 @@
 package dev.vfyjxf.cumulus.impl.codec;
 
 import dev.vfyjxf.cumulus.api.context.ContextSource;
-import dev.vfyjxf.cumulus.api.context.ContextSources;
 import dev.vfyjxf.cumulus.api.context.sources.CapturePositionSource;
 import dev.vfyjxf.cumulus.api.context.sources.CapturePropertySource;
 import dev.vfyjxf.cumulus.api.context.sources.CaptureValueSource;
 import dev.vfyjxf.cumulus.api.context.sources.ContextRefSource;
 import dev.vfyjxf.cumulus.api.context.sources.LiteralSource;
 import dev.vfyjxf.cumulus.api.definition.StructurePointId;
-import dev.vfyjxf.cumulus.api.types.ContextKey;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -28,8 +27,7 @@ import java.util.Objects;
  */
 public final class ContextSourceCodec {
 
-    private ContextSourceCodec() {
-    }
+    private ContextSourceCodec() {}
 
     public static Map<String, Object> serialize(ContextSource source) {
         Objects.requireNonNull(source, "ContextSource must not be null");
@@ -62,12 +60,12 @@ public final class ContextSourceCodec {
         var kind = String.valueOf(wire.get("kind"));
         return switch (kind) {
             case "capture_property" -> new CapturePropertySource(
-                    new StructurePointId(String.valueOf(wire.get("point"))),
-                    String.valueOf(wire.get("property")));
+                            new StructurePointId(String.valueOf(wire.get("point"))),
+                            String.valueOf(wire.get("property")));
             case "capture_value" -> new CaptureValueSource(
-                    new StructurePointId(String.valueOf(wire.get("point"))));
+                            new StructurePointId(String.valueOf(wire.get("point"))));
             case "capture_position" -> new CapturePositionSource(
-                    new StructurePointId(String.valueOf(wire.get("point"))));
+                            new StructurePointId(String.valueOf(wire.get("point"))));
             case "context_ref" -> {
                 @SuppressWarnings("unchecked")
                 var keyWire = (Map<String, String>) wire.get("key");

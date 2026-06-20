@@ -8,8 +8,8 @@ public record SectionKey(int x, int y, int z) {
             throw new IllegalArgumentException("Block position must not be null");
         }
         return new SectionKey(
-                Math.floorDiv(pos.getX(), 16),
-                Math.floorDiv(pos.getY(), 16),
-                Math.floorDiv(pos.getZ(), 16));
+                        Math.floorDiv(pos.getX(), 16),
+                        Math.floorDiv(pos.getY(), 16),
+                        Math.floorDiv(pos.getZ(), 16));
     }
 }

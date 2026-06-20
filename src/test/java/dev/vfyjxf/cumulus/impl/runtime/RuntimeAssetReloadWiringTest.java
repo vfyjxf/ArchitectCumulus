@@ -1,6 +1,18 @@
 package dev.vfyjxf.cumulus.impl.runtime;
 
 import dev.vfyjxf.cumulus.impl.codec.RuntimeAssetReloadListener;
+
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
+
+import org.junit.jupiter.api.Test;
+
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -12,15 +24,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.resources.Resource;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -37,43 +40,33 @@ class RuntimeAssetReloadWiringTest {
         eventBus.dispatch(event);
 
         assertEquals(1, event.getListeners().size());
-        event.getListeners().getFirst().reload(
-                        CompletableFuture::completedFuture,
-                        manager(),
-                        net.minecraft.util.profiling.InactiveProfiler.INSTANCE,
-                        net.minecraft.util.profiling.InactiveProfiler.INSTANCE,
-                        Runnable::run,
-                        Runnable::run)
-                .join();
+        event.getListeners().getFirst().reload(CompletableFuture::completedFuture, manager(), net.minecraft.util.profiling.InactiveProfiler.INSTANCE, net.minecraft.util.profiling.InactiveProfiler.INSTANCE, Runnable::run, Runnable::run).join();
 
-        assertEquals(ResourceLocation.parse("cumulus:registered_asset"),
-                listener.lastResult().orElseThrow().assets().getFirst().id());
+        assertEquals(ResourceLocation.parse("cumulus:registered_asset"), listener.lastResult().orElseThrow().assets().getFirst().id());
     }
 
     private static ResourceManager manager() {
-        return new FakeResourceManager(Map.of(
-                ResourceLocation.parse("cumulus:cumulus/structures/registered_asset.json"),
-                new Resource(
+        return new FakeResourceManager(Map.of(ResourceLocation.parse("cumulus:cumulus/structures/registered_asset.json"), new Resource(
                         null,
                         () -> new ByteArrayInputStream(("""
-                                {
-                                  "id": "cumulus:registered_asset",
-                                  "schema_version": 1,
-                                  "definition": "cumulus:registered_asset",
-                                  "debug_asset": false,
-                                  "runtime_plan": {
-                                    "definition": "cumulus:registered_asset",
-                                    "entries": [
-                                      {
-                                        "id": "origin",
-                                        "target": "cumulus:block",
-                                        "min": "0,0,0",
-                                        "max": "0,0,0"
-                                      }
-                                    ]
-                                  }
-                                }
-                                """).getBytes(StandardCharsets.UTF_8)))));
+                                        {
+                                          "id": "cumulus:registered_asset",
+                                          "schema_version": 1,
+                                          "definition": "cumulus:registered_asset",
+                                          "debug_asset": false,
+                                          "runtime_plan": {
+                                            "definition": "cumulus:registered_asset",
+                                            "entries": [
+                                              {
+                                                "id": "origin",
+                                                "target": "cumulus:block",
+                                                "min": "0,0,0",
+                                                "max": "0,0,0"
+                                              }
+                                            ]
+                                          }
+                                        }
+                                        """).getBytes(StandardCharsets.UTF_8)))));
     }
 
     private static final class CapturingEventBus implements IEventBus {
@@ -81,8 +74,7 @@ class RuntimeAssetReloadWiringTest {
         private final List<Consumer<? extends Event>> consumers = new ArrayList<>();
 
         @Override
-        public void register(Object target) {
-        }
+        public void register(Object target) {}
 
         @Override
         public <T extends Event> void addListener(Consumer<T> consumer) {
@@ -112,11 +104,7 @@ class RuntimeAssetReloadWiringTest {
         }
 
         @Override
-        public <T extends Event> void addListener(
-                EventPriority priority,
-                boolean receiveCanceled,
-                Class<T> eventType,
-                Consumer<T> consumer) {
+        public <T extends Event> void addListener(EventPriority priority, boolean receiveCanceled, Class<T> eventType, Consumer<T> consumer) {
             eventTypes.add(eventType);
             consumers.add(consumer);
         }
@@ -127,17 +115,13 @@ class RuntimeAssetReloadWiringTest {
         }
 
         @Override
-        public <T extends Event> void addListener(
-                boolean receiveCanceled,
-                Class<T> eventType,
-                Consumer<T> consumer) {
+        public <T extends Event> void addListener(boolean receiveCanceled, Class<T> eventType, Consumer<T> consumer) {
             eventTypes.add(eventType);
             consumers.add(consumer);
         }
 
         @Override
-        public void unregister(Object object) {
-        }
+        public void unregister(Object object) {}
 
         @Override
         public <T extends Event> T post(T event) {
@@ -152,8 +136,7 @@ class RuntimeAssetReloadWiringTest {
         }
 
         @Override
-        public void start() {
-        }
+        public void start() {}
 
         @SuppressWarnings("unchecked")
         private <T extends Event> void dispatch(T event) {
@@ -180,25 +163,13 @@ class RuntimeAssetReloadWiringTest {
         }
 
         @Override
-        public Map<ResourceLocation, Resource> listResources(
-                String path,
-                Predicate<ResourceLocation> filter) {
-            return resources.entrySet().stream()
-                    .filter(entry -> entry.getKey().getPath().startsWith(path))
-                    .filter(entry -> filter.test(entry.getKey()))
-                    .collect(java.util.stream.Collectors.toMap(
-                            Map.Entry::getKey,
-                            Map.Entry::getValue));
+        public Map<ResourceLocation, Resource> listResources(String path, Predicate<ResourceLocation> filter) {
+            return resources.entrySet().stream().filter(entry -> entry.getKey().getPath().startsWith(path)).filter(entry -> filter.test(entry.getKey())).collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
 
         @Override
-        public Map<ResourceLocation, List<Resource>> listResourceStacks(
-                String path,
-                Predicate<ResourceLocation> filter) {
-            return listResources(path, filter).entrySet().stream()
-                    .collect(java.util.stream.Collectors.toMap(
-                            Map.Entry::getKey,
-                            entry -> List.of(entry.getValue())));
+        public Map<ResourceLocation, List<Resource>> listResourceStacks(String path, Predicate<ResourceLocation> filter) {
+            return listResources(path, filter).entrySet().stream().collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, entry -> List.of(entry.getValue())));
         }
 
         @Override

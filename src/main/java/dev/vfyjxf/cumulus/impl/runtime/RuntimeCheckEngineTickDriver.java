@@ -1,10 +1,11 @@
 package dev.vfyjxf.cumulus.impl.runtime;
 
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntSupplier;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 public final class RuntimeCheckEngineTickDriver {
     private static final int defaultMaxChecksPerTick = 16;
@@ -27,9 +28,9 @@ public final class RuntimeCheckEngineTickDriver {
     }
 
     public RuntimeCheckEngineTickDriver(
-            FrameRunner diagnosticRunner,
-            FrameRunner fastRunner,
-            IntSupplier pendingChecks) {
+                    FrameRunner diagnosticRunner,
+                    FrameRunner fastRunner,
+                    IntSupplier pendingChecks) {
         if (diagnosticRunner == null) {
             throw new IllegalArgumentException("Runtime diagnostic frame runner must not be null");
         }

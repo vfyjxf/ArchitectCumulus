@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.api.runtime;
 
 import dev.vfyjxf.cumulus.api.types.ContextKey;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -15,9 +16,9 @@ import java.util.Optional;
  * substructure lifecycle state, and migration ops.
  */
 public record RuntimeStructureContext(
-        StructureInstanceKey key,
-        int revision,
-        Map<ContextKey<?>, Object> values) {
+                StructureInstanceKey key,
+                int revision,
+                Map<ContextKey<?>, Object> values) {
 
     public RuntimeStructureContext {
         if (key == null) {

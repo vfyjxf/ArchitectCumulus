@@ -1,15 +1,17 @@
 package dev.vfyjxf.cumulus.impl;
 
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
-import java.util.Map;
+
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Map;
+
 public record RuntimePlanEntry(
-        String id,
-        ResourceLocation targetType,
-        RelativeBlockPos min,
-        RelativeBlockPos max,
-        Map<String, String> properties) {
+                String id,
+                ResourceLocation targetType,
+                RelativeBlockPos min,
+                RelativeBlockPos max,
+                Map<String, String> properties) {
     public RuntimePlanEntry {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("Runtime plan entry id must not be blank");
@@ -27,10 +29,10 @@ public record RuntimePlanEntry(
     }
 
     public RuntimePlanEntry(
-            String id,
-            ResourceLocation targetType,
-            RelativeBlockPos min,
-            RelativeBlockPos max) {
+                    String id,
+                    ResourceLocation targetType,
+                    RelativeBlockPos min,
+                    RelativeBlockPos max) {
         this(id, targetType, min, max, Map.of());
     }
 }

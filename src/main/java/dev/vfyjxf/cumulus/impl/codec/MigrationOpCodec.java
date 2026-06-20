@@ -4,6 +4,7 @@ import dev.vfyjxf.cumulus.api.migration.MigrationOp;
 import dev.vfyjxf.cumulus.api.migration.MigrationOps;
 import dev.vfyjxf.cumulus.api.migration.MutableRuntimeContext;
 import dev.vfyjxf.cumulus.api.types.ContextKey;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -27,8 +28,7 @@ import java.util.function.Consumer;
  */
 public final class MigrationOpCodec {
 
-    private MigrationOpCodec() {
-    }
+    private MigrationOpCodec() {}
 
     /**
      * Helper that bypasses the generic {@code <T>} constraint on
@@ -62,8 +62,7 @@ public final class MigrationOpCodec {
             // Don't serialize the lambda — caller must re-register on load.
         } else {
             throw new IllegalArgumentException(
-                    "Cannot serialize MigrationOp of type " + op.getClass().getName()
-                            + " (transform_value and lambda custom ops are Java-DSL-only)");
+                            "Cannot serialize MigrationOp of type " + op.getClass().getName() + " (transform_value and lambda custom ops are Java-DSL-only)");
         }
         return map;
     }
@@ -89,13 +88,12 @@ public final class MigrationOpCodec {
                 yield MigrationOps.remove(ContextKeyCodec.deserialize(keyWire));
             }
             case "custom" -> {
-                var id = net.minecraft.resources.ResourceLocation.parse(
-                        String.valueOf(wire.get("id")));
+                var id = net.minecraft.resources.ResourceLocation.parse(String.valueOf(wire.get("id")));
                 // No-op deserialization: caller must register a real handler under this id
                 // before the migration runs. Until then this is a placeholder.
                 yield MigrationOps.custom(id, (Consumer<MutableRuntimeContext>) ctx -> {
                     throw new IllegalStateException(
-                            "Custom migration op " + id + " has no registered handler");
+                                    "Custom migration op " + id + " has no registered handler");
                 });
             }
             default -> throw new IllegalArgumentException("Unknown MigrationOp kind: " + op);

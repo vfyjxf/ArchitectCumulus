@@ -1,13 +1,14 @@
 package dev.vfyjxf.cumulus.impl.build;
 
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
+
 import net.minecraft.resources.ResourceLocation;
 
 public record BuiltTarget(
-        ResourceLocation targetType,
-        RelativeBlockPos min,
-        RelativeBlockPos max,
-        String actionId) {
+                ResourceLocation targetType,
+                RelativeBlockPos min,
+                RelativeBlockPos max,
+                String actionId) {
     public BuiltTarget {
         if (targetType == null) {
             throw new IllegalArgumentException("Built target type must not be null");

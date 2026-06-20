@@ -1,8 +1,10 @@
 package dev.vfyjxf.cumulus.impl.editor;
 
 import dev.vfyjxf.cumulus.impl.StructureRuntimePlan;
-import java.util.Optional;
+
 import net.minecraft.core.BlockPos;
+
+import java.util.Optional;
 
 public final class StructureEditorController {
     private StructureEditorSession activeSession;

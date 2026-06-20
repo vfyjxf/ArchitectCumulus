@@ -1,14 +1,17 @@
 package dev.vfyjxf.cumulus.impl.check;
 
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
+
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
 
 public record InMemoryTargetSnapshot(
-        Map<TargetKey, SnapshotTarget> targets,
-        Map<String, String> contextValues) {
+                Map<TargetKey, SnapshotTarget> targets,
+                Map<String, String> contextValues) {
+
     private static final ResourceLocation block = ResourceLocation.parse("cumulus:block");
     private static final ResourceLocation blockEntity = ResourceLocation.parse("cumulus:block_entity");
     private static final ResourceLocation entity = ResourceLocation.parse("cumulus:entity");
@@ -43,8 +46,7 @@ public record InMemoryTargetSnapshot(
         if (key == null || key.isBlank()) {
             throw new IllegalArgumentException("Context key must not be blank");
         }
-        return Optional.ofNullable(contextValues.get(key))
-                .map(value -> new SnapshotTarget(value, Map.of("key", key)));
+        return Optional.ofNullable(contextValues.get(key)).map(value -> new SnapshotTarget(value, Map.of("key", key)));
     }
 
     public static final class Builder {
@@ -120,12 +122,7 @@ public record InMemoryTargetSnapshot(
             return new InMemoryTargetSnapshot(targets, contextValues);
         }
 
-        private void put(
-                ResourceLocation targetType,
-                RelativeBlockPos min,
-                RelativeBlockPos max,
-                String value,
-                Map<String, String> properties) {
+        private void put(ResourceLocation targetType, RelativeBlockPos min, RelativeBlockPos max, String value, Map<String, String> properties) {
             if (min == null || max == null) {
                 throw new IllegalArgumentException("Snapshot target bounds must not be null");
             }
@@ -134,8 +131,8 @@ public record InMemoryTargetSnapshot(
     }
 
     private record TargetKey(
-            ResourceLocation targetType,
-            RelativeBlockPos min,
-            RelativeBlockPos max) {
+                    ResourceLocation targetType,
+                    RelativeBlockPos min,
+                    RelativeBlockPos max) {
     }
 }

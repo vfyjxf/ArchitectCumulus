@@ -4,8 +4,10 @@ import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptors;
 import dev.vfyjxf.cumulus.api.target.Targets;
-import java.util.ArrayList;
+
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -14,11 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class BoxComponentTest {
     @Test
     void filledBoxExpandsAllPositionsInclusively() {
-        var component = Components.box("casing",
-                RelativeBlockPos.of(0, 0, 0),
-                RelativeBlockPos.of(1, 1, 1))
-            .target(Targets.block())
-            .where(PredicateDescriptors.id("cumulus:any"));
+        var component = Components.box("casing", RelativeBlockPos.of(0, 0, 0), RelativeBlockPos.of(1, 1, 1)).target(Targets.block()).where(PredicateDescriptors.id("cumulus:any"));
 
         var emitted = new ArrayList<StructurePointDefinition>();
         component.emit(emitted::add);
@@ -30,10 +28,7 @@ class BoxComponentTest {
 
     @Test
     void hollowBoxOnlyEmitsShell() {
-        var component = Components.hollowBox("shell",
-                RelativeBlockPos.of(0, 0, 0),
-                RelativeBlockPos.of(2, 2, 2))
-            .target(Targets.block());
+        var component = Components.hollowBox("shell", RelativeBlockPos.of(0, 0, 0), RelativeBlockPos.of(2, 2, 2)).target(Targets.block());
 
         var emitted = new ArrayList<StructurePointDefinition>();
         component.emit(emitted::add);
@@ -44,16 +39,11 @@ class BoxComponentTest {
 
     @Test
     void boxRejectsCaptureBearingTargetPatterns() {
-        assertThrows(IllegalArgumentException.class, () ->
-                Components.box("captured",
-                                RelativeBlockPos.of(0, 0, 0),
-                                RelativeBlockPos.of(1, 1, 1))
-                        .target(Targets.block().capture("controller")));
+        assertThrows(IllegalArgumentException.class, () -> Components.box("captured", RelativeBlockPos.of(0, 0, 0), RelativeBlockPos.of(1, 1, 1)).target(Targets.block().capture("controller")));
     }
 
     @Test
     void boxRejectsInvertedBounds() {
-        assertThrows(IllegalArgumentException.class, () ->
-                Components.box("bad", RelativeBlockPos.of(1, 0, 0), RelativeBlockPos.of(0, 0, 0)));
+        assertThrows(IllegalArgumentException.class, () -> Components.box("bad", RelativeBlockPos.of(1, 0, 0), RelativeBlockPos.of(0, 0, 0)));
     }
 }

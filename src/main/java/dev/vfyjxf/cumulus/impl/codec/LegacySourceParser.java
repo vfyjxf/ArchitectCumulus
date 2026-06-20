@@ -1,7 +1,6 @@
 package dev.vfyjxf.cumulus.impl.codec;
 
 import dev.vfyjxf.cumulus.api.context.ContextSource;
-import dev.vfyjxf.cumulus.api.context.ContextSources;
 import dev.vfyjxf.cumulus.api.context.sources.CapturePositionSource;
 import dev.vfyjxf.cumulus.api.context.sources.CapturePropertySource;
 import dev.vfyjxf.cumulus.api.context.sources.CaptureValueSource;
@@ -16,8 +15,7 @@ import dev.vfyjxf.cumulus.api.types.ContextKey;
  */
 public final class LegacySourceParser {
 
-    private LegacySourceParser() {
-    }
+    private LegacySourceParser() {}
 
     /**
      * Parse a v1 expression string into a typed source.

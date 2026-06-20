@@ -3,16 +3,19 @@ package dev.vfyjxf.cumulus.api.runtime;
 import dev.vfyjxf.cumulus.api.component.Components;
 import dev.vfyjxf.cumulus.api.context.ContextRuleDescriptor;
 import dev.vfyjxf.cumulus.api.context.ContextSources;
-import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.Structures;
 import dev.vfyjxf.cumulus.api.migration.MigrationDescriptor;
 import dev.vfyjxf.cumulus.api.migration.StructureVersionDescriptor;
 import dev.vfyjxf.cumulus.api.target.Targets;
 import dev.vfyjxf.cumulus.api.transform.Transforms;
-import java.util.Map;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
+
 import net.minecraft.resources.ResourceLocation;
+
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -42,11 +45,7 @@ class DefinitionExpansionTest {
 
     @Test
     void regionComponentEmitsSingleRegionPoint() {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:door"))
-                .component(Components.region("door_frame",
-                        RelativeBlockPos.of(-1, 0, 0),
-                        RelativeBlockPos.of(1, 2, 0)))
-                .build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:door")).component(Components.region("door_frame", RelativeBlockPos.of(-1, 0, 0), RelativeBlockPos.of(1, 2, 0))).build();
 
         assertEquals(1, definition.points().size());
         var point = definition.points().get(0);
@@ -59,9 +58,7 @@ class DefinitionExpansionTest {
     @Test
     void substructureComponentMetadataIsPreservedByDefinition() {
         var structureId = ResourceLocation.parse("cumulus:door_leaf");
-        var definition = Structures.define(ResourceLocation.parse("cumulus:double_door"))
-                .component(Components.substructure("left_leaf", structureId, RelativeBlockPos.of(-1, 0, 0)))
-                .build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:double_door")).component(Components.substructure("left_leaf", structureId, RelativeBlockPos.of(-1, 0, 0))).build();
 
         assertEquals(0, definition.points().size());
         assertEquals(1, definition.components().size());
@@ -79,22 +76,17 @@ class DefinitionExpansionTest {
         assertEquals(ResourceLocation.parse("cumulus:rotate_y_180"), Transforms.rotateY180().id());
         assertEquals(ResourceLocation.parse("cumulus:rotate_y_270"), Transforms.rotateY270().id());
         assertEquals(ResourceLocation.parse("cumulus:rotations_3d"), Transforms.rotations3d().id());
-        assertEquals("strict", Transforms.custom(ResourceLocation.parse("cumulus:custom"), Map.of("mode", "strict"))
-                .properties()
-                .get("mode"));
+        assertEquals("strict", Transforms.custom(ResourceLocation.parse("cumulus:custom"), Map.of("mode", "strict")).properties().get("mode"));
     }
 
     @Test
     void builderPreservesContextAndMigrationDescriptors() {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:migrating_machine"))
-                .context(ContextRuleDescriptor.derive(ContextKey.string("facing"), ContextSources.capture("controller").property("facing")))
-                .version(new StructureVersionDescriptor(2, ResourceLocation.parse("cumulus:machine/v2")))
-                .migration(new MigrationDescriptor(
-                        1,
-                        2,
-                        ResourceLocation.parse("cumulus:migrations/machine_1_to_2"),
-                        Map.of("context", "facing")))
-                .build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:migrating_machine")).context(ContextRuleDescriptor.derive(ContextKey.string("facing"), ContextSources.capture("controller").property("facing"))).version(new StructureVersionDescriptor(2,
+                        ResourceLocation.parse("cumulus:machine/v2"))).migration(new MigrationDescriptor(
+                                        1,
+                                        2,
+                                        ResourceLocation.parse("cumulus:migrations/machine_1_to_2"),
+                                        Map.of("context", "facing"))).build();
 
         assertEquals(1, definition.contextRules().size());
         assertEquals("facing", definition.contextRules().get(0).targetKey().name());
@@ -108,8 +100,7 @@ class DefinitionExpansionTest {
         assertEquals(1, definition.migrations().size());
         assertEquals(1, definition.migrations().get(0).fromVersion());
         assertEquals(2, definition.migrations().get(0).toVersion());
-        assertEquals(ResourceLocation.parse("cumulus:migrations/machine_1_to_2"),
-                definition.migrations().get(0).migrationId());
+        assertEquals(ResourceLocation.parse("cumulus:migrations/machine_1_to_2"), definition.migrations().get(0).migrationId());
         assertEquals("facing", definition.migrations().get(0).properties().get("context"));
     }
 }

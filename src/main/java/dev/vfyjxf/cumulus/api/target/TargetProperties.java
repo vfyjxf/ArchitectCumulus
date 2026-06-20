@@ -15,5 +15,4 @@ package dev.vfyjxf.cumulus.api.target;
  * }
  * }</pre>
  */
-public interface TargetProperties {
-}
+public interface TargetProperties {}

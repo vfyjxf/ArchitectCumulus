@@ -1,25 +1,28 @@
 package dev.vfyjxf.cumulus.impl.codec;
 
-import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
+import dev.vfyjxf.cumulus.api.component.ComponentDescriptor;
 import dev.vfyjxf.cumulus.api.definition.PointRequirement;
+import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
 import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
 import dev.vfyjxf.cumulus.api.definition.StructurePointId;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticEdge;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticGraph;
+import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticMetadata;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticNode;
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
-import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticMetadata;
 import dev.vfyjxf.cumulus.api.migration.MigrationDescriptor;
 import dev.vfyjxf.cumulus.api.migration.StructureVersionDescriptor;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptor;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptors;
 import dev.vfyjxf.cumulus.api.target.TargetDescriptor;
-import dev.vfyjxf.cumulus.api.visualization.VisualizationModel;
 import dev.vfyjxf.cumulus.api.transform.TransformDescriptor;
-import dev.vfyjxf.cumulus.api.component.ComponentDescriptor;
+import dev.vfyjxf.cumulus.api.visualization.VisualizationModel;
 import dev.vfyjxf.cumulus.impl.RuntimePlanEntry;
 import dev.vfyjxf.cumulus.impl.StructureRuntimePlan;
+
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -28,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeSet;
-import net.minecraft.resources.ResourceLocation;
 
 public final class RuntimeAssetLoader {
     public RuntimeAssetLoadResult load(List<RuntimeAssetSource> sources) {
@@ -41,9 +43,7 @@ public final class RuntimeAssetLoader {
         var assets = new ArrayList<LoadedRuntimeAsset>();
         var seenPaths = new TreeSet<String>();
 
-        var sortedSources = sources.stream()
-                .sorted(Comparator.comparing(RuntimeAssetSource::resourcePath))
-                .toList();
+        var sortedSources = sources.stream().sorted(Comparator.comparing(RuntimeAssetSource::resourcePath)).toList();
         for (var source : sortedSources) {
             if (!seenPaths.add(source.resourcePath())) {
                 addDiagnostic(diagnostics, edges, "DUPLICATE_RESOURCE_PATH", source.resourcePath(), source.resourcePath());
@@ -56,14 +56,11 @@ public final class RuntimeAssetLoader {
         }
 
         return new RuntimeAssetLoadResult(
-                assets,
-                new DiagnosticGraph("root", List.copyOf(diagnostics), List.copyOf(edges)));
+                        assets,
+                        new DiagnosticGraph("root", List.copyOf(diagnostics), List.copyOf(edges)));
     }
 
-    private static LoadedRuntimeAsset loadOne(
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges) {
+    private static LoadedRuntimeAsset loadOne(RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges) {
         var values = source.values();
         var valid = true;
 
@@ -92,21 +89,17 @@ public final class RuntimeAssetLoader {
             return null;
         }
         return new LoadedRuntimeAsset(
-                source.resourcePath(),
-                ResourceLocation.parse(id),
-                schemaVersion,
-                definition.definitionId(),
-                definition.definition(),
-                debugAsset,
-                plan,
-                predicates);
+                        source.resourcePath(),
+                        ResourceLocation.parse(id),
+                        schemaVersion,
+                        definition.definitionId(),
+                        definition.definition(),
+                        debugAsset,
+                        plan,
+                        predicates);
     }
 
-    private static LoadedDefinition definition(
-            Object value,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges) {
+    private static LoadedDefinition definition(Object value, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges) {
         if (value instanceof String text && !text.isBlank()) {
             return new LoadedDefinition(ResourceLocation.parse(text), Optional.empty());
         }
@@ -122,11 +115,7 @@ public final class RuntimeAssetLoader {
         return new LoadedDefinition(null, Optional.empty());
     }
 
-    private static StructureDefinition loadDefinition(
-            Map<String, Object> values,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges) {
+    private static StructureDefinition loadDefinition(Map<String, Object> values, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges) {
         var id = string(values, "id", source, diagnostics, edges);
         var schemaVersion = integer(values, "schema_version", source, diagnostics, edges);
         var transformsValues = list(values, "transforms", source, diagnostics, edges);
@@ -134,13 +123,7 @@ public final class RuntimeAssetLoader {
         var componentsValues = list(values, "components", source, diagnostics, edges);
         var versionsValues = list(values, "versions", source, diagnostics, edges);
         var migrationsValues = list(values, "migrations", source, diagnostics, edges);
-        if (id == null
-                || schemaVersion == null
-                || transformsValues == null
-                || pointsValues == null
-                || componentsValues == null
-                || versionsValues == null
-                || migrationsValues == null) {
+        if (id == null || schemaVersion == null || transformsValues == null || pointsValues == null || componentsValues == null || versionsValues == null || migrationsValues == null) {
             return null;
         }
 
@@ -153,22 +136,18 @@ public final class RuntimeAssetLoader {
             return null;
         }
         return new StructureDefinition(
-                ResourceLocation.parse(id),
-                schemaVersion,
-                transforms,
-                points,
-                components,
-                List.of(),
-                versions,
-                migrations,
-                DiagnosticMetadata.empty());
+                        ResourceLocation.parse(id),
+                        schemaVersion,
+                        transforms,
+                        points,
+                        components,
+                        List.of(),
+                        versions,
+                        migrations,
+                        DiagnosticMetadata.empty());
     }
 
-    private static List<TransformDescriptor> transforms(
-            List<?> values,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges) {
+    private static List<TransformDescriptor> transforms(List<?> values, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges) {
         var transforms = new ArrayList<TransformDescriptor>();
         for (var item : values) {
             if (!(item instanceof Map<?, ?> raw)) {
@@ -186,11 +165,7 @@ public final class RuntimeAssetLoader {
         return transforms;
     }
 
-    private static List<StructurePointDefinition> points(
-            List<?> values,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges) {
+    private static List<StructurePointDefinition> points(List<?> values, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges) {
         var points = new ArrayList<StructurePointDefinition>();
         for (var item : values) {
             if (!(item instanceof Map<?, ?> raw)) {
@@ -206,11 +181,7 @@ public final class RuntimeAssetLoader {
         return points;
     }
 
-    private static StructurePointDefinition point(
-            Map<String, Object> values,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges) {
+    private static StructurePointDefinition point(Map<String, Object> values, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges) {
         var id = string(values, "id", source, diagnostics, edges);
         var location = string(values, "location", source, diagnostics, edges);
         var target = string(values, "target", source, diagnostics, edges);
@@ -219,14 +190,7 @@ public final class RuntimeAssetLoader {
         var requirement = string(values, "requirement", source, diagnostics, edges);
         var captureValues = list(values, "captures", source, diagnostics, edges);
         var groupValues = list(values, "groups", source, diagnostics, edges);
-        if (id == null
-                || location == null
-                || target == null
-                || targetProperties == null
-                || predicateValues == null
-                || requirement == null
-                || captureValues == null
-                || groupValues == null) {
+        if (id == null || location == null || target == null || targetProperties == null || predicateValues == null || requirement == null || captureValues == null || groupValues == null) {
             return null;
         }
         var predicates = predicates(predicateValues, source, diagnostics, edges);
@@ -237,25 +201,21 @@ public final class RuntimeAssetLoader {
         }
         try {
             return new StructurePointDefinition(
-                    new StructurePointId(id),
-                    parsePos(location),
-                    new TargetDescriptor(ResourceLocation.parse(target), targetProperties),
-                    predicates,
-                    PointRequirement.valueOf(requirement),
-                    captures,
-                    groups,
-                    DiagnosticMetadata.empty());
+                            new StructurePointId(id),
+                            parsePos(location),
+                            new TargetDescriptor(ResourceLocation.parse(target), targetProperties),
+                            predicates,
+                            PointRequirement.valueOf(requirement),
+                            captures,
+                            groups,
+                            DiagnosticMetadata.empty());
         } catch (IllegalArgumentException ex) {
             addDiagnostic(diagnostics, edges, "INVALID_POINT", source.resourcePath(), source.resourcePath());
             return null;
         }
     }
 
-    private static List<PredicateDescriptor> predicates(
-            List<?> values,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges) {
+    private static List<PredicateDescriptor> predicates(List<?> values, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges) {
         var predicates = new ArrayList<PredicateDescriptor>();
         for (var item : values) {
             if (!(item instanceof Map<?, ?> raw)) {
@@ -273,11 +233,7 @@ public final class RuntimeAssetLoader {
         return predicates;
     }
 
-    private static List<ComponentDescriptor> components(
-            List<?> values,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges) {
+    private static List<ComponentDescriptor> components(List<?> values, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges) {
         var components = new ArrayList<ComponentDescriptor>();
         for (var item : values) {
             if (!(item instanceof Map<?, ?> raw)) {
@@ -296,11 +252,7 @@ public final class RuntimeAssetLoader {
         return components;
     }
 
-    private static List<StructureVersionDescriptor> versions(
-            List<?> values,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges) {
+    private static List<StructureVersionDescriptor> versions(List<?> values, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges) {
         var versions = new ArrayList<StructureVersionDescriptor>();
         for (var item : values) {
             if (!(item instanceof Map<?, ?> raw)) {
@@ -318,11 +270,7 @@ public final class RuntimeAssetLoader {
         return versions;
     }
 
-    private static List<MigrationDescriptor> migrations(
-            List<?> values,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges) {
+    private static List<MigrationDescriptor> migrations(List<?> values, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges) {
         var migrations = new ArrayList<MigrationDescriptor>();
         for (var item : values) {
             if (!(item instanceof Map<?, ?> raw)) {
@@ -342,11 +290,7 @@ public final class RuntimeAssetLoader {
         return migrations;
     }
 
-    private static StructureRuntimePlan runtimePlan(
-            Map<String, Object> values,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges) {
+    private static StructureRuntimePlan runtimePlan(Map<String, Object> values, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges) {
         var definition = string(values, "definition", source, diagnostics, edges);
         var entriesValues = list(values, "entries", source, diagnostics, edges);
         if (definition == null || entriesValues == null) {
@@ -369,25 +313,21 @@ public final class RuntimeAssetLoader {
             }
             var properties = stringMapOrEmpty(rawEntry.get("properties"));
             entries.add(new RuntimePlanEntry(
-                    id,
-                    ResourceLocation.parse(target),
-                    parsePos(min),
-                    parsePos(max),
-                    properties));
+                            id,
+                            ResourceLocation.parse(target),
+                            parsePos(min),
+                            parsePos(max),
+                            properties));
         }
         return new StructureRuntimePlan(
-                ResourceLocation.parse(definition),
-                entries,
-                List.of(),
-                List.of(),
-                new VisualizationModel(definition + "/loaded", List.of()));
+                        ResourceLocation.parse(definition),
+                        entries,
+                        List.of(),
+                        List.of(),
+                        new VisualizationModel(definition + "/loaded", List.of()));
     }
 
-    private static List<PredicateDescriptor> loadPredicates(
-            Object value,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges) {
+    private static List<PredicateDescriptor> loadPredicates(Object value, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges) {
         if (value == null) {
             return List.of();
         }
@@ -413,34 +353,23 @@ public final class RuntimeAssetLoader {
 
     private static Map<String, String> toStringMap(Map<?, ?> raw) {
         var values = new LinkedHashMap<String, String>();
-        raw.entrySet().stream()
-                .sorted(Comparator.comparing(entry -> String.valueOf(entry.getKey())))
-                .forEach(entry -> values.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue())));
+        raw.entrySet().stream().sorted(Comparator.comparing(entry -> String.valueOf(entry.getKey()))).forEach(entry -> values.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue())));
         return values;
     }
 
     private static Map<String, Object> toObjectMap(Map<?, ?> raw) {
         var values = new LinkedHashMap<String, Object>();
-        raw.entrySet().stream()
-                .sorted(Comparator.comparing(entry -> String.valueOf(entry.getKey())))
-                .forEach(entry -> values.put(String.valueOf(entry.getKey()), entry.getValue()));
+        raw.entrySet().stream().sorted(Comparator.comparing(entry -> String.valueOf(entry.getKey()))).forEach(entry -> values.put(String.valueOf(entry.getKey()), entry.getValue()));
         return values;
     }
 
-    private static Map<String, String> stringMap(
-            Object value,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges,
-            String diagnosticCode) {
+    private static Map<String, String> stringMap(Object value, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges, String diagnosticCode) {
         if (!(value instanceof Map<?, ?> raw)) {
             addDiagnostic(diagnostics, edges, diagnosticCode, source.resourcePath(), source.resourcePath());
             return null;
         }
         var values = new LinkedHashMap<String, String>();
-        raw.entrySet().stream()
-                .sorted(Comparator.comparing(entry -> String.valueOf(entry.getKey())))
-                .forEach(entry -> values.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue())));
+        raw.entrySet().stream().sorted(Comparator.comparing(entry -> String.valueOf(entry.getKey()))).forEach(entry -> values.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue())));
         return values;
     }
 
@@ -449,18 +378,11 @@ public final class RuntimeAssetLoader {
             return Map.of();
         }
         var values = new LinkedHashMap<String, String>();
-        raw.entrySet().stream()
-                .sorted(Comparator.comparing(entry -> String.valueOf(entry.getKey())))
-                .forEach(entry -> values.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue())));
+        raw.entrySet().stream().sorted(Comparator.comparing(entry -> String.valueOf(entry.getKey()))).forEach(entry -> values.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue())));
         return values;
     }
 
-    private static Map<String, Object> objectMap(
-            Object value,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges,
-            String diagnosticCode) {
+    private static Map<String, Object> objectMap(Object value, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges, String diagnosticCode) {
         if (!(value instanceof Map<?, ?> raw)) {
             addDiagnostic(diagnostics, edges, diagnosticCode, source.resourcePath(), source.resourcePath());
             return null;
@@ -468,12 +390,7 @@ public final class RuntimeAssetLoader {
         return toObjectMap(raw);
     }
 
-    private static LinkedHashSet<String> stringSet(
-            List<?> values,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges,
-            String diagnosticCode) {
+    private static LinkedHashSet<String> stringSet(List<?> values, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges, String diagnosticCode) {
         var result = new LinkedHashSet<String>();
         for (var value : values) {
             if (!(value instanceof String text)) {
@@ -485,12 +402,7 @@ public final class RuntimeAssetLoader {
         return result;
     }
 
-    private static String string(
-            Map<String, Object> values,
-            String key,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges) {
+    private static String string(Map<String, Object> values, String key, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges) {
         var value = values.get(key);
         if (value instanceof String text && !text.isBlank()) {
             return text;
@@ -499,12 +411,7 @@ public final class RuntimeAssetLoader {
         return null;
     }
 
-    private static Integer integer(
-            Map<String, Object> values,
-            String key,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges) {
+    private static Integer integer(Map<String, Object> values, String key, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges) {
         var value = values.get(key);
         if (value instanceof Number number) {
             return number.intValue();
@@ -513,12 +420,7 @@ public final class RuntimeAssetLoader {
         return null;
     }
 
-    private static Boolean bool(
-            Map<String, Object> values,
-            String key,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges) {
+    private static Boolean bool(Map<String, Object> values, String key, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges) {
         var value = values.get(key);
         if (value instanceof Boolean bool) {
             return bool;
@@ -527,30 +429,18 @@ public final class RuntimeAssetLoader {
         return null;
     }
 
-    private static Map<String, Object> map(
-            Map<String, Object> values,
-            String key,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges) {
+    private static Map<String, Object> map(Map<String, Object> values, String key, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges) {
         var value = values.get(key);
         if (value instanceof Map<?, ?> raw) {
             var map = new LinkedHashMap<String, Object>();
-            raw.entrySet().stream()
-                    .sorted(Comparator.comparing(entry -> String.valueOf(entry.getKey())))
-                    .forEach(entry -> map.put(String.valueOf(entry.getKey()), entry.getValue()));
+            raw.entrySet().stream().sorted(Comparator.comparing(entry -> String.valueOf(entry.getKey()))).forEach(entry -> map.put(String.valueOf(entry.getKey()), entry.getValue()));
             return map;
         }
         addDiagnostic(diagnostics, edges, "MISSING_" + key.toUpperCase(), source.resourcePath(), source.resourcePath());
         return null;
     }
 
-    private static List<?> list(
-            Map<String, Object> values,
-            String key,
-            RuntimeAssetSource source,
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges) {
+    private static List<?> list(Map<String, Object> values, String key, RuntimeAssetSource source, List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges) {
         var value = values.get(key);
         if (value instanceof List<?> list) {
             return list;
@@ -564,41 +454,33 @@ public final class RuntimeAssetLoader {
         if (parts.length != 3) {
             throw new IllegalArgumentException("Relative position must have x,y,z parts");
         }
-        return RelativeBlockPos.of(
-                Integer.parseInt(parts[0]),
-                Integer.parseInt(parts[1]),
-                Integer.parseInt(parts[2]));
+        return RelativeBlockPos.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
     }
 
-    private static void addDiagnostic(
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges,
-            String code,
-            String message,
-            String sourcePath) {
+    private static void addDiagnostic(List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges, String code, String message, String sourcePath) {
         if (diagnostics.isEmpty()) {
             diagnostics.add(new DiagnosticNode(
-                    "root",
-                    Severity.info,
-                    "Runtime asset loading failed",
-                    "diagnostic.cumulus.asset_load_failed",
-                    List.of(),
-                    "runtime/assets",
-                    List.of()));
+                            "root",
+                            Severity.info,
+                            "Runtime asset loading failed",
+                            "diagnostic.cumulus.asset_load_failed",
+                            List.of(),
+                            "runtime/assets",
+                            List.of()));
         }
         diagnostics.add(new DiagnosticNode(
-                code,
-                Severity.error,
-                message,
-                "diagnostic.cumulus." + code.toLowerCase(),
-                List.of(),
-                sourcePath,
-                List.of()));
+                        code,
+                        Severity.error,
+                        message,
+                        "diagnostic.cumulus." + code.toLowerCase(),
+                        List.of(),
+                        sourcePath,
+                        List.of()));
         edges.add(new DiagnosticEdge("root", code, "caused_by"));
     }
 
     private record LoadedDefinition(
-            ResourceLocation definitionId,
-            Optional<StructureDefinition> definition) {
+                    ResourceLocation definitionId,
+                    Optional<StructureDefinition> definition) {
     }
 }

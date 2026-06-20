@@ -11,12 +11,15 @@ import dev.vfyjxf.cumulus.api.diagnostic.FixHint;
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
 import dev.vfyjxf.cumulus.api.visualization.VisualizationElement;
 import dev.vfyjxf.cumulus.api.visualization.VisualizationModel;
+
+import net.minecraft.resources.ResourceLocation;
+
+import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -26,13 +29,7 @@ class DiagnosticsAndAssetsTest {
     void diagnosticGraphCopiesInputsAndSupportsNestedCauses() {
         var descriptors = new HashMap<String, String>();
         descriptors.put("expected", "minecraft:stone");
-        var evidence = DiagnosticEvidence.relative(
-                RelativeBlockPos.of(1, 2, 3),
-                "controller",
-                "cumulus:block_id",
-                "frame/top",
-                "chunk section not loaded",
-                descriptors);
+        var evidence = DiagnosticEvidence.relative(RelativeBlockPos.of(1, 2, 3), "controller", "cumulus:block_id", "frame/top", "chunk section not loaded", descriptors);
         descriptors.put("actual", "minecraft:air");
 
         var fixProperties = new HashMap<String, String>();
@@ -42,21 +39,21 @@ class DiagnosticsAndAssetsTest {
 
         var nodes = new ArrayList<DiagnosticNode>();
         nodes.add(new DiagnosticNode(
-                "missing-casing",
-                Severity.error,
-                "Casing is missing",
-                "diagnostic.cumulus.missing_casing",
-                List.of(evidence),
-                "definitions/machine.json",
-                List.of(fix)));
+                        "missing-casing",
+                        Severity.error,
+                        "Casing is missing",
+                        "diagnostic.cumulus.missing_casing",
+                        List.of(evidence),
+                        "definitions/machine.json",
+                        List.of(fix)));
         nodes.add(new DiagnosticNode(
-                "root",
-                Severity.warn,
-                "Machine is incomplete",
-                "diagnostic.cumulus.machine_incomplete",
-                List.of(),
-                "definitions/machine.json",
-                List.of()));
+                        "root",
+                        Severity.warn,
+                        "Machine is incomplete",
+                        "diagnostic.cumulus.machine_incomplete",
+                        List.of(),
+                        "definitions/machine.json",
+                        List.of()));
 
         var edges = new ArrayList<DiagnosticEdge>();
         edges.add(new DiagnosticEdge("root", "missing-casing", "caused_by"));
@@ -78,15 +75,7 @@ class DiagnosticsAndAssetsTest {
     @Test
     void visualizationModelCopiesRegionElements() {
         var elements = new ArrayList<VisualizationElement>();
-        elements.add(VisualizationElement.region(
-                "missing-casing-overlay",
-                "block-region",
-                RelativeBlockPos.of(0, 0, 0),
-                RelativeBlockPos.of(2, 1, 2),
-                Severity.error,
-                "casing",
-                "visualization.cumulus.missing_casing",
-                100));
+        elements.add(VisualizationElement.region("missing-casing-overlay", "block-region", RelativeBlockPos.of(0, 0, 0), RelativeBlockPos.of(2, 1, 2), Severity.error, "casing", "visualization.cumulus.missing_casing", 100));
 
         var model = new VisualizationModel("machine-diagnostics", elements);
         elements.clear();
@@ -100,10 +89,10 @@ class DiagnosticsAndAssetsTest {
     @Test
     void datagenSpecExposesStableResourcePath() {
         var asset = new DataDrivenStructureAsset(
-                ResourceLocation.parse("cumulus:machines/furnace_core"),
-                1,
-                ResourceLocation.parse("cumulus:furnace_core"),
-                true);
+                        ResourceLocation.parse("cumulus:machines/furnace_core"),
+                        1,
+                        ResourceLocation.parse("cumulus:furnace_core"),
+                        true);
         var definitions = new HashMap<ResourceLocation, DataDrivenStructureAsset>();
         definitions.put(asset.runtimeAssetId(), asset);
 

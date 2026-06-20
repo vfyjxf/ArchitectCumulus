@@ -2,8 +2,10 @@ package dev.vfyjxf.cumulus.api.target.types;
 
 import dev.vfyjxf.cumulus.api.target.TargetProperties;
 import dev.vfyjxf.cumulus.api.target.TargetType;
-import java.util.Objects;
+
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.Objects;
 
 /**
  * Fallback target type used when the codec encounters an id not registered in

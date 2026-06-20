@@ -1,8 +1,5 @@
 package dev.vfyjxf.cumulus.api.runtime;
 
 public enum InstanceStatus {
-    valid,
-    invalid,
-    incomplete,
-    stale
+    valid, invalid, incomplete, stale
 }

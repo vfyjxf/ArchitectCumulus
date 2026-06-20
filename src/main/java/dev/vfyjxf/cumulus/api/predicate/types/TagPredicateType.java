@@ -2,8 +2,10 @@ package dev.vfyjxf.cumulus.api.predicate.types;
 
 import dev.vfyjxf.cumulus.api.predicate.PredicateProperties;
 import dev.vfyjxf.cumulus.api.predicate.PredicateType;
-import java.util.Objects;
+
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.Objects;
 
 /** Predicate: target's id is in a tag. */
 public final class TagPredicateType implements PredicateType {
@@ -11,8 +13,7 @@ public final class TagPredicateType implements PredicateType {
     public static final ResourceLocation id = ResourceLocation.parse("cumulus:tag");
     public static final TagPredicateType instance = new TagPredicateType();
 
-    private TagPredicateType() {
-    }
+    private TagPredicateType() {}
 
     @Override
     public ResourceLocation id() {

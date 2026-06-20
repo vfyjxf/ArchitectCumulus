@@ -8,18 +8,19 @@ import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticMetadata;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptor;
 import dev.vfyjxf.cumulus.api.target.TargetPattern;
 import dev.vfyjxf.cumulus.api.target.Targets;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 public record BoxComponent(
-        String name,
-        RelativeBlockPos from,
-        RelativeBlockPos to,
-        boolean hollow,
-        TargetPattern target,
-        PointRequirement requirement,
-        Set<String> groups,
-        DiagnosticMetadata diagnostics) implements StructureComponent {
+                String name,
+                RelativeBlockPos from,
+                RelativeBlockPos to,
+                boolean hollow,
+                TargetPattern target,
+                PointRequirement requirement,
+                Set<String> groups,
+                DiagnosticMetadata diagnostics) implements StructureComponent {
     public BoxComponent {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Box component name must not be blank");
@@ -79,22 +80,20 @@ public record BoxComponent(
                         continue;
                     }
                     emitter.point(new StructurePointDefinition(
-                            new StructurePointId(name + "_" + x + "_" + y + "_" + z),
-                            RelativeBlockPos.of(x, y, z),
-                            target.target(),
-                            target.predicates(),
-                            requirement,
-                            target.captures(),
-                            groups,
-                            diagnostics));
+                                    new StructurePointId(name + "_" + x + "_" + y + "_" + z),
+                                    RelativeBlockPos.of(x, y, z),
+                                    target.target(),
+                                    target.predicates(),
+                                    requirement,
+                                    target.captures(),
+                                    groups,
+                                    diagnostics));
                 }
             }
         }
     }
 
     private boolean isShell(int x, int y, int z) {
-        return x == from.x() || x == to.x()
-                || y == from.y() || y == to.y()
-                || z == from.z() || z == to.z();
+        return x == from.x() || x == to.x() || y == from.y() || y == to.y() || z == from.z() || z == to.z();
     }
 }

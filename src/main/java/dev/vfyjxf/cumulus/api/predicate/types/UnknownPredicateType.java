@@ -2,9 +2,11 @@ package dev.vfyjxf.cumulus.api.predicate.types;
 
 import dev.vfyjxf.cumulus.api.predicate.PredicateProperties;
 import dev.vfyjxf.cumulus.api.predicate.PredicateType;
+
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.Map;
 import java.util.Objects;
-import net.minecraft.resources.ResourceLocation;
 
 /**
  * Fallback predicate type used when the codec encounters an id not registered

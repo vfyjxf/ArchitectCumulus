@@ -3,19 +3,21 @@ package dev.vfyjxf.cumulus.impl.codec;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptor;
 import dev.vfyjxf.cumulus.impl.StructureRuntimePlan;
-import java.util.List;
-import java.util.Optional;
+
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.List;
+import java.util.Optional;
+
 public record LoadedRuntimeAsset(
-        String resourcePath,
-        ResourceLocation id,
-        int schemaVersion,
-        ResourceLocation definitionId,
-        Optional<StructureDefinition> definition,
-        boolean debugAsset,
-        StructureRuntimePlan runtimePlan,
-        List<PredicateDescriptor> predicates) {
+                String resourcePath,
+                ResourceLocation id,
+                int schemaVersion,
+                ResourceLocation definitionId,
+                Optional<StructureDefinition> definition,
+                boolean debugAsset,
+                StructureRuntimePlan runtimePlan,
+                List<PredicateDescriptor> predicates) {
     public LoadedRuntimeAsset {
         if (resourcePath == null || resourcePath.isBlank()) {
             throw new IllegalArgumentException("Loaded runtime asset path must not be blank");
@@ -47,13 +49,13 @@ public record LoadedRuntimeAsset(
     }
 
     public LoadedRuntimeAsset(
-            String resourcePath,
-            ResourceLocation id,
-            int schemaVersion,
-            ResourceLocation definitionId,
-            boolean debugAsset,
-            StructureRuntimePlan runtimePlan,
-            List<PredicateDescriptor> predicates) {
+                    String resourcePath,
+                    ResourceLocation id,
+                    int schemaVersion,
+                    ResourceLocation definitionId,
+                    boolean debugAsset,
+                    StructureRuntimePlan runtimePlan,
+                    List<PredicateDescriptor> predicates) {
         this(resourcePath, id, schemaVersion, definitionId, Optional.empty(), debugAsset, runtimePlan, predicates);
     }
 }

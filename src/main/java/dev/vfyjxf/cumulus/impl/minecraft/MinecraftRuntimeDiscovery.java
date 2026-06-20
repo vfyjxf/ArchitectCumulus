@@ -1,17 +1,19 @@
 package dev.vfyjxf.cumulus.impl.minecraft;
 
+import dev.vfyjxf.cumulus.api.definition.PointRequirement;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
 import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
-import dev.vfyjxf.cumulus.api.definition.PointRequirement;
 import dev.vfyjxf.cumulus.impl.check.PredicateEvaluator;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.LevelAccessor;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.LevelAccessor;
 
 public final class MinecraftRuntimeDiscovery {
     private final MinecraftRuntimeInstanceTracker tracker;
@@ -53,10 +55,7 @@ public final class MinecraftRuntimeDiscovery {
         }
         for (var candidates : candidatesByDefinition.values()) {
             for (var candidate : candidates) {
-                var instanceAnchor = changedBlock.offset(
-                        -candidate.offset().x(),
-                        -candidate.offset().y(),
-                        -candidate.offset().z());
+                var instanceAnchor = changedBlock.offset(-candidate.offset().x(), -candidate.offset().y(), -candidate.offset().z());
                 if (!matchesCandidate(candidate.point(), changedBlock, reader)) {
                     continue;
                 }
@@ -68,10 +67,7 @@ public final class MinecraftRuntimeDiscovery {
     }
 
     private static List<DiscoveryCandidate> discoveryCandidates(StructureDefinition definition) {
-        var explicit = definition.points().stream()
-                .filter(point -> Boolean.parseBoolean(point.target().properties().getOrDefault("anchor", "false")))
-                .map(point -> new DiscoveryCandidate(definition.id(), point.location(), point))
-                .toList();
+        var explicit = definition.points().stream().filter(point -> Boolean.parseBoolean(point.target().properties().getOrDefault("anchor", "false"))).map(point -> new DiscoveryCandidate(definition.id(), point.location(), point)).toList();
         if (!explicit.isEmpty()) {
             return explicit;
         }
@@ -88,16 +84,7 @@ public final class MinecraftRuntimeDiscovery {
         if (!reader.isLoaded(changedBlock)) {
             return false;
         }
-        var target = new MinecraftTargetSnapshotSource(BlockPos.ZERO, reader, Map.of())
-                .target(point.target().typeId(), RelativeBlockPos.of(
-                                changedBlock.getX(),
-                                changedBlock.getY(),
-                                changedBlock.getZ()),
-                        RelativeBlockPos.of(
-                                changedBlock.getX(),
-                                changedBlock.getY(),
-                                changedBlock.getZ()))
-                .orElse(null);
+        var target = new MinecraftTargetSnapshotSource(BlockPos.ZERO, reader, Map.of()).target(point.target().typeId(), RelativeBlockPos.of(changedBlock.getX(), changedBlock.getY(), changedBlock.getZ()), RelativeBlockPos.of(changedBlock.getX(), changedBlock.getY(), changedBlock.getZ())).orElse(null);
         if (target == null) {
             return false;
         }
@@ -114,8 +101,8 @@ public final class MinecraftRuntimeDiscovery {
     }
 
     private record DiscoveryCandidate(
-            ResourceLocation definitionId,
-            RelativeBlockPos offset,
-            StructurePointDefinition point) {
+                    ResourceLocation definitionId,
+                    RelativeBlockPos offset,
+                    StructurePointDefinition point) {
     }
 }

@@ -3,6 +3,7 @@ package dev.vfyjxf.cumulus.api.migration;
 import dev.vfyjxf.cumulus.api.runtime.RuntimeStructureContext;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
 import dev.vfyjxf.cumulus.api.types.ContextKey;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -49,11 +50,7 @@ public final class MutableRuntimeContext {
 
     /** Backwards-compat string lookup; matches any key with that name. */
     public Optional<String> getStringValue(String name) {
-        return values.entrySet().stream()
-                .filter(e -> e.getKey().name().equals(name))
-                .map(e -> Optional.of(String.valueOf(e.getValue())))
-                .findFirst()
-                .orElse(Optional.empty());
+        return values.entrySet().stream().filter(e -> e.getKey().name().equals(name)).map(e -> Optional.of(String.valueOf(e.getValue()))).findFirst().orElse(Optional.empty());
     }
 
     /** Typed put. */
@@ -62,8 +59,7 @@ public final class MutableRuntimeContext {
         Objects.requireNonNull(value, "Context value must not be null");
         if (!key.type().isInstance(value)) {
             throw new ClassCastException(
-                    "ContextKey '" + key.name() + "' expects " + key.type().getName()
-                            + " but got " + value.getClass().getName());
+                            "ContextKey '" + key.name() + "' expects " + key.type().getName() + " but got " + value.getClass().getName());
         }
         values.put(key, value);
     }
@@ -74,8 +70,7 @@ public final class MutableRuntimeContext {
         Objects.requireNonNull(value);
         if (!key.type().isInstance(value)) {
             throw new ClassCastException(
-                    "ContextKey '" + key.name() + "' expects " + key.type().getName()
-                            + " but got " + value.getClass().getName());
+                            "ContextKey '" + key.name() + "' expects " + key.type().getName() + " but got " + value.getClass().getName());
         }
         values.put(key, value);
     }
@@ -98,10 +93,7 @@ public final class MutableRuntimeContext {
 
     /** Snapshot view as an immutable {@link RuntimeStructureContext}. */
     public RuntimeStructureContext toContext() {
-        return RuntimeStructureContext.builder(key)
-                .revision(revision)
-                .putAll(values)
-                .build();
+        return RuntimeStructureContext.builder(key).revision(revision).putAll(values).build();
     }
 
     /** Read-only view of the entries (for iteration in custom ops). */

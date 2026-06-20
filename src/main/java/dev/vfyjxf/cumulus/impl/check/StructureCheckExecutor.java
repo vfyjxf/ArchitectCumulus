@@ -2,7 +2,6 @@ package dev.vfyjxf.cumulus.impl.check;
 
 import dev.vfyjxf.cumulus.api.context.CheckContext;
 import dev.vfyjxf.cumulus.api.context.ContextRuleDescriptor;
-import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.definition.PointRequirement;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
@@ -12,50 +11,38 @@ import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticEvidence;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticGraph;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticNode;
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
+import dev.vfyjxf.cumulus.api.partition.SectionKey;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptor;
 import dev.vfyjxf.cumulus.api.predicate.PredicateRegistry;
-import dev.vfyjxf.cumulus.api.partition.SectionKey;
 import dev.vfyjxf.cumulus.api.request.DataRequest;
 import dev.vfyjxf.cumulus.api.request.RequestPriority;
 import dev.vfyjxf.cumulus.api.request.RequestReason;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
-import dev.vfyjxf.cumulus.api.runtime.RuntimeStructureContext;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.visualization.VisualizationElement;
 import dev.vfyjxf.cumulus.api.visualization.VisualizationModel;
 import dev.vfyjxf.cumulus.impl.StructureRuntimePlanCompiler;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public final class StructureCheckExecutor {
     private static final ResourceLocation regionTarget = ResourceLocation.parse("cumulus:region");
     private static final ResourceLocation contextTarget = ResourceLocation.parse("cumulus:context");
-    private static final List<ResourceLocation> supportedTargets = List.of(
-            ResourceLocation.parse("cumulus:block"),
-            ResourceLocation.parse("cumulus:block_entity"),
-            ResourceLocation.parse("cumulus:entity"),
-            ResourceLocation.parse("cumulus:fluid"),
-            ResourceLocation.parse("cumulus:capability"),
-            regionTarget,
-            contextTarget);
+    private static final List<ResourceLocation> supportedTargets = List.of(ResourceLocation.parse("cumulus:block"), ResourceLocation.parse("cumulus:block_entity"), ResourceLocation.parse("cumulus:entity"), ResourceLocation.parse("cumulus:fluid"), ResourceLocation.parse("cumulus:capability"), regionTarget, contextTarget);
 
-    private StructureCheckExecutor() {
-    }
+    private StructureCheckExecutor() {}
 
     public static StructureCheckResult check(StructureDefinition definition, BlockPos anchor, InMemoryTargetSnapshot snapshot) {
         return check(definition, anchor, snapshot, PredicateRegistry.defaults());
     }
 
-    public static StructureCheckResult check(
-            StructureDefinition definition,
-            BlockPos anchor,
-            InMemoryTargetSnapshot snapshot,
-            PredicateRegistry predicateRegistry) {
+    public static StructureCheckResult check(StructureDefinition definition, BlockPos anchor, InMemoryTargetSnapshot snapshot, PredicateRegistry predicateRegistry) {
         if (definition == null) {
             throw new IllegalArgumentException("Structure definition must not be null");
         }
@@ -71,18 +58,11 @@ public final class StructureCheckExecutor {
         return check(StructureRuntimePlanCompiler.compileCheckPlan(definition), anchor, snapshot, predicateRegistry);
     }
 
-    public static StructureCheckResult check(
-            StructureCheckPlan plan,
-            BlockPos anchor,
-            InMemoryTargetSnapshot snapshot) {
+    public static StructureCheckResult check(StructureCheckPlan plan, BlockPos anchor, InMemoryTargetSnapshot snapshot) {
         return check(plan, anchor, snapshot, PredicateRegistry.defaults());
     }
 
-    public static StructureCheckResult check(
-            StructureCheckPlan plan,
-            BlockPos anchor,
-            InMemoryTargetSnapshot snapshot,
-            PredicateRegistry predicateRegistry) {
+    public static StructureCheckResult check(StructureCheckPlan plan, BlockPos anchor, InMemoryTargetSnapshot snapshot, PredicateRegistry predicateRegistry) {
         if (plan == null) {
             throw new IllegalArgumentException("Structure check plan must not be null");
         }
@@ -119,22 +99,15 @@ public final class StructureCheckExecutor {
         return checkCandidate(plan.definition(), anchor, snapshot, null, predicateRegistry);
     }
 
-    public static FastCheckResult fastCheck(
-            StructureCheckPlan plan,
-            InMemoryTargetSnapshot snapshot) {
+    public static FastCheckResult fastCheck(StructureCheckPlan plan, InMemoryTargetSnapshot snapshot) {
         return fastCheck(plan, snapshot, PredicateRegistry.defaults());
     }
 
-    public static FastCheckResult fastCheck(
-            StructureCheckPlan plan,
-            TargetSnapshotSource source) {
+    public static FastCheckResult fastCheck(StructureCheckPlan plan, TargetSnapshotSource source) {
         return fastCheck(plan, source, PredicateRegistry.defaults());
     }
 
-    public static FastCheckResult fastCheck(
-            StructureCheckPlan plan,
-            InMemoryTargetSnapshot snapshot,
-            PredicateRegistry predicateRegistry) {
+    public static FastCheckResult fastCheck(StructureCheckPlan plan, InMemoryTargetSnapshot snapshot, PredicateRegistry predicateRegistry) {
         if (plan == null) {
             throw new IllegalArgumentException("Structure check plan must not be null");
         }
@@ -150,10 +123,7 @@ public final class StructureCheckExecutor {
         var sawIncomplete = false;
         for (var candidateIndex = 0; candidateIndex < plan.candidates().size(); candidateIndex++) {
             var candidate = plan.candidates().get(candidateIndex);
-            var result = fastCheckCandidate(
-                    candidate,
-                    (point, bounds) -> resolveTarget(point, bounds, snapshot),
-                    predicateRegistry);
+            var result = fastCheckCandidate(candidate, (point, bounds) -> resolveTarget(point, bounds, snapshot), predicateRegistry);
             candidatesEvaluated++;
             entriesEvaluated += result.entriesEvaluated();
             if (result.status() == InstanceStatus.valid) {
@@ -164,16 +134,13 @@ public final class StructureCheckExecutor {
             }
         }
         return new FastCheckResult(
-                sawIncomplete ? InstanceStatus.incomplete : InstanceStatus.invalid,
-                candidatesEvaluated,
-                entriesEvaluated,
-                -1);
+                        sawIncomplete ? InstanceStatus.incomplete : InstanceStatus.invalid,
+                        candidatesEvaluated,
+                        entriesEvaluated,
+                        -1);
     }
 
-    public static FastCheckResult fastCheck(
-            StructureCheckPlan plan,
-            TargetSnapshotSource source,
-            PredicateRegistry predicateRegistry) {
+    public static FastCheckResult fastCheck(StructureCheckPlan plan, TargetSnapshotSource source, PredicateRegistry predicateRegistry) {
         if (plan == null) {
             throw new IllegalArgumentException("Structure check plan must not be null");
         }
@@ -189,10 +156,7 @@ public final class StructureCheckExecutor {
         var sawIncomplete = false;
         for (var candidateIndex = 0; candidateIndex < plan.candidates().size(); candidateIndex++) {
             var candidate = plan.candidates().get(candidateIndex);
-            var result = fastCheckCandidate(
-                    candidate,
-                    (point, bounds) -> resolveTarget(point, bounds, source),
-                    predicateRegistry);
+            var result = fastCheckCandidate(candidate, (point, bounds) -> resolveTarget(point, bounds, source), predicateRegistry);
             candidatesEvaluated++;
             entriesEvaluated += result.entriesEvaluated();
             if (result.status() == InstanceStatus.valid) {
@@ -203,16 +167,13 @@ public final class StructureCheckExecutor {
             }
         }
         return new FastCheckResult(
-                sawIncomplete ? InstanceStatus.incomplete : InstanceStatus.invalid,
-                candidatesEvaluated,
-                entriesEvaluated,
-                -1);
+                        sawIncomplete ? InstanceStatus.incomplete : InstanceStatus.invalid,
+                        candidatesEvaluated,
+                        entriesEvaluated,
+                        -1);
     }
 
-    private static FastCandidateResult fastCheckCandidate(
-            CheckPlanCandidate candidate,
-            FastTargetResolver targetResolver,
-            PredicateRegistry predicateRegistry) {
+    private static FastCandidateResult fastCheckCandidate(CheckPlanCandidate candidate, FastTargetResolver targetResolver, PredicateRegistry predicateRegistry) {
         var entriesEvaluated = 0;
         var sawIncomplete = false;
         for (var entry : candidate.entries()) {
@@ -239,16 +200,11 @@ public final class StructureCheckExecutor {
             }
         }
         return new FastCandidateResult(
-                sawIncomplete ? InstanceStatus.incomplete : InstanceStatus.valid,
-                entriesEvaluated);
+                        sawIncomplete ? InstanceStatus.incomplete : InstanceStatus.valid,
+                        entriesEvaluated);
     }
 
-    private static StructureCheckResult checkCandidate(
-            StructureDefinition definition,
-            BlockPos anchor,
-            InMemoryTargetSnapshot snapshot,
-            CheckPlanCandidate candidate,
-            PredicateRegistry predicateRegistry) {
+    private static StructureCheckResult checkCandidate(StructureDefinition definition, BlockPos anchor, InMemoryTargetSnapshot snapshot, CheckPlanCandidate candidate, PredicateRegistry predicateRegistry) {
         var key = new StructureInstanceKey(definition.id(), anchor);
         var checkCtx = new CheckContext();
         var nodes = new ArrayList<DiagnosticNode>();
@@ -264,16 +220,7 @@ public final class StructureCheckExecutor {
                 if (point.requirement() == PointRequirement.optional) {
                     continue;
                 }
-                addProblem(
-                        point,
-                        bounds,
-                        "WRONG_TARGET_TYPE",
-                        "Unsupported target",
-                        "diagnostic.cumulus.wrong_target_type",
-                        null,
-                        nodes,
-                        edges,
-                        visualization);
+                addProblem(point, bounds, "WRONG_TARGET_TYPE", "Unsupported target", "diagnostic.cumulus.wrong_target_type", null, nodes, edges, visualization);
                 continue;
             }
             var target = resolveTarget(point, bounds, snapshot);
@@ -282,16 +229,14 @@ public final class StructureCheckExecutor {
                     continue;
                 }
                 var code = contextTarget.equals(point.target().typeId()) ? "CONTEXT_CAPTURE_FAILED" : "MISSING_TARGET";
-                var localizationKey = contextTarget.equals(point.target().typeId())
-                        ? "diagnostic.cumulus.context_capture_failed"
-                        : "diagnostic.cumulus.missing_target";
+                var localizationKey = contextTarget.equals(point.target().typeId()) ? "diagnostic.cumulus.context_capture_failed" : "diagnostic.cumulus.missing_target";
                 addProblem(point, bounds, code, "Missing target", localizationKey, null, nodes, edges, visualization);
                 requests.add(new DataRequest(
-                        SectionKey.fromBlock(anchor.offset(bounds.min().x(), bounds.min().y(), bounds.min().z())),
-                        RequestReason.checkNeedsContext,
-                        RequestPriority.high,
-                        20,
-                        definition.id() + "/" + point.id().value()));
+                                SectionKey.fromBlock(anchor.offset(bounds.min().x(), bounds.min().y(), bounds.min().z())),
+                                RequestReason.checkNeedsContext,
+                                RequestPriority.high,
+                                20,
+                                definition.id() + "/" + point.id().value()));
                 continue;
             }
 
@@ -300,16 +245,7 @@ public final class StructureCheckExecutor {
                 if (point.requirement() == PointRequirement.optional) {
                     continue;
                 }
-                addProblem(
-                        point,
-                        bounds,
-                        failed.code(),
-                        failed.message(),
-                        failed.localizationKey(),
-                        failed.predicate(),
-                        nodes,
-                        edges,
-                        visualization);
+                addProblem(point, bounds, failed.code(), failed.message(), failed.localizationKey(), failed.predicate(), nodes, edges, visualization);
                 continue;
             }
 
@@ -319,123 +255,85 @@ public final class StructureCheckExecutor {
                 checkCtx.putCapture(capture, formatted);
                 checkCtx.putDerived(ContextKey.string(capture), formatted);
             }
-            checkCtx.putResolvedTarget(point.id(),
-                    new CheckContext.ResolvedTarget(target.value(), target.properties(), format(absolute)));
+            checkCtx.putResolvedTarget(point.id(), new CheckContext.ResolvedTarget(target.value(), target.properties(), format(absolute)));
         }
         applyContextRules(definition.contextRules(), checkCtx);
 
         var diagnostics = graph(nodes, edges);
         var status = status(nodes, requests);
         return new StructureCheckResult(
-                status,
-                checkCtx.toRuntime(key, 1),
-                diagnostics,
-                new VisualizationModel(definition.id() + "/check", visualization),
-                requests);
+                        status,
+                        checkCtx.toRuntime(key, 1),
+                        diagnostics,
+                        new VisualizationModel(definition.id() + "/check", visualization),
+                        requests);
     }
 
     private static List<CheckPlanEntry> fallbackEntries(StructureDefinition definition) {
-        return StructureRuntimePlanCompiler.compileCheckPlan(definition).candidates().stream()
-                .findFirst()
-                .map(CheckPlanCandidate::entries)
-                .orElse(List.of());
+        return StructureRuntimePlanCompiler.compileCheckPlan(definition).candidates().stream().findFirst().map(CheckPlanCandidate::entries).orElse(List.of());
     }
 
-    private static PredicateProblem evaluatePredicates(
-            StructurePointDefinition point,
-            SnapshotTarget target,
-            PredicateRegistry predicateRegistry) {
+    private static PredicateProblem evaluatePredicates(StructurePointDefinition point, SnapshotTarget target, PredicateRegistry predicateRegistry) {
         for (var predicate : point.predicates()) {
             var evaluation = PredicateEvaluator.evaluate(predicate, target, predicateRegistry);
             if (evaluation == PredicateEvaluator.Evaluation.unsupported) {
                 return new PredicateProblem(
-                        "UNSUPPORTED_PREDICATE",
-                        "Unsupported predicate",
-                        "diagnostic.cumulus.unsupported_predicate",
-                        predicate);
+                                "UNSUPPORTED_PREDICATE",
+                                "Unsupported predicate",
+                                "diagnostic.cumulus.unsupported_predicate",
+                                predicate);
             }
             if (evaluation == PredicateEvaluator.Evaluation.failed) {
                 return new PredicateProblem(
-                        "PREDICATE_FAILED",
-                        "Predicate failed",
-                        "diagnostic.cumulus.predicate_failed",
-                        predicate);
+                                "PREDICATE_FAILED",
+                                "Predicate failed",
+                                "diagnostic.cumulus.predicate_failed",
+                                predicate);
             }
         }
         return null;
     }
 
-    private static SnapshotTarget resolveTarget(
-            StructurePointDefinition point,
-            Bounds bounds,
-            InMemoryTargetSnapshot snapshot) {
+    private static SnapshotTarget resolveTarget(StructurePointDefinition point, Bounds bounds, InMemoryTargetSnapshot snapshot) {
         if (contextTarget.equals(point.target().typeId())) {
             return snapshot.context(point.target().properties().get("key")).orElse(null);
         }
         return snapshot.target(point.target().typeId(), bounds.min(), bounds.max()).orElse(null);
     }
 
-    private static SnapshotTarget resolveTarget(
-            StructurePointDefinition point,
-            Bounds bounds,
-            TargetSnapshotSource source) {
+    private static SnapshotTarget resolveTarget(StructurePointDefinition point, Bounds bounds, TargetSnapshotSource source) {
         if (contextTarget.equals(point.target().typeId())) {
             var key = point.target().properties().get("key");
             if (key == null || key.isBlank()) {
                 return null;
             }
-            return source.context(key)
-                    .map(value -> new SnapshotTarget(value, Map.of("key", key)))
-                    .orElse(null);
+            return source.context(key).map(value -> new SnapshotTarget(value, Map.of("key", key))).orElse(null);
         }
         return source.target(point.target().typeId(), bounds.min(), bounds.max(), point.target().properties()).orElse(null);
     }
 
-    private static void addProblem(
-            StructurePointDefinition point,
-            Bounds bounds,
-            String code,
-            String message,
-            String localizationKey,
-            PredicateDescriptor predicate,
-            List<DiagnosticNode> nodes,
-            List<DiagnosticEdge> edges,
-            List<VisualizationElement> visualization) {
+    private static void addProblem(StructurePointDefinition point, Bounds bounds, String code, String message, String localizationKey, PredicateDescriptor predicate, List<DiagnosticNode> nodes, List<DiagnosticEdge> edges, List<VisualizationElement> visualization) {
         if (nodes.isEmpty()) {
             nodes.add(new DiagnosticNode(
-                    "root",
-                    Severity.error,
-                    "Structure check failed",
-                    "diagnostic.cumulus.structure_failed",
-                    List.of(),
-                    "runtime/check",
-                    List.of()));
+                            "root",
+                            Severity.error,
+                            "Structure check failed",
+                            "diagnostic.cumulus.structure_failed",
+                            List.of(),
+                            "runtime/check",
+                            List.of()));
         }
         var pointId = point.id().value();
         nodes.add(new DiagnosticNode(
-                pointId,
-                Severity.error,
-                message,
-                localizationKey,
-                List.of(DiagnosticEvidence.relative(
-                        bounds.min(),
-                        point.target().typeId().toString(),
-                        predicate == null ? code : predicate.id().toString(),
                         pointId,
-                        code,
-                        descriptors(bounds, predicate))),
-                "runtime/check/" + pointId,
-                List.of()));
+                        Severity.error,
+                        message,
+                        localizationKey,
+                        List.of(DiagnosticEvidence.relative(bounds.min(), point.target().typeId().toString(), predicate == null ? code : predicate.id().toString(), pointId, code, descriptors(bounds, predicate))),
+                        "runtime/check/" + pointId,
+                        List.of()));
         edges.add(new DiagnosticEdge("root", pointId, "caused_by"));
-        visualization.add(VisualizationElement.region(
-                pointId + "-error",
-                point.target().typeId().getPath(),
-                bounds.min(),
-                bounds.max(),
-                Severity.error,
-                point.groups().isEmpty() ? "structure" : point.groups().iterator().next(),
-                localizationKey,
-                100));
+        visualization.add(VisualizationElement.region(pointId + "-error", point.target().typeId().getPath(), bounds.min(), bounds.max(), Severity.error, point.groups().isEmpty() ? "structure" : point.groups().iterator().next(), localizationKey, 100));
     }
 
     private static Map<String, String> descriptors(Bounds bounds, PredicateDescriptor predicate) {
@@ -482,15 +380,15 @@ public final class StructureCheckExecutor {
     }
 
     private record PredicateProblem(
-            String code,
-            String message,
-            String localizationKey,
-            PredicateDescriptor predicate) {
+                    String code,
+                    String message,
+                    String localizationKey,
+                    PredicateDescriptor predicate) {
     }
 
     private record FastCandidateResult(
-            InstanceStatus status,
-            int entriesEvaluated) {
+                    InstanceStatus status,
+                    int entriesEvaluated) {
     }
 
     @FunctionalInterface

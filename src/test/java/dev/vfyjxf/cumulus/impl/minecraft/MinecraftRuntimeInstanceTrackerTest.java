@@ -1,33 +1,31 @@
 package dev.vfyjxf.cumulus.impl.minecraft;
 
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
-import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.definition.Structures;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptors;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.target.Targets;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.impl.check.SnapshotTarget;
 import dev.vfyjxf.cumulus.impl.runtime.RuntimeCheckEngine;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+
+import org.junit.jupiter.api.Test;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MinecraftRuntimeInstanceTrackerTest {
     @Test
     void tracksMinecraftBackedInstancesAndMarksChangedSectionsDirty() {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:minecraft_runtime_machine"))
-                .point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block()
-                        .where(PredicateDescriptors.id("minecraft:furnace"))
-                        .capture("controller"))
-                .build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:minecraft_runtime_machine")).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("minecraft:furnace")).capture("controller")).build();
         var engine = new RuntimeCheckEngine().register(definition);
-        var reader = new FakeLevelTargetReader()
-                .block(new BlockPos(5, 70, 5), "minecraft:furnace", Map.of());
+        var reader = new FakeLevelTargetReader().block(new BlockPos(5, 70, 5), "minecraft:furnace", Map.of());
         var tracker = new MinecraftRuntimeInstanceTracker(engine);
 
         tracker.track(definition.id(), new BlockPos(5, 70, 5), reader, Map.of());
@@ -40,13 +38,9 @@ class MinecraftRuntimeInstanceTrackerTest {
 
     @Test
     void untracksMinecraftBackedInstancesAndStopsFutureDirtyChecks() {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:minecraft_runtime_removed"))
-                .point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block()
-                        .where(PredicateDescriptors.id("minecraft:furnace")))
-                .build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:minecraft_runtime_removed")).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("minecraft:furnace"))).build();
         var engine = new RuntimeCheckEngine().register(definition);
-        var reader = new FakeLevelTargetReader()
-                .block(new BlockPos(0, 64, 0), "minecraft:furnace", Map.of());
+        var reader = new FakeLevelTargetReader().block(new BlockPos(0, 64, 0), "minecraft:furnace", Map.of());
         var tracker = new MinecraftRuntimeInstanceTracker(engine);
 
         tracker.track(definition.id(), new BlockPos(0, 64, 0), reader, Map.of());

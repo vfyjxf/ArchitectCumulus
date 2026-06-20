@@ -1,10 +1,11 @@
 package dev.vfyjxf.cumulus.api.types;
 
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
 
 /**
  * Open, type-safe registry mapping a {@link ResourceLocation} id to a value of type {@code V}.
@@ -62,8 +63,7 @@ public record Registry<V>(Map<ResourceLocation, V> entries) {
     public Registry<V> register(V value) {
         if (!(value instanceof RegistryValue rv)) {
             throw new IllegalArgumentException(
-                "Registry value must implement RegistryValue when using the single-arg register(); got "
-                    + value.getClass());
+                            "Registry value must implement RegistryValue when using the single-arg register(); got " + value.getClass());
         }
         return register(rv.id(), value);
     }

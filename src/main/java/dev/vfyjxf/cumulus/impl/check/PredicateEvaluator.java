@@ -5,8 +5,7 @@ import dev.vfyjxf.cumulus.api.predicate.PredicateRegistry;
 import dev.vfyjxf.cumulus.api.predicate.PredicateTarget;
 
 public final class PredicateEvaluator {
-    private PredicateEvaluator() {
-    }
+    private PredicateEvaluator() {}
 
     public static Evaluation evaluate(PredicateDescriptor predicate, SnapshotTarget target) {
         return evaluate(predicate, target, PredicateRegistry.defaults());
@@ -26,9 +25,7 @@ public final class PredicateEvaluator {
         if (result.isEmpty()) {
             return Evaluation.unsupported;
         }
-        return result.orElseThrow()
-                ? Evaluation.match
-                : Evaluation.failed;
+        return result.orElseThrow() ? Evaluation.match : Evaluation.failed;
     }
 
     public static boolean matches(PredicateDescriptor predicate, SnapshotTarget target) {
@@ -36,8 +33,6 @@ public final class PredicateEvaluator {
     }
 
     public enum Evaluation {
-        match,
-        failed,
-        unsupported
+        match, failed, unsupported
     }
 }

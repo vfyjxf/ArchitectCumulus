@@ -3,11 +3,11 @@ package dev.vfyjxf.cumulus.api.request;
 import dev.vfyjxf.cumulus.api.partition.SectionKey;
 
 public record DataRequest(
-        SectionKey section,
-        RequestReason reason,
-        RequestPriority priority,
-        int ttlTicks,
-        String consumerId) {
+                SectionKey section,
+                RequestReason reason,
+                RequestPriority priority,
+                int ttlTicks,
+                String consumerId) {
     public DataRequest {
         if (section == null) {
             throw new IllegalArgumentException("Request section must not be null");

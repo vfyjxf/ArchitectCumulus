@@ -6,18 +6,21 @@ import dev.vfyjxf.cumulus.api.request.DataRequest;
 import dev.vfyjxf.cumulus.api.request.RequestPriority;
 import dev.vfyjxf.cumulus.api.request.RequestReason;
 import dev.vfyjxf.cumulus.api.runtime.InstanceDelta;
-import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.RuntimeStructureContext;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.visualization.VisualizationModel;
 import dev.vfyjxf.cumulus.impl.RuntimePlanEntry;
 import dev.vfyjxf.cumulus.impl.StructureRuntimePlan;
-import java.util.ArrayList;
-import java.util.List;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -73,11 +76,11 @@ class RuntimeSchedulerTest {
         var scheduler = new RuntimeScheduler();
         var instance = key("cumulus:machine", new BlockPos(0, 64, 0));
         var request = new DataRequest(
-                new SectionKey(1, 4, 0),
-                RequestReason.checkNeedsContext,
-                RequestPriority.high,
-                20,
-                "cumulus:machine/controller");
+                        new SectionKey(1, 4, 0),
+                        RequestReason.checkNeedsContext,
+                        RequestPriority.high,
+                        20,
+                        "cumulus:machine/controller");
         scheduler.register(instance, plan("cumulus:machine", 0, 0));
 
         scheduler.markDirty(new SectionKey(0, 4, 0));
@@ -93,10 +96,7 @@ class RuntimeSchedulerTest {
     void drainDuePublishesCheckDeltasOnEngineFrame() {
         var scheduler = new RuntimeScheduler();
         var instance = key("cumulus:machine", new BlockPos(0, 64, 0));
-        var context = RuntimeStructureContext.builder(instance)
-                .revision(7)
-                .put(ContextKey.string("controller"), "0,64,0")
-                .build();
+        var context = RuntimeStructureContext.builder(instance).revision(7).put(ContextKey.string("controller"), "0,64,0").build();
         var delta = new InstanceDelta(instance, InstanceStatus.valid, context);
         scheduler.register(instance, plan("cumulus:machine", 0, 0));
 
@@ -135,14 +135,14 @@ class RuntimeSchedulerTest {
 
     private static StructureRuntimePlan plan(String id, int minX, int maxX) {
         return new StructureRuntimePlan(
-                ResourceLocation.parse(id),
-                List.of(new RuntimePlanEntry(
-                        "body",
-                        ResourceLocation.parse("cumulus:block"),
-                        RelativeBlockPos.of(minX, 0, 0),
-                        RelativeBlockPos.of(maxX, 0, 0))),
-                List.of(),
-                List.of(),
-                new VisualizationModel(id + "/visualization", List.of()));
+                        ResourceLocation.parse(id),
+                        List.of(new RuntimePlanEntry(
+                                        "body",
+                                        ResourceLocation.parse("cumulus:block"),
+                                        RelativeBlockPos.of(minX, 0, 0),
+                                        RelativeBlockPos.of(maxX, 0, 0))),
+                        List.of(),
+                        List.of(),
+                        new VisualizationModel(id + "/visualization", List.of()));
     }
 }

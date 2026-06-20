@@ -1,13 +1,14 @@
 package dev.vfyjxf.cumulus.api.migration;
 
-import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Map;
+
 public record MigrationDescriptor(
-        int fromVersion,
-        int toVersion,
-        ResourceLocation migrationId,
-        Map<String, String> properties) {
+                int fromVersion,
+                int toVersion,
+                ResourceLocation migrationId,
+                Map<String, String> properties) {
     public MigrationDescriptor {
         if (fromVersion < 1) {
             throw new IllegalArgumentException("Migration source version must be positive");

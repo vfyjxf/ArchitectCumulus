@@ -1,10 +1,7 @@
 package dev.vfyjxf.cumulus.impl.minecraft;
 
 import dev.vfyjxf.cumulus.impl.check.SnapshotTarget;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.function.Function;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -13,7 +10,13 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
+
 import org.jetbrains.annotations.Nullable;
+
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.function.Function;
 
 public final class MinecraftCapabilityResolvers {
     private final Map<String, BlockResolver<?, ?>> blockResolvers;
@@ -27,27 +30,14 @@ public final class MinecraftCapabilityResolvers {
     }
 
     public static MinecraftCapabilityResolvers defaults() {
-        return MinecraftCapabilityResolvers.empty()
-                .register("energy", Capabilities.EnergyStorage.BLOCK, MinecraftCapabilityResolvers::sidedContext,
-                        MinecraftCapabilityResolvers::energyProperties)
-                .register("item_handler", Capabilities.ItemHandler.BLOCK, MinecraftCapabilityResolvers::sidedContext,
-                        MinecraftCapabilityResolvers::itemHandlerProperties)
-                .register("fluid_handler", Capabilities.FluidHandler.BLOCK, MinecraftCapabilityResolvers::sidedContext,
-                        MinecraftCapabilityResolvers::fluidHandlerProperties);
+        return MinecraftCapabilityResolvers.empty().register("energy", Capabilities.EnergyStorage.BLOCK, MinecraftCapabilityResolvers::sidedContext, MinecraftCapabilityResolvers::energyProperties).register("item_handler", Capabilities.ItemHandler.BLOCK, MinecraftCapabilityResolvers::sidedContext, MinecraftCapabilityResolvers::itemHandlerProperties).register("fluid_handler", Capabilities.FluidHandler.BLOCK, MinecraftCapabilityResolvers::sidedContext, MinecraftCapabilityResolvers::fluidHandlerProperties);
     }
 
-    public <T> MinecraftCapabilityResolvers register(
-            String name,
-            BlockCapability<T, @Nullable Void> capability,
-            Function<T, Map<String, String>> properties) {
+    public <T> MinecraftCapabilityResolvers register(String name, BlockCapability<T, @Nullable Void> capability, Function<T, Map<String, String>> properties) {
         return register(name, capability, unused -> null, properties);
     }
 
-    public <T, C extends @Nullable Object> MinecraftCapabilityResolvers register(
-            String name,
-            BlockCapability<T, C> capability,
-            Function<Map<String, String>, C> context,
-            Function<T, Map<String, String>> properties) {
+    public <T, C extends @Nullable Object> MinecraftCapabilityResolvers register(String name, BlockCapability<T, C> capability, Function<Map<String, String>, C> context, Function<T, Map<String, String>> properties) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Capability name must not be blank");
         }
@@ -65,11 +55,7 @@ public final class MinecraftCapabilityResolvers {
         return new MinecraftCapabilityResolvers(next);
     }
 
-    public SnapshotTarget resolve(
-            CapabilityLookup lookup,
-            BlockPos pos,
-            String name,
-            Map<String, String> targetProperties) {
+    public SnapshotTarget resolve(CapabilityLookup lookup, BlockPos pos, String name, Map<String, String> targetProperties) {
         if (lookup == null) {
             throw new IllegalArgumentException("Capability lookup must not be null");
         }
@@ -90,11 +76,7 @@ public final class MinecraftCapabilityResolvers {
     }
 
     private static Map<String, String> energyProperties(IEnergyStorage storage) {
-        return Map.of(
-                "energy", Integer.toString(storage.getEnergyStored()),
-                "capacity", Integer.toString(storage.getMaxEnergyStored()),
-                "can_extract", Boolean.toString(storage.canExtract()),
-                "can_receive", Boolean.toString(storage.canReceive()));
+        return Map.of("energy", Integer.toString(storage.getEnergyStored()), "capacity", Integer.toString(storage.getMaxEnergyStored()), "can_extract", Boolean.toString(storage.canExtract()), "can_receive", Boolean.toString(storage.canReceive()));
     }
 
     private static Map<String, String> itemHandlerProperties(IItemHandler handler) {
@@ -104,9 +86,7 @@ public final class MinecraftCapabilityResolvers {
                 occupied++;
             }
         }
-        return Map.of(
-                "slots", Integer.toString(handler.getSlots()),
-                "occupied_slots", Integer.toString(occupied));
+        return Map.of("slots", Integer.toString(handler.getSlots()), "occupied_slots", Integer.toString(occupied));
     }
 
     private static Map<String, String> fluidHandlerProperties(IFluidHandler handler) {
@@ -146,14 +126,10 @@ public final class MinecraftCapabilityResolvers {
     }
 
     private record BlockResolver<T, C extends @Nullable Object>(
-            BlockCapability<T, C> capability,
-            Function<Map<String, String>, C> context,
-            Function<T, Map<String, String>> properties) {
-        SnapshotTarget resolve(
-                CapabilityLookup lookup,
-                BlockPos pos,
-                String name,
-                Map<String, String> targetProperties) {
+                    BlockCapability<T, C> capability,
+                    Function<Map<String, String>, C> context,
+                    Function<T, Map<String, String>> properties) {
+        SnapshotTarget resolve(CapabilityLookup lookup, BlockPos pos, String name, Map<String, String> targetProperties) {
             var contextValue = context.apply(targetProperties);
             var value = lookup.get(capability, pos, contextValue);
             if (value == null) {

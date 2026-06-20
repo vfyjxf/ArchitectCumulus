@@ -3,8 +3,10 @@ package dev.vfyjxf.cumulus.impl.check;
 import dev.vfyjxf.cumulus.api.definition.PointRequirement;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
 import dev.vfyjxf.cumulus.impl.StructureRuntimePlanCompiler;
-import java.util.Comparator;
+
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.Comparator;
 
 public final class TargetSnapshotReader {
     private static final ResourceLocation block = ResourceLocation.parse("cumulus:block");
@@ -15,8 +17,7 @@ public final class TargetSnapshotReader {
     private static final ResourceLocation region = ResourceLocation.parse("cumulus:region");
     private static final ResourceLocation context = ResourceLocation.parse("cumulus:context");
 
-    private TargetSnapshotReader() {
-    }
+    private TargetSnapshotReader() {}
 
     public static InMemoryTargetSnapshot fromDefinition(StructureDefinition definition, TargetSnapshotSource source) {
         if (definition == null) {
@@ -50,9 +51,7 @@ public final class TargetSnapshotReader {
         return best == null ? InMemoryTargetSnapshot.empty() : best.snapshot();
     }
 
-    private static Candidate readCandidate(
-            CheckPlanCandidate checkCandidate,
-            TargetSnapshotSource source) {
+    private static Candidate readCandidate(CheckPlanCandidate checkCandidate, TargetSnapshotSource source) {
         var builder = InMemoryTargetSnapshot.builder();
         var presentRequired = 0;
         var missingRequired = 0;
@@ -72,11 +71,7 @@ public final class TargetSnapshotReader {
                 continue;
             }
 
-            var target = source.target(
-                    point.target().typeId(),
-                    entry.min(),
-                    entry.max(),
-                    point.target().properties());
+            var target = source.target(point.target().typeId(), entry.min(), entry.max(), point.target().properties());
             if (target.isPresent()) {
                 put(builder, point.target().typeId(), entry, target.orElseThrow());
                 if (point.requirement() == PointRequirement.required) {
@@ -89,11 +84,7 @@ public final class TargetSnapshotReader {
         return new Candidate(builder.build(), presentRequired, missingRequired);
     }
 
-    private static void put(
-            InMemoryTargetSnapshot.Builder builder,
-            ResourceLocation targetType,
-            CheckPlanEntry entry,
-            SnapshotTarget target) {
+    private static void put(InMemoryTargetSnapshot.Builder builder, ResourceLocation targetType, CheckPlanEntry entry, SnapshotTarget target) {
         if (block.equals(targetType)) {
             builder.block(entry.min(), target.value(), target.properties());
             return;
@@ -120,19 +111,16 @@ public final class TargetSnapshotReader {
     }
 
     private record Candidate(
-            InMemoryTargetSnapshot snapshot,
-            int presentRequired,
-            int missingRequired) implements Comparable<Candidate> {
+                    InMemoryTargetSnapshot snapshot,
+                    int presentRequired,
+                    int missingRequired) implements Comparable<Candidate> {
         private boolean complete() {
             return missingRequired == 0;
         }
 
         @Override
         public int compareTo(Candidate other) {
-            return Comparator
-                    .comparingInt(Candidate::presentRequired)
-                    .thenComparing(candidate -> -candidate.missingRequired())
-                    .compare(this, other);
+            return Comparator.comparingInt(Candidate::presentRequired).thenComparing(candidate -> -candidate.missingRequired()).compare(this, other);
         }
     }
 }

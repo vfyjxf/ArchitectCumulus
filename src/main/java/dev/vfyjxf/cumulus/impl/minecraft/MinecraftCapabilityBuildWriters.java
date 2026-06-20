@@ -1,14 +1,15 @@
 package dev.vfyjxf.cumulus.impl.minecraft;
 
-import java.util.Map;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
+
+import java.util.Map;
 
 public final class MinecraftCapabilityBuildWriters {
     private static final TypedCapabilityBuildWriter unsupported = new TypedCapabilityBuildWriter() {
@@ -28,13 +29,9 @@ public final class MinecraftCapabilityBuildWriters {
         }
     };
 
-    private MinecraftCapabilityBuildWriters() {
-    }
+    private MinecraftCapabilityBuildWriters() {}
 
-    public static CapabilityBuildWriter defaults(
-            TypedCapabilityBuildWriter energy,
-            TypedCapabilityBuildWriter item,
-            TypedCapabilityBuildWriter fluid) {
+    public static CapabilityBuildWriter defaults(TypedCapabilityBuildWriter energy, TypedCapabilityBuildWriter item, TypedCapabilityBuildWriter fluid) {
         if (energy == null) {
             throw new IllegalArgumentException("Energy capability build writer must not be null");
         }
@@ -44,10 +41,7 @@ public final class MinecraftCapabilityBuildWriters {
         if (fluid == null) {
             throw new IllegalArgumentException("Fluid capability build writer must not be null");
         }
-        return new RoutingCapabilityBuildWriter(Map.of(
-                "energy", energy,
-                "item_handler", item,
-                "fluid_handler", fluid));
+        return new RoutingCapabilityBuildWriter(Map.of("energy", energy, "item_handler", item, "fluid_handler", fluid));
     }
 
     public static TypedCapabilityBuildWriter unsupported() {
@@ -76,7 +70,7 @@ public final class MinecraftCapabilityBuildWriters {
     }
 
     private record RoutingCapabilityBuildWriter(
-            Map<String, TypedCapabilityBuildWriter> writers) implements CapabilityBuildWriter {
+                    Map<String, TypedCapabilityBuildWriter> writers) implements CapabilityBuildWriter {
         private RoutingCapabilityBuildWriter {
             writers = Map.copyOf(writers);
         }
@@ -96,8 +90,7 @@ public final class MinecraftCapabilityBuildWriters {
         @Override
         public boolean mutate(BlockPos pos, String capabilityName, Map<String, String> mutation) {
             var writer = writers.get(capabilityName);
-            return writer != null && writer.canWrite(mutation.getOrDefault("operation", ""))
-                    && writer.mutate(pos, mutation);
+            return writer != null && writer.canWrite(mutation.getOrDefault("operation", "")) && writer.mutate(pos, mutation);
         }
     }
 

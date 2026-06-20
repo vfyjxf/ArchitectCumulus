@@ -1,8 +1,5 @@
 package dev.vfyjxf.cumulus.impl.minecraft;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -11,7 +8,12 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
+
 import org.junit.jupiter.api.Test;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -43,10 +45,7 @@ class MinecraftCapabilityBuildWritersTest {
     @Test
     void defaultsRejectUnsupportedOperationsWithoutMutatingTypedPolicy() {
         var energy = new RecordingTypedWriter("insert_energy");
-        var writer = MinecraftCapabilityBuildWriters.defaults(
-                energy,
-                MinecraftCapabilityBuildWriters.unsupported(),
-                MinecraftCapabilityBuildWriters.unsupported());
+        var writer = MinecraftCapabilityBuildWriters.defaults(energy, MinecraftCapabilityBuildWriters.unsupported(), MinecraftCapabilityBuildWriters.unsupported());
         var pos = new BlockPos(1, 2, 3);
 
         assertFalse(writer.canWrite("energy", "extract_energy"));
@@ -74,10 +73,7 @@ class MinecraftCapabilityBuildWritersTest {
     void itemWriterEnsuresItemCountAcrossHandlerSlotsIdempotently() {
         var handler = new FakeItemHandler(2);
         var writer = MinecraftCapabilityBuildWriters.item(handler);
-        var mutation = Map.of(
-                "operation", "ensure_item",
-                "item", "minecraft:coal",
-                "count", "12");
+        var mutation = Map.of("operation", "ensure_item", "item", "minecraft:coal", "count", "12");
 
         assertTrue(writer.canWrite("ensure_item"));
         assertFalse(writer.hasMutation(BlockPos.ZERO, mutation));
@@ -92,10 +88,7 @@ class MinecraftCapabilityBuildWritersTest {
     void fluidWriterEnsuresFluidAmountAcrossTanksIdempotently() {
         var handler = new FakeFluidHandler(1000);
         var writer = MinecraftCapabilityBuildWriters.fluid(handler);
-        var mutation = Map.of(
-                "operation", "ensure_fluid",
-                "fluid", "minecraft:water",
-                "amount", "400");
+        var mutation = Map.of("operation", "ensure_fluid", "fluid", "minecraft:water", "amount", "400");
 
         assertTrue(writer.canWrite("ensure_fluid"));
         assertFalse(writer.hasMutation(BlockPos.ZERO, mutation));

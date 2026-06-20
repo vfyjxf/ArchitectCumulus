@@ -7,10 +7,12 @@ import dev.vfyjxf.cumulus.api.migration.StructureVersionDescriptor;
 import dev.vfyjxf.cumulus.api.target.TargetPattern;
 import dev.vfyjxf.cumulus.api.transform.TransformDescriptor;
 import dev.vfyjxf.cumulus.impl.definition.StructureDefinitionCompiler;
+
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import net.minecraft.resources.ResourceLocation;
 
 public final class StructureDefinitionBuilder {
     private final ResourceLocation id;

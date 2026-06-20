@@ -5,5 +5,4 @@ package dev.vfyjxf.cumulus.api.predicate;
  * Each concrete predicate type declares its own Properties record implementing
  * this interface.
  */
-public interface PredicateProperties {
-}
+public interface PredicateProperties {}

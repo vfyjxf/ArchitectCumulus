@@ -4,14 +4,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 
 public record GhostPreviewRenderCommand(
-        String elementId,
-        BlockPos min,
-        BlockPos max,
-        GhostPreviewRenderStyle style,
-        float red,
-        float green,
-        float blue,
-        float alpha) {
+                String elementId,
+                BlockPos min,
+                BlockPos max,
+                GhostPreviewRenderStyle style,
+                float red,
+                float green,
+                float blue,
+                float alpha) {
     public GhostPreviewRenderCommand {
         if (elementId == null || elementId.isBlank()) {
             throw new IllegalArgumentException("Render command element id must not be blank");

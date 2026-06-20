@@ -1,12 +1,13 @@
 package dev.vfyjxf.cumulus.impl.editor;
 
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
+
 import java.util.Comparator;
 import java.util.List;
 
 public record GhostPreviewRenderPlan(
-        String previewId,
-        List<GhostPreviewRenderCommand> commands) {
+                String previewId,
+                List<GhostPreviewRenderCommand> commands) {
     public GhostPreviewRenderPlan {
         if (previewId == null || previewId.isBlank()) {
             throw new IllegalArgumentException("Ghost preview render plan id must not be blank");
@@ -18,12 +19,7 @@ public record GhostPreviewRenderPlan(
         if (preview == null) {
             throw new IllegalArgumentException("Ghost preview model must not be null");
         }
-        var commands = preview.elements().stream()
-                .sorted(Comparator
-                        .comparingInt(GhostPreviewElement::priority)
-                        .thenComparing(GhostPreviewElement::id))
-                .map(GhostPreviewRenderPlan::command)
-                .toList();
+        var commands = preview.elements().stream().sorted(Comparator.comparingInt(GhostPreviewElement::priority).thenComparing(GhostPreviewElement::id)).map(GhostPreviewRenderPlan::command).toList();
         return new GhostPreviewRenderPlan(preview.id() + "/render", commands);
     }
 
@@ -38,22 +34,16 @@ public record GhostPreviewRenderPlan(
         };
     }
 
-    private static GhostPreviewRenderCommand command(
-            GhostPreviewElement element,
-            GhostPreviewRenderStyle style,
-            float red,
-            float green,
-            float blue,
-            float alpha) {
+    private static GhostPreviewRenderCommand command(GhostPreviewElement element, GhostPreviewRenderStyle style, float red, float green, float blue, float alpha) {
         return new GhostPreviewRenderCommand(
-                element.id(),
-                element.min(),
-                element.max(),
-                style,
-                red,
-                green,
-                blue,
-                alpha);
+                        element.id(),
+                        element.min(),
+                        element.max(),
+                        style,
+                        red,
+                        green,
+                        blue,
+                        alpha);
     }
 
     private static GhostPreviewRenderStyle styleFor(Severity severity) {

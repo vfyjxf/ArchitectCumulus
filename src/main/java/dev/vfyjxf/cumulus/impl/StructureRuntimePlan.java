@@ -1,22 +1,23 @@
 package dev.vfyjxf.cumulus.impl;
 
 import dev.vfyjxf.cumulus.api.component.ComponentDescriptor;
-import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.diagnostic.FixHint;
 import dev.vfyjxf.cumulus.api.partition.SectionKey;
 import dev.vfyjxf.cumulus.api.visualization.VisualizationModel;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 public record StructureRuntimePlan(
-        ResourceLocation definitionId,
-        List<RuntimePlanEntry> entries,
-        List<ComponentDescriptor> substructures,
-        List<FixHint> buildHints,
-        VisualizationModel visualization) {
+                ResourceLocation definitionId,
+                List<RuntimePlanEntry> entries,
+                List<ComponentDescriptor> substructures,
+                List<FixHint> buildHints,
+                VisualizationModel visualization) {
     public StructureRuntimePlan {
         if (definitionId == null) {
             throw new IllegalArgumentException("Runtime plan definition id must not be null");

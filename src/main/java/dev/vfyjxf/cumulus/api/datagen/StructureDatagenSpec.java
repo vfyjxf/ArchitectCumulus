@@ -1,12 +1,13 @@
 package dev.vfyjxf.cumulus.api.datagen;
 
-import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Map;
+
 public record StructureDatagenSpec(
-        String namespace,
-        String path,
-        Map<ResourceLocation, DataDrivenStructureAsset> assets) {
+                String namespace,
+                String path,
+                Map<ResourceLocation, DataDrivenStructureAsset> assets) {
     public StructureDatagenSpec {
         if (namespace == null || namespace.isBlank()) {
             throw new IllegalArgumentException("Datagen namespace must not be blank");

@@ -1,13 +1,15 @@
 package dev.vfyjxf.cumulus.impl.editor;
 
 import dev.vfyjxf.cumulus.impl.StructureRuntimePlan;
-import java.util.Optional;
+
 import net.minecraft.core.BlockPos;
 
+import java.util.Optional;
+
 public record StructureEditorSession(
-        StructureRuntimePlan plan,
-        BlockPos anchor,
-        Optional<String> selectedElementId) {
+                StructureRuntimePlan plan,
+                BlockPos anchor,
+                Optional<String> selectedElementId) {
     public StructureEditorSession {
         if (plan == null) {
             throw new IllegalArgumentException("Editor runtime plan must not be null");

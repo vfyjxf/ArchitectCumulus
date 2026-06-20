@@ -1,13 +1,14 @@
 package dev.vfyjxf.cumulus.impl.substructure;
 
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
+
 import net.minecraft.resources.ResourceLocation;
 
 public record RuntimeSubstructureOccurrence(
-        String occurrenceId,
-        ResourceLocation definitionId,
-        String parentOccurrenceId,
-        RelativeBlockPos anchorOffsetFromRoot) {
+                String occurrenceId,
+                ResourceLocation definitionId,
+                String parentOccurrenceId,
+                RelativeBlockPos anchorOffsetFromRoot) {
     public RuntimeSubstructureOccurrence {
         if (occurrenceId == null || occurrenceId.isBlank()) {
             throw new IllegalArgumentException("Substructure occurrence id must not be blank");

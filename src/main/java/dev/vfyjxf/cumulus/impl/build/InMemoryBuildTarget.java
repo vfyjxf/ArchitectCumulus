@@ -1,9 +1,10 @@
 package dev.vfyjxf.cumulus.impl.build;
 
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
 
 public final class InMemoryBuildTarget implements BuildTarget {
     private static final ResourceLocation capability = ResourceLocation.parse("cumulus:capability");
@@ -15,9 +16,7 @@ public final class InMemoryBuildTarget implements BuildTarget {
         if (action == null) {
             throw new IllegalArgumentException("Build action must not be null");
         }
-        return !capability.equals(action.targetType())
-                || !action.properties().getOrDefault("block", "").isBlank()
-                || !action.properties().getOrDefault("operation", "").isBlank();
+        return !capability.equals(action.targetType()) || !action.properties().getOrDefault("block", "").isBlank() || !action.properties().getOrDefault("operation", "").isBlank();
     }
 
     @Override
@@ -40,9 +39,7 @@ public final class InMemoryBuildTarget implements BuildTarget {
             capabilityMutations.putIfAbsent(capabilityMutationKey(action), mutationProperties(action));
             return;
         }
-        var previous = targets.putIfAbsent(
-                key(action),
-                new BuiltTarget(action.targetType(), action.min(), action.max(), action.id()));
+        var previous = targets.putIfAbsent(key(action), new BuiltTarget(action.targetType(), action.min(), action.max(), action.id()));
         if (previous != null && !previous.actionId().equals(action.id())) {
             throw new IllegalStateException("Build target already exists for a different action: " + action.id());
         }
@@ -63,15 +60,11 @@ public final class InMemoryBuildTarget implements BuildTarget {
     }
 
     private static boolean isCapabilityMutation(BuildAction action) {
-        return capability.equals(action.targetType())
-                && !action.properties().getOrDefault("operation", "").isBlank();
+        return capability.equals(action.targetType()) && !action.properties().getOrDefault("operation", "").isBlank();
     }
 
     private static String capabilityMutationKey(BuildAction action) {
-        return action.targetType()
-                + "|" + action.min().asString()
-                + "|" + action.max().asString()
-                + "|" + action.properties().getOrDefault("name", action.id());
+        return action.targetType() + "|" + action.min().asString() + "|" + action.max().asString() + "|" + action.properties().getOrDefault("name", action.id());
     }
 
     private static Map<String, String> mutationProperties(BuildAction action) {

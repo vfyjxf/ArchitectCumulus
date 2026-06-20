@@ -1,9 +1,10 @@
 package dev.vfyjxf.cumulus.api.predicate;
 
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
 
 public record PredicateDescriptor(ResourceLocation id, Map<String, String> properties) {
     public PredicateDescriptor {

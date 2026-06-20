@@ -8,16 +8,17 @@ import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticMetadata;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptor;
 import dev.vfyjxf.cumulus.api.target.TargetPattern;
 import dev.vfyjxf.cumulus.api.target.Targets;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 public record PointComponent(
-        String name,
-        RelativeBlockPos location,
-        TargetPattern target,
-        PointRequirement requirement,
-        Set<String> groups,
-        DiagnosticMetadata diagnostics) implements StructureComponent {
+                String name,
+                RelativeBlockPos location,
+                TargetPattern target,
+                PointRequirement requirement,
+                Set<String> groups,
+                DiagnosticMetadata diagnostics) implements StructureComponent {
     public PointComponent {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Point component name must not be blank");
@@ -62,13 +63,13 @@ public record PointComponent(
     @Override
     public void emit(ComponentEmitter emitter) {
         emitter.point(new StructurePointDefinition(
-                new StructurePointId(name),
-                location,
-                target.target(),
-                target.predicates(),
-                requirement,
-                target.captures(),
-                groups,
-                diagnostics));
+                        new StructurePointId(name),
+                        location,
+                        target.target(),
+                        target.predicates(),
+                        requirement,
+                        target.captures(),
+                        groups,
+                        diagnostics));
     }
 }

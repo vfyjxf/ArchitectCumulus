@@ -5,12 +5,13 @@ import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinitionException;
 import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
-import java.util.HashMap;
+
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.HashMap;
+
 public final class StructureDefinitionValidator {
-    private StructureDefinitionValidator() {
-    }
+    private StructureDefinitionValidator() {}
 
     public static void validate(StructureDefinition definition) {
         if (definition == null) {
@@ -25,20 +26,14 @@ public final class StructureDefinitionValidator {
             var previousId = pointIds.putIfAbsent(point.id().value(), point);
             if (previousId != null) {
                 throw new StructureDefinitionException(
-                        "Duplicate structure point id '" + point.id().value()
-                                + "' at " + format(previousId.location())
-                                + " and " + format(point.location()));
+                                "Duplicate structure point id '" + point.id().value() + "' at " + format(previousId.location()) + " and " + format(point.location()));
             }
 
             for (var capture : point.captures()) {
                 var previousCapture = captures.putIfAbsent(capture, point);
                 if (previousCapture != null) {
                     throw new StructureDefinitionException(
-                            "Duplicate capture '" + capture + "' on points '"
-                                    + previousCapture.id().value() + "' at "
-                                    + format(previousCapture.location()) + " and '"
-                                    + point.id().value() + "' at "
-                                    + format(point.location()));
+                                    "Duplicate capture '" + capture + "' on points '" + previousCapture.id().value() + "' at " + format(previousCapture.location()) + " and '" + point.id().value() + "' at " + format(point.location()));
                 }
             }
 
@@ -50,10 +45,7 @@ public final class StructureDefinitionValidator {
             var previousTarget = requiredTargets.putIfAbsent(key, point);
             if (previousTarget != null) {
                 throw new StructureDefinitionException(
-                        "Required target conflict at " + format(point.location())
-                                + " for target '" + point.target().typeId()
-                                + "' between points '" + previousTarget.id().value()
-                                + "' and '" + point.id().value() + "'");
+                                "Required target conflict at " + format(point.location()) + " for target '" + point.target().typeId() + "' between points '" + previousTarget.id().value() + "' and '" + point.id().value() + "'");
             }
         }
     }

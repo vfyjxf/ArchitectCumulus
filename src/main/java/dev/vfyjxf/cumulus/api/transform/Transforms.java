@@ -1,11 +1,11 @@
 package dev.vfyjxf.cumulus.api.transform;
 
-import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Map;
+
 public final class Transforms {
-    private Transforms() {
-    }
+    private Transforms() {}
 
     public static TransformDescriptor identity() {
         return new TransformDescriptor(ResourceLocation.parse("cumulus:identity"), Map.of());

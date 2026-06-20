@@ -1,7 +1,6 @@
 package dev.vfyjxf.cumulus.impl;
 
 import dev.vfyjxf.cumulus.api.component.Components;
-import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.Structures;
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
@@ -13,12 +12,15 @@ import dev.vfyjxf.cumulus.api.request.RequestReason;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
 import dev.vfyjxf.cumulus.api.target.Targets;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.impl.check.InMemoryTargetSnapshot;
-import java.util.List;
-import java.util.Map;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,10 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class StructureInstanceManagerTest {
     @Test
     void managerRegistersPlanAndRequestsFootprintSections() {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:machine"))
-                .point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block())
-                .component(Components.region("body", RelativeBlockPos.of(16, 0, 0), RelativeBlockPos.of(17, 0, 0)))
-                .build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:machine")).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block()).component(Components.region("body", RelativeBlockPos.of(16, 0, 0), RelativeBlockPos.of(17, 0, 0))).build();
         var manager = new StructureInstanceManager();
         manager.register(StructureRuntimePlanCompiler.compile(definition));
 
@@ -47,7 +46,7 @@ class StructureInstanceManagerTest {
         var anchor = new BlockPos(1, 64, 1);
         var manager = new StructureInstanceManager();
         manager.register(new StructureRuntimePlan(definitionId, java.util.List.of(), java.util.List.of(), java.util.List.of(),
-                new dev.vfyjxf.cumulus.api.visualization.VisualizationModel("empty", java.util.List.of())));
+                        new dev.vfyjxf.cumulus.api.visualization.VisualizationModel("empty", java.util.List.of())));
         manager.track(definitionId, anchor);
 
         var frame = manager.publishContext(definitionId, anchor, java.util.Map.of(ContextKey.string("facing"), "north"));
@@ -60,21 +59,12 @@ class StructureInstanceManagerTest {
 
     @Test
     void managerRunsCheckAndPublishesResultFrame() {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:machine"))
-                .point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block()
-                        .where(PredicateDescriptors.id("cumulus:controller"))
-                        .capture("controller"))
-                .build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:machine")).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:controller")).capture("controller")).build();
         var anchor = new BlockPos(4, 64, 4);
         var manager = new StructureInstanceManager();
         manager.register(StructureRuntimePlanCompiler.compile(definition));
 
-        var frame = manager.check(
-                definition,
-                anchor,
-                InMemoryTargetSnapshot.builder()
-                        .block(RelativeBlockPos.of(0, 0, 0), "cumulus:controller")
-                        .build());
+        var frame = manager.check(definition, anchor, InMemoryTargetSnapshot.builder().block(RelativeBlockPos.of(0, 0, 0), "cumulus:controller").build());
 
         assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
         assertEquals("4,64,4", frame.deltas().getFirst().context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller")).orElse(null));
@@ -91,11 +81,9 @@ class StructureInstanceManagerTest {
         var second = new StructureInstanceKey(definition.id(), secondAnchor);
         var manager = registeredManager(definition);
 
-        manager.check(definition, firstAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(part, first, ClaimMode.exclusive)));
+        manager.check(definition, firstAnchor, validControllerSnapshot(), List.of(new PartClaim(part, first, ClaimMode.exclusive)));
 
-        var frame = manager.check(definition, secondAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(part, second, ClaimMode.exclusive)));
+        var frame = manager.check(definition, secondAnchor, validControllerSnapshot(), List.of(new PartClaim(part, second, ClaimMode.exclusive)));
 
         assertEquals(InstanceStatus.invalid, frame.deltas().getFirst().status());
         var conflict = manager.diagnostics(second).childrenOf("root").getFirst();
@@ -114,11 +102,9 @@ class StructureInstanceManagerTest {
         var second = new StructureInstanceKey(definition.id(), secondAnchor);
         var manager = registeredManager(definition);
 
-        manager.check(definition, firstAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(part, first, ClaimMode.shared)));
+        manager.check(definition, firstAnchor, validControllerSnapshot(), List.of(new PartClaim(part, first, ClaimMode.shared)));
 
-        var frame = manager.check(definition, secondAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(part, second, ClaimMode.shared)));
+        var frame = manager.check(definition, secondAnchor, validControllerSnapshot(), List.of(new PartClaim(part, second, ClaimMode.shared)));
 
         assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
         assertTrue(manager.diagnostics(second).nodes().isEmpty());
@@ -134,11 +120,9 @@ class StructureInstanceManagerTest {
         var second = new StructureInstanceKey(definition.id(), secondAnchor);
         var manager = registeredManager(definition);
 
-        manager.check(definition, firstAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(part, first, ClaimMode.shared)));
+        manager.check(definition, firstAnchor, validControllerSnapshot(), List.of(new PartClaim(part, first, ClaimMode.shared)));
 
-        var frame = manager.check(definition, secondAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(part, second, ClaimMode.exclusive)));
+        var frame = manager.check(definition, secondAnchor, validControllerSnapshot(), List.of(new PartClaim(part, second, ClaimMode.exclusive)));
 
         assertEquals(InstanceStatus.invalid, frame.deltas().getFirst().status());
         var evidence = manager.diagnostics(second).childrenOf("root").getFirst().evidence().getFirst();
@@ -158,10 +142,8 @@ class StructureInstanceManagerTest {
         var valid = new StructureInstanceKey(definition.id(), validAnchor);
         var manager = registeredManager(definition);
 
-        var invalidFrame = manager.check(definition, invalidAnchor, InMemoryTargetSnapshot.empty(), List.of(
-                new PartClaim(part, invalid, ClaimMode.exclusive)));
-        var validFrame = manager.check(definition, validAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(part, valid, ClaimMode.exclusive)));
+        var invalidFrame = manager.check(definition, invalidAnchor, InMemoryTargetSnapshot.empty(), List.of(new PartClaim(part, invalid, ClaimMode.exclusive)));
+        var validFrame = manager.check(definition, validAnchor, validControllerSnapshot(), List.of(new PartClaim(part, valid, ClaimMode.exclusive)));
 
         assertEquals(InstanceStatus.incomplete, invalidFrame.deltas().getFirst().status());
         assertEquals(InstanceStatus.valid, validFrame.deltas().getFirst().status());
@@ -181,13 +163,9 @@ class StructureInstanceManagerTest {
         var third = new StructureInstanceKey(definition.id(), thirdAnchor);
         var manager = registeredManager(definition);
 
-        manager.check(definition, firstAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(existingPart, first, ClaimMode.exclusive)));
-        var conflictFrame = manager.check(definition, secondAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(newPart, second, ClaimMode.exclusive),
-                new PartClaim(existingPart, second, ClaimMode.exclusive)));
-        var thirdFrame = manager.check(definition, thirdAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(newPart, third, ClaimMode.exclusive)));
+        manager.check(definition, firstAnchor, validControllerSnapshot(), List.of(new PartClaim(existingPart, first, ClaimMode.exclusive)));
+        var conflictFrame = manager.check(definition, secondAnchor, validControllerSnapshot(), List.of(new PartClaim(newPart, second, ClaimMode.exclusive), new PartClaim(existingPart, second, ClaimMode.exclusive)));
+        var thirdFrame = manager.check(definition, thirdAnchor, validControllerSnapshot(), List.of(new PartClaim(newPart, third, ClaimMode.exclusive)));
 
         assertEquals(InstanceStatus.invalid, conflictFrame.deltas().getFirst().status());
         assertEquals(InstanceStatus.valid, thirdFrame.deltas().getFirst().status());
@@ -201,15 +179,10 @@ class StructureInstanceManagerTest {
     }
 
     private static dev.vfyjxf.cumulus.api.definition.StructureDefinition validControllerDefinition(ResourceLocation id) {
-        return Structures.define(id)
-                .point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block()
-                        .where(PredicateDescriptors.id("cumulus:controller")))
-                .build();
+        return Structures.define(id).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:controller"))).build();
     }
 
     private static InMemoryTargetSnapshot validControllerSnapshot() {
-        return InMemoryTargetSnapshot.builder()
-                .block(RelativeBlockPos.of(0, 0, 0), "cumulus:controller")
-                .build();
+        return InMemoryTargetSnapshot.builder().block(RelativeBlockPos.of(0, 0, 0), "cumulus:controller").build();
     }
 }

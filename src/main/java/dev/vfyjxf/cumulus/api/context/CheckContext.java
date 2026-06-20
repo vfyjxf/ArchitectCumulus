@@ -4,6 +4,7 @@ import dev.vfyjxf.cumulus.api.definition.StructurePointId;
 import dev.vfyjxf.cumulus.api.runtime.RuntimeStructureContext;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
 import dev.vfyjxf.cumulus.api.types.ContextKey;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -58,8 +59,7 @@ public final class CheckContext {
      *  Carried over into RuntimeStructureContext; shadows derived under the same key. */
     private final Map<ContextKey<?>, Object> computed = new LinkedHashMap<>();
 
-    public CheckContext() {
-    }
+    public CheckContext() {}
 
     // ── resolved targets ──────────────────────────────────────────────
 
@@ -94,8 +94,7 @@ public final class CheckContext {
         Objects.requireNonNull(value, "derived value must not be null");
         if (!key.type().isInstance(value)) {
             throw new ClassCastException(
-                    "ContextKey '" + key.name() + "' expects " + key.type().getName()
-                            + " but got " + value.getClass().getName());
+                            "ContextKey '" + key.name() + "' expects " + key.type().getName() + " but got " + value.getClass().getName());
         }
         derived.put(key, value);
     }
@@ -118,8 +117,7 @@ public final class CheckContext {
         Objects.requireNonNull(value, "computed value must not be null");
         if (!key.type().isInstance(value)) {
             throw new ClassCastException(
-                    "ContextKey '" + key.name() + "' expects " + key.type().getName()
-                            + " but got " + value.getClass().getName());
+                            "ContextKey '" + key.name() + "' expects " + key.type().getName() + " but got " + value.getClass().getName());
         }
         computed.put(key, value);
     }
@@ -162,10 +160,7 @@ public final class CheckContext {
         var merged = new LinkedHashMap<ContextKey<?>, Object>();
         merged.putAll(derived);
         merged.putAll(computed);
-        return RuntimeStructureContext.builder(key)
-                .revision(revision)
-                .putAll(merged)
-                .build();
+        return RuntimeStructureContext.builder(key).revision(revision).putAll(merged).build();
     }
 
     /**

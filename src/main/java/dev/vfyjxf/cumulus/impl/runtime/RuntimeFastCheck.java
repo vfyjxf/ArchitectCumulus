@@ -4,8 +4,8 @@ import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
 import dev.vfyjxf.cumulus.impl.check.FastCheckResult;
 
 public record RuntimeFastCheck(
-        StructureInstanceKey instance,
-        FastCheckResult result) {
+                StructureInstanceKey instance,
+                FastCheckResult result) {
     public RuntimeFastCheck {
         if (instance == null) {
             throw new IllegalArgumentException("Runtime fast-check instance must not be null");

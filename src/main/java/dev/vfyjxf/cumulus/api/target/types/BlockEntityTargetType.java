@@ -2,8 +2,10 @@ package dev.vfyjxf.cumulus.api.target.types;
 
 import dev.vfyjxf.cumulus.api.target.TargetProperties;
 import dev.vfyjxf.cumulus.api.target.TargetType;
-import java.util.Objects;
+
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.Objects;
 
 /**
  * Target category: a Minecraft block entity. Carries the expected block id,
@@ -14,8 +16,7 @@ public final class BlockEntityTargetType implements TargetType {
     public static final ResourceLocation id = ResourceLocation.parse("cumulus:block_entity");
     public static final BlockEntityTargetType instance = new BlockEntityTargetType();
 
-    private BlockEntityTargetType() {
-    }
+    private BlockEntityTargetType() {}
 
     @Override
     public ResourceLocation id() {
@@ -29,9 +30,9 @@ public final class BlockEntityTargetType implements TargetType {
 
     /** Block entity target properties: block id, BE type id, NBT snippet. */
     public record Props(
-            ResourceLocation blockId,
-            ResourceLocation blockEntityId,
-            String nbt) implements TargetProperties {
+                    ResourceLocation blockId,
+                    ResourceLocation blockEntityId,
+                    String nbt) implements TargetProperties {
 
         public Props {
             Objects.requireNonNull(blockId, "blockId must not be null");

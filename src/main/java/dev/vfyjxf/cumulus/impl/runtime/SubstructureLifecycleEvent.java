@@ -2,15 +2,16 @@ package dev.vfyjxf.cumulus.impl.runtime;
 
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
+
 import java.util.Optional;
 
 public record SubstructureLifecycleEvent(
-        StructureInstanceKey parent,
-        StructureInstanceKey child,
-        String occurrenceId,
-        Optional<InstanceStatus> previousStatus,
-        InstanceStatus currentStatus,
-        SubstructureLifecycleTransition transition) {
+                StructureInstanceKey parent,
+                StructureInstanceKey child,
+                String occurrenceId,
+                Optional<InstanceStatus> previousStatus,
+                InstanceStatus currentStatus,
+                SubstructureLifecycleTransition transition) {
     public SubstructureLifecycleEvent {
         if (parent == null) {
             throw new IllegalArgumentException("Parent instance key must not be null");

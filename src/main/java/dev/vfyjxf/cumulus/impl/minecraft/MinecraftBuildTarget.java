@@ -2,7 +2,7 @@ package dev.vfyjxf.cumulus.impl.minecraft;
 
 import dev.vfyjxf.cumulus.impl.build.BuildAction;
 import dev.vfyjxf.cumulus.impl.build.BuildTarget;
-import java.util.Map;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -17,6 +17,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.Map;
 
 public final class MinecraftBuildTarget implements BuildTarget {
     private static final ResourceLocation block = ResourceLocation.parse("cumulus:block");
@@ -44,29 +46,29 @@ public final class MinecraftBuildTarget implements BuildTarget {
     }
 
     public MinecraftBuildTarget(
-            BlockPos anchor,
-            BlockBuildWriter writer,
-            FluidBuildWriter fluidWriter,
-            BlockEntityBuildWriter blockEntityWriter) {
+                    BlockPos anchor,
+                    BlockBuildWriter writer,
+                    FluidBuildWriter fluidWriter,
+                    BlockEntityBuildWriter blockEntityWriter) {
         this(anchor, writer, fluidWriter, blockEntityWriter, NoopEntityBuildWriter.instance);
     }
 
     public MinecraftBuildTarget(
-            BlockPos anchor,
-            BlockBuildWriter writer,
-            FluidBuildWriter fluidWriter,
-            BlockEntityBuildWriter blockEntityWriter,
-            EntityBuildWriter entityWriter) {
+                    BlockPos anchor,
+                    BlockBuildWriter writer,
+                    FluidBuildWriter fluidWriter,
+                    BlockEntityBuildWriter blockEntityWriter,
+                    EntityBuildWriter entityWriter) {
         this(anchor, writer, fluidWriter, blockEntityWriter, entityWriter, NoopCapabilityBuildWriter.instance);
     }
 
     public MinecraftBuildTarget(
-            BlockPos anchor,
-            BlockBuildWriter writer,
-            FluidBuildWriter fluidWriter,
-            BlockEntityBuildWriter blockEntityWriter,
-            EntityBuildWriter entityWriter,
-            CapabilityBuildWriter capabilityWriter) {
+                    BlockPos anchor,
+                    BlockBuildWriter writer,
+                    FluidBuildWriter fluidWriter,
+                    BlockEntityBuildWriter blockEntityWriter,
+                    EntityBuildWriter entityWriter,
+                    CapabilityBuildWriter capabilityWriter) {
         if (anchor == null) {
             throw new IllegalArgumentException("Build anchor must not be null");
         }
@@ -99,11 +101,11 @@ public final class MinecraftBuildTarget implements BuildTarget {
         }
         var writer = new LevelBlockBuildWriter(level);
         return new MinecraftBuildTarget(
-                anchor,
-                writer,
-                new LevelFluidBuildWriter(level),
-                new LevelBlockEntityBuildWriter(level),
-                new LevelEntityBuildWriter(level));
+                        anchor,
+                        writer,
+                        new LevelFluidBuildWriter(level),
+                        new LevelBlockEntityBuildWriter(level),
+                        new LevelEntityBuildWriter(level));
     }
 
     @Override
@@ -111,9 +113,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
         if (action == null) {
             throw new IllegalArgumentException("Build action must not be null");
         }
-        if (capability.equals(action.targetType())
-                && !action.properties().getOrDefault("operation", "").isBlank()
-                && action.properties().getOrDefault("block", "").isBlank()) {
+        if (capability.equals(action.targetType()) && !action.properties().getOrDefault("operation", "").isBlank() && action.properties().getOrDefault("block", "").isBlank()) {
             return capabilityWriter.canWrite(capabilityName(action), capabilityOperation(action));
         }
         return true;
@@ -198,8 +198,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
         if (!block.equals(action.targetType()) && !region.equals(action.targetType()) && !capability.equals(action.targetType())) {
             return null;
         }
-        if (capability.equals(action.targetType())
-                && action.properties().getOrDefault("block", "").isBlank()) {
+        if (capability.equals(action.targetType()) && action.properties().getOrDefault("block", "").isBlank()) {
             return null;
         }
         return ResourceLocation.parse(action.properties().getOrDefault("block", defaultBlock.toString()));
@@ -254,8 +253,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
     }
 
     private static boolean hasCapabilityMutation(BuildAction action) {
-        return capability.equals(action.targetType())
-                && !action.properties().getOrDefault("operation", "").isBlank();
+        return capability.equals(action.targetType()) && !action.properties().getOrDefault("operation", "").isBlank();
     }
 
     private static String capabilityName(BuildAction action) {
@@ -346,8 +344,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
     }
 
     private static ResourceLocation blockEntityId(BuildAction action) {
-        return ResourceLocation.parse(action.properties().getOrDefault("block_entity", action.properties()
-                .getOrDefault("type", "minecraft:furnace")));
+        return ResourceLocation.parse(action.properties().getOrDefault("block_entity", action.properties().getOrDefault("type", "minecraft:furnace")));
     }
 
     private static String blockEntityNbt(BuildAction action) {
@@ -471,31 +468,19 @@ public final class MinecraftBuildTarget implements BuildTarget {
 
         @Override
         public boolean canWrite(ResourceLocation blockId, ResourceLocation blockEntityId) {
-            return BuiltInRegistries.BLOCK.containsKey(blockId)
-                    && BuiltInRegistries.BLOCK_ENTITY_TYPE.containsKey(blockEntityId);
+            return BuiltInRegistries.BLOCK.containsKey(blockId) && BuiltInRegistries.BLOCK_ENTITY_TYPE.containsKey(blockEntityId);
         }
 
         @Override
-        public boolean hasBlockEntity(
-                BlockPos pos,
-                ResourceLocation blockId,
-                ResourceLocation blockEntityId,
-                String nbt) {
+        public boolean hasBlockEntity(BlockPos pos, ResourceLocation blockId, ResourceLocation blockEntityId, String nbt) {
             var block = BuiltInRegistries.BLOCK.get(blockId);
             var type = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(blockEntityId);
             var blockEntity = level.getBlockEntity(pos);
-            return level.getBlockState(pos).is(block)
-                    && blockEntity != null
-                    && blockEntity.getType().equals(type)
-                    && normalizedNbt(blockEntity).equals(parseNbt(nbt));
+            return level.getBlockState(pos).is(block) && blockEntity != null && blockEntity.getType().equals(type) && normalizedNbt(blockEntity).equals(parseNbt(nbt));
         }
 
         @Override
-        public boolean setBlockEntity(
-                BlockPos pos,
-                ResourceLocation blockId,
-                ResourceLocation blockEntityId,
-                String nbt) {
+        public boolean setBlockEntity(BlockPos pos, ResourceLocation blockId, ResourceLocation blockEntityId, String nbt) {
             var block = BuiltInRegistries.BLOCK.get(blockId);
             if (block == null || !canWrite(blockId, blockEntityId)) {
                 return false;
@@ -568,9 +553,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
         public boolean hasEntity(BlockPos pos, ResourceLocation entityId, String nbt) {
             var type = BuiltInRegistries.ENTITY_TYPE.get(entityId);
             var expected = parseNbt(nbt);
-            return level.getEntities((Entity) null, entityBox(pos), entity -> entity.getType().equals(type))
-                    .stream()
-                    .anyMatch(entity -> EntityBuildWriter.containsAuthoredNbt(normalizedNbt(entity), expected));
+            return level.getEntities((Entity) null, entityBox(pos), entity -> entity.getType().equals(type)).stream().anyMatch(entity -> EntityBuildWriter.containsAuthoredNbt(normalizedNbt(entity), expected));
         }
 
         @Override

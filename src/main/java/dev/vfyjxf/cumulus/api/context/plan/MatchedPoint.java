@@ -2,11 +2,13 @@ package dev.vfyjxf.cumulus.api.context.plan;
 
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.StructurePointId;
+
+import net.minecraft.core.BlockPos;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.core.BlockPos;
 
 /**
  * Typed view of one matched structure point, exposed to {@link ContextOperation}s
@@ -25,12 +27,12 @@ import net.minecraft.core.BlockPos;
  * @param absolutePos  world position after the chosen transform is applied
  */
 public record MatchedPoint(
-        StructurePointId id,
-        Set<String> groups,
-        String value,
-        Map<String, String> properties,
-        RelativeBlockPos relativePos,
-        BlockPos absolutePos) {
+                StructurePointId id,
+                Set<String> groups,
+                String value,
+                Map<String, String> properties,
+                RelativeBlockPos relativePos,
+                BlockPos absolutePos) {
 
     public MatchedPoint {
         Objects.requireNonNull(id, "MatchedPoint id must not be null");
@@ -52,11 +54,16 @@ public record MatchedPoint(
             return Optional.empty();
         }
         try {
-            if (type == String.class) return Optional.of(type.cast(raw));
-            if (type == Integer.class) return Optional.of(type.cast(Integer.valueOf(raw)));
-            if (type == Long.class) return Optional.of(type.cast(Long.valueOf(raw)));
-            if (type == Double.class) return Optional.of(type.cast(Double.valueOf(raw)));
-            if (type == Boolean.class) return Optional.of(type.cast(Boolean.valueOf(raw)));
+            if (type == String.class)
+                return Optional.of(type.cast(raw));
+            if (type == Integer.class)
+                return Optional.of(type.cast(Integer.valueOf(raw)));
+            if (type == Long.class)
+                return Optional.of(type.cast(Long.valueOf(raw)));
+            if (type == Double.class)
+                return Optional.of(type.cast(Double.valueOf(raw)));
+            if (type == Boolean.class)
+                return Optional.of(type.cast(Boolean.valueOf(raw)));
         } catch (NumberFormatException e) {
             return Optional.empty();
         }

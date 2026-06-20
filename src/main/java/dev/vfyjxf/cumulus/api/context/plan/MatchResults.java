@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.api.context.plan;
 
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -75,14 +76,8 @@ public final class MatchResults {
                 min = r;
                 max = r;
             } else {
-                min = RelativeBlockPos.of(
-                        Math.min(min.x(), r.x()),
-                        Math.min(min.y(), r.y()),
-                        Math.min(min.z(), r.z()));
-                max = RelativeBlockPos.of(
-                        Math.max(max.x(), r.x()),
-                        Math.max(max.y(), r.y()),
-                        Math.max(max.z(), r.z()));
+                min = RelativeBlockPos.of(Math.min(min.x(), r.x()), Math.min(min.y(), r.y()), Math.min(min.z(), r.z()));
+                max = RelativeBlockPos.of(Math.max(max.x(), r.x()), Math.max(max.y(), r.y()), Math.max(max.z(), r.z()));
             }
         }
         return min == null ? Optional.empty() : Optional.of(new Bounds3d(min, max));
@@ -97,12 +92,11 @@ public final class MatchResults {
      * is less than 3 (no enclosed cavity).
      */
     public Optional<Integer> interiorVolume(String shellGroup) {
-        return bounds(p -> p.inGroup(shellGroup))
-                .map(b -> {
-                    int w = Math.max(0, b.width() - 2);
-                    int h = Math.max(0, b.height() - 2);
-                    int d = Math.max(0, b.depth() - 2);
-                    return w * h * d;
-                });
+        return bounds(p -> p.inGroup(shellGroup)).map(b -> {
+            int w = Math.max(0, b.width() - 2);
+            int h = Math.max(0, b.height() - 2);
+            int d = Math.max(0, b.depth() - 2);
+            return w * h * d;
+        });
     }
 }

@@ -3,12 +3,14 @@ package dev.vfyjxf.cumulus.api.predicate;
 import dev.vfyjxf.cumulus.api.predicate.types.IdPredicateType;
 import dev.vfyjxf.cumulus.api.predicate.types.StatePropertyPredicateType;
 import dev.vfyjxf.cumulus.api.predicate.types.TagPredicateType;
+
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
 
 /**
  * Registry of all known {@link PredicateType}s. Built-in types are pre-registered;
@@ -19,16 +21,12 @@ public final class PredicateTypes {
     private static final Map<ResourceLocation, PredicateType> entries = new LinkedHashMap<>();
 
     static {
-        for (var type : List.of(
-                IdPredicateType.instance,
-                TagPredicateType.instance,
-                StatePropertyPredicateType.instance)) {
+        for (var type : List.of(IdPredicateType.instance, TagPredicateType.instance, StatePropertyPredicateType.instance)) {
             entries.put(type.id(), type);
         }
     }
 
-    private PredicateTypes() {
-    }
+    private PredicateTypes() {}
 
     public static synchronized void register(PredicateType type) {
         Objects.requireNonNull(type, "PredicateType must not be null");
@@ -42,7 +40,7 @@ public final class PredicateTypes {
 
     public static PredicateType fromId(ResourceLocation id) {
         return maybeFromId(id).orElseThrow(() -> new IllegalArgumentException(
-                "Unknown PredicateType: " + id));
+                        "Unknown PredicateType: " + id));
     }
 
     public static boolean isRegistered(ResourceLocation id) {

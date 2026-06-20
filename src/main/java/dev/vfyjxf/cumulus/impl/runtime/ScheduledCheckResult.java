@@ -2,15 +2,16 @@ package dev.vfyjxf.cumulus.impl.runtime;
 
 import dev.vfyjxf.cumulus.api.request.DataRequest;
 import dev.vfyjxf.cumulus.api.runtime.InstanceDelta;
+
 import java.util.List;
 
 public record ScheduledCheckResult(
-        List<InstanceDelta> deltas,
-        List<DataRequest> requests,
-        List<RuntimeFastCheck> fastChecks) {
+                List<InstanceDelta> deltas,
+                List<DataRequest> requests,
+                List<RuntimeFastCheck> fastChecks) {
     public ScheduledCheckResult(
-            List<InstanceDelta> deltas,
-            List<DataRequest> requests) {
+                    List<InstanceDelta> deltas,
+                    List<DataRequest> requests) {
         this(deltas, requests, List.of());
     }
 

@@ -11,5 +11,4 @@ package dev.vfyjxf.cumulus.api.types;
  * <p>This is the open-for-extension counterpart to a sealed hierarchy. Mods and datapack
  * authors can introduce new {@code TypedProperties} subtypes without modifying Cumulus.
  */
-public interface TypedProperties {
-}
+public interface TypedProperties {}

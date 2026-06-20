@@ -3,10 +3,10 @@ package dev.vfyjxf.cumulus.impl.check;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 
 public record FastCheckResult(
-        InstanceStatus status,
-        int candidatesEvaluated,
-        int entriesEvaluated,
-        int validCandidateIndex) {
+                InstanceStatus status,
+                int candidatesEvaluated,
+                int entriesEvaluated,
+                int validCandidateIndex) {
     public FastCheckResult {
         if (status == null) {
             throw new IllegalArgumentException("Fast check status must not be null");

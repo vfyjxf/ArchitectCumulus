@@ -3,6 +3,8 @@ plugins {
     id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.141'
     id 'idea'
+    id 'jacoco'
+    id 'com.diffplug.spotless' version '6.25.0'
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -202,5 +204,42 @@ idea {
     module {
         downloadSources = true
         downloadJavadoc = true
+    }
+}
+
+// ── JaCoCo coverage ────────────────────────────────────────────────────────
+// Coverage report, no verification threshold yet (observation phase).
+// Generates build/reports/jacoco/test/html/index.html after `./gradlew test`.
+jacoco {
+    toolVersion = '0.8.12'
+}
+
+tasks.named('test', Test).configure {
+    finalizedBy 'jacocoTestReport'
+    jacoco {
+        excludes = ['net.neoforged.**', 'net.minecraft.**']
+    }
+}
+
+tasks.named('jacocoTestReport', JacocoReport).configure {
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+}
+
+// ── Spotless formatting ────────────────────────────────────────────────────
+// Rules reverse-engineered from the CloudLib blueprint style: 4-space indent,
+// no column wrap, K&R braces, static imports at the bottom. Only the Eclipse
+// JDT engine can reproduce all three of these; GJF/Palantir hard-wrap lines.
+spotless {
+    java {
+        target 'src/main/java/**/*.java', 'src/test/java/**/*.java'
+        removeUnusedImports()
+        importOrder('dev', 'com', 'net', 'org', 'java', 'javax', '\\#')
+        eclipse('4.31').configFile 'spotless/eclipse-formatter.xml'
+        trimTrailingWhitespace()
+        endWithNewline()
     }
 }

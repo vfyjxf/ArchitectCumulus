@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.api.context;
 
 import dev.vfyjxf.cumulus.api.types.ContextKey;
+
 import java.util.Optional;
 
 /**
@@ -33,8 +34,7 @@ public final class SubstructurePaths {
 
     public static final String prefix = "substructure.";
 
-    private SubstructurePaths() {
-    }
+    private SubstructurePaths() {}
 
     public static ContextKey<String> status(SubstructureOccurrenceId occurrence) {
         return ContextKey.string(prefix + occurrence.value() + ".status");
@@ -71,9 +71,9 @@ public final class SubstructurePaths {
             var occPart = rest.substring(0, contextIdx);
             var capturePath = rest.substring(contextIdx + ".context.".length());
             return new InspectResult(
-                Optional.of(new SubstructureOccurrenceId(occPart)),
-                Optional.of(capturePath),
-                Optional.empty());
+                            Optional.of(new SubstructureOccurrenceId(occPart)),
+                            Optional.of(capturePath),
+                            Optional.empty());
         }
 
         var lastDot = rest.lastIndexOf('.');
@@ -91,14 +91,13 @@ public final class SubstructurePaths {
             return InspectResult.notSubstructure();
         }
         return new InspectResult(
-            Optional.of(new SubstructureOccurrenceId(occPart)),
-            Optional.empty(),
-            fieldKind);
+                        Optional.of(new SubstructureOccurrenceId(occPart)),
+                        Optional.empty(),
+                        fieldKind);
     }
 
     public enum Field {
-        status,
-        anchorOffset
+        status, anchorOffset
     }
 
     /**
@@ -106,9 +105,9 @@ public final class SubstructurePaths {
      * status/anchor_offset path, or a context mirroring path.
      */
     public record InspectResult(
-            Optional<SubstructureOccurrenceId> occurrence,
-            Optional<String> capturePath,
-            Optional<Field> field) {
+                    Optional<SubstructureOccurrenceId> occurrence,
+                    Optional<String> capturePath,
+                    Optional<Field> field) {
 
         public boolean isSubstructure() {
             return occurrence.isPresent();

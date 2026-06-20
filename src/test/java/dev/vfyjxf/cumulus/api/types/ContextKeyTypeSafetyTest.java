@@ -1,15 +1,17 @@
 package dev.vfyjxf.cumulus.api.types;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import dev.vfyjxf.cumulus.api.runtime.RuntimeStructureContext;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Verifies the type-safety contract of {@link ContextKey} and
@@ -21,8 +23,7 @@ class ContextKeyTypeSafetyTest {
     private static final ContextKey<Direction> facing = ContextKey.direction("facing");
     private static final ContextKey<Integer> tier = ContextKey.integer("tier");
     private static final ContextKey<BlockPos> controller = ContextKey.blockPos("controller");
-    private static final ContextKey<ResourceLocation> controllerId =
-            ContextKey.resourceLocation("controller_id");
+    private static final ContextKey<ResourceLocation> controllerId = ContextKey.resourceLocation("controller_id");
     private static final ContextKey<String> label = ContextKey.string("label");
 
     private static StructureInstanceKey testKey() {
@@ -31,13 +32,7 @@ class ContextKeyTypeSafetyTest {
 
     @Test
     void typedPutAndReadRoundTripsValue() {
-        var ctx = RuntimeStructureContext.builder(testKey())
-                .put(facing, Direction.NORTH)
-                .put(tier, 3)
-                .put(controller, new BlockPos(10, 65, 10))
-                .put(controllerId, ResourceLocation.parse("cumulus:controller"))
-                .put(label, "main_machine")
-                .build();
+        var ctx = RuntimeStructureContext.builder(testKey()).put(facing, Direction.NORTH).put(tier, 3).put(controller, new BlockPos(10, 65, 10)).put(controllerId, ResourceLocation.parse("cumulus:controller")).put(label, "main_machine").build();
 
         assertEquals(Direction.NORTH, ctx.get(facing).orElseThrow());
         assertEquals(3, ctx.get(tier).orElseThrow());
@@ -55,9 +50,7 @@ class ContextKeyTypeSafetyTest {
 
     @Test
     void typedKeysAreDistinctByType() {
-        var ctx = RuntimeStructureContext.builder(testKey())
-                .put(facing, Direction.NORTH)
-                .build();
+        var ctx = RuntimeStructureContext.builder(testKey()).put(facing, Direction.NORTH).build();
         // ContextKey<string>("facing") ≠ ContextKey<Direction>("facing") — different value type
         assertTrue(ctx.get(ContextKey.string("facing")).isEmpty());
         // But the typed key finds the value
@@ -66,12 +59,8 @@ class ContextKeyTypeSafetyTest {
 
     @Test
     void stringViewRoundTripsAllEntriesAsStrings() {
-        var ctx = RuntimeStructureContext.builder(testKey())
-                .put(facing, Direction.EAST)
-                .put(tier, 5)
-                .build();
-        var view = ctx.values().entrySet().stream()
-                .collect(java.util.stream.Collectors.toMap(e -> e.getKey().name(), e -> String.valueOf(e.getValue())));
+        var ctx = RuntimeStructureContext.builder(testKey()).put(facing, Direction.EAST).put(tier, 5).build();
+        var view = ctx.values().entrySet().stream().collect(java.util.stream.Collectors.toMap(e -> e.getKey().name(), e -> String.valueOf(e.getValue())));
         assertEquals("east", view.get("facing"));
         assertEquals("5", view.get("tier"));
         assertEquals(2, view.size());

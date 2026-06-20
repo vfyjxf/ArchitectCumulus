@@ -4,6 +4,7 @@ import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticEdge;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticGraph;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticNode;
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,8 +32,8 @@ public final class RuntimeAssetJsonLoader {
         }
         if (!diagnostics.isEmpty()) {
             return new RuntimeAssetLoadResult(
-                    List.of(),
-                    new DiagnosticGraph("root", diagnostics, edges));
+                            List.of(),
+                            new DiagnosticGraph("root", diagnostics, edges));
         }
         return new RuntimeAssetLoader().load(parsed);
     }
@@ -43,28 +44,25 @@ public final class RuntimeAssetJsonLoader {
         return values;
     }
 
-    private static void addInvalidJson(
-            List<DiagnosticNode> diagnostics,
-            List<DiagnosticEdge> edges,
-            String sourcePath) {
+    private static void addInvalidJson(List<DiagnosticNode> diagnostics, List<DiagnosticEdge> edges, String sourcePath) {
         if (diagnostics.isEmpty()) {
             diagnostics.add(new DiagnosticNode(
-                    "root",
-                    Severity.info,
-                    "Runtime asset JSON loading failed",
-                    "diagnostic.cumulus.asset_json_load_failed",
-                    List.of(),
-                    "runtime/assets/json",
-                    List.of()));
+                            "root",
+                            Severity.info,
+                            "Runtime asset JSON loading failed",
+                            "diagnostic.cumulus.asset_json_load_failed",
+                            List.of(),
+                            "runtime/assets/json",
+                            List.of()));
         }
         diagnostics.add(new DiagnosticNode(
-                "INVALID_JSON",
-                Severity.error,
-                "Invalid runtime asset JSON",
-                "diagnostic.cumulus.invalid_json",
-                List.of(),
-                sourcePath,
-                List.of()));
+                        "INVALID_JSON",
+                        Severity.error,
+                        "Invalid runtime asset JSON",
+                        "diagnostic.cumulus.invalid_json",
+                        List.of(),
+                        sourcePath,
+                        List.of()));
         edges.add(new DiagnosticEdge("root", "INVALID_JSON", "caused_by"));
     }
 

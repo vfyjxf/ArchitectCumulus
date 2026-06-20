@@ -2,6 +2,7 @@ package dev.vfyjxf.cumulus.api.target.types;
 
 import dev.vfyjxf.cumulus.api.target.TargetProperties;
 import dev.vfyjxf.cumulus.api.target.TargetType;
+
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -16,8 +17,7 @@ public final class BlockTargetType implements TargetType {
     public static final BlockTargetType instance = new BlockTargetType();
     public static final Props props = new Props();
 
-    private BlockTargetType() {
-    }
+    private BlockTargetType() {}
 
     @Override
     public ResourceLocation id() {

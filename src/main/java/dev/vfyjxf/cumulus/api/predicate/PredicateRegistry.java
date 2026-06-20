@@ -1,9 +1,10 @@
 package dev.vfyjxf.cumulus.api.predicate;
 
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
 
 public record PredicateRegistry(Map<ResourceLocation, PredicateMatcher> matchers) {
     private static final ResourceLocation property = ResourceLocation.parse("cumulus:property");
@@ -14,9 +15,7 @@ public record PredicateRegistry(Map<ResourceLocation, PredicateMatcher> matchers
     }
 
     public static PredicateRegistry defaults() {
-        return new PredicateRegistry(Map.of(
-                id, PredicateRegistry::matchesId,
-                property, PredicateRegistry::matchesProperty));
+        return new PredicateRegistry(Map.of(id, PredicateRegistry::matchesId, property, PredicateRegistry::matchesProperty));
     }
 
     public PredicateRegistry register(ResourceLocation id, PredicateMatcher matcher) {
@@ -49,9 +48,7 @@ public record PredicateRegistry(Map<ResourceLocation, PredicateMatcher> matchers
     }
 
     private static boolean matchesId(PredicateDescriptor predicate, PredicateTarget target) {
-        return predicate.properties().isEmpty()
-                && (predicate.id().toString().equals(target.value())
-                || predicate.id().getPath().equals(target.value()));
+        return predicate.properties().isEmpty() && (predicate.id().toString().equals(target.value()) || predicate.id().getPath().equals(target.value()));
     }
 
     private static boolean matchesProperty(PredicateDescriptor predicate, PredicateTarget target) {

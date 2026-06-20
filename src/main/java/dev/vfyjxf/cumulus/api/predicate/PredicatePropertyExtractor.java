@@ -4,9 +4,11 @@ import dev.vfyjxf.cumulus.api.predicate.types.IdPredicateType;
 import dev.vfyjxf.cumulus.api.predicate.types.StatePropertyPredicateType;
 import dev.vfyjxf.cumulus.api.predicate.types.TagPredicateType;
 import dev.vfyjxf.cumulus.api.predicate.types.UnknownPredicateType;
+
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
 
 /**
  * Internal helper: extract a {@code Map<String, String>} view from a typed
@@ -14,8 +16,7 @@ import net.minecraft.resources.ResourceLocation;
  */
 public final class PredicatePropertyExtractor {
 
-    private PredicatePropertyExtractor() {
-    }
+    private PredicatePropertyExtractor() {}
 
     public static Map<String, String> extract(PredicateProperties props) {
         var map = new LinkedHashMap<String, String>();
@@ -36,21 +37,19 @@ public final class PredicatePropertyExtractor {
     }
 
     /** Reconstruct typed Props from a legacy v1 id + property map. */
-    public static PredicateProperties buildProps(
-            PredicateType type,
-            Map<String, String> properties) {
+    public static PredicateProperties buildProps(PredicateType type, Map<String, String> properties) {
         if (type instanceof IdPredicateType) {
             return new IdPredicateType.Props(
-                    ResourceLocation.parse(properties.getOrDefault("id", "cumulus:any")));
+                            ResourceLocation.parse(properties.getOrDefault("id", "cumulus:any")));
         }
         if (type instanceof TagPredicateType) {
             return new TagPredicateType.Props(
-                    ResourceLocation.parse(properties.getOrDefault("tag", "cumulus:any")));
+                            ResourceLocation.parse(properties.getOrDefault("tag", "cumulus:any")));
         }
         if (type instanceof StatePropertyPredicateType) {
             return new StatePropertyPredicateType.Props(
-                    properties.getOrDefault("key", properties.getOrDefault("property", "facing")),
-                    properties.getOrDefault("value", "north"));
+                            properties.getOrDefault("key", properties.getOrDefault("property", "facing")),
+                            properties.getOrDefault("value", "north"));
         }
         if (type instanceof UnknownPredicateType) {
             return new UnknownPredicateType.Props(properties);

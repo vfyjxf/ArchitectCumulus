@@ -1,14 +1,15 @@
 package dev.vfyjxf.cumulus.api.diagnostic;
 
-import java.util.Objects;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.Objects;
 
 /**
  * Reference {@link DiagnosticCode} implementation. Mods that just need to declare
  * a custom code without overriding any behaviour should use this record directly:
  *
  * <pre>{@code
- * public static final DiagnosticCode MY_CUSTOM =
+ * public static final DiagnosticCode myCustom =
  *     new SimpleDiagnosticCode(
  *         ResourceLocation.parse("mymod:custom_failure"),
  *         Severity.warn,
@@ -19,9 +20,9 @@ import net.minecraft.resources.ResourceLocation;
  * {@link DiagnosticCode} directly.
  */
 public record SimpleDiagnosticCode(
-        ResourceLocation id,
-        Severity defaultSeverity,
-        String localizationKey) implements DiagnosticCode {
+                ResourceLocation id,
+                Severity defaultSeverity,
+                String localizationKey) implements DiagnosticCode {
 
     public SimpleDiagnosticCode {
         Objects.requireNonNull(id, "DiagnosticCode id must not be null");

@@ -1,8 +1,9 @@
 package dev.vfyjxf.cumulus.api.context.sources;
 
-import dev.vfyjxf.cumulus.api.context.ContextSource;
 import dev.vfyjxf.cumulus.api.context.CheckContext;
+import dev.vfyjxf.cumulus.api.context.ContextSource;
 import dev.vfyjxf.cumulus.api.definition.StructurePointId;
+
 import java.util.Optional;
 
 /**

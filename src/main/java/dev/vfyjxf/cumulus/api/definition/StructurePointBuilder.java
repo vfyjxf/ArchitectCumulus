@@ -2,16 +2,17 @@ package dev.vfyjxf.cumulus.api.definition;
 
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticMetadata;
 import dev.vfyjxf.cumulus.api.target.TargetPattern;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 public record StructurePointBuilder(
-        String id,
-        RelativeBlockPos location,
-        TargetPattern target,
-        PointRequirement requirement,
-        Set<String> groups,
-        DiagnosticMetadata diagnostics) {
+                String id,
+                RelativeBlockPos location,
+                TargetPattern target,
+                PointRequirement requirement,
+                Set<String> groups,
+                DiagnosticMetadata diagnostics) {
     public StructurePointBuilder {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("Structure point id must not be blank");
@@ -47,13 +48,13 @@ public record StructurePointBuilder(
 
     public StructurePointDefinition build() {
         return new StructurePointDefinition(
-                new StructurePointId(id),
-                location,
-                target.target(),
-                target.predicates(),
-                requirement,
-                target.captures(),
-                groups,
-                diagnostics);
+                        new StructurePointId(id),
+                        location,
+                        target.target(),
+                        target.predicates(),
+                        requirement,
+                        target.captures(),
+                        groups,
+                        diagnostics);
     }
 }

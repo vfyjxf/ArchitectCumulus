@@ -1,5 +1,6 @@
 package dev.vfyjxf.cumulus.impl.runtime;
 
+import dev.vfyjxf.cumulus.api.context.WellKnownContextKeys;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticEdge;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticEvidence;
@@ -9,31 +10,24 @@ import dev.vfyjxf.cumulus.api.runtime.InstanceDelta;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.RuntimeStructureContext;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
-import dev.vfyjxf.cumulus.api.context.WellKnownContextKeys;
 import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.impl.check.StructureCheckResult;
 import dev.vfyjxf.cumulus.impl.substructure.RuntimeSubstructureOccurrence;
+
+import net.minecraft.core.BlockPos;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import net.minecraft.core.BlockPos;
 
 final class SubstructureLifecycleState {
-    private static final Set<String> childParentMetadata = Set.of(
-            "parent_occurrence",
-            "parent_structure",
-            "parent_anchor",
-            "parent_status");
+    private static final Set<String> childParentMetadata = Set.of("parent_occurrence", "parent_structure", "parent_anchor", "parent_status");
 
-    private SubstructureLifecycleState() {
-    }
+    private SubstructureLifecycleState() {}
 
-    static List<InstanceDelta> deltas(
-            StructureInstanceKey rootInstance,
-            StructureCheckResult rootResult,
-            List<RuntimeSubstructureOccurrence> occurrences) {
+    static List<InstanceDelta> deltas(StructureInstanceKey rootInstance, StructureCheckResult rootResult, List<RuntimeSubstructureOccurrence> occurrences) {
         if (rootInstance == null) {
             throw new IllegalArgumentException("Root instance key must not be null");
         }
@@ -54,11 +48,7 @@ final class SubstructureLifecycleState {
         return deltas;
     }
 
-    static List<InstanceDelta> synchronizeRoot(
-            StructureInstanceKey rootInstance,
-            List<InstanceDelta> deltas,
-            List<RuntimeSubstructureOccurrence> occurrences,
-            SubstructureSyncPolicy syncPolicy) {
+    static List<InstanceDelta> synchronizeRoot(StructureInstanceKey rootInstance, List<InstanceDelta> deltas, List<RuntimeSubstructureOccurrence> occurrences, SubstructureSyncPolicy syncPolicy) {
         if (rootInstance == null) {
             throw new IllegalArgumentException("Root instance key must not be null");
         }
@@ -88,8 +78,7 @@ final class SubstructureLifecycleState {
                 synchronizedDeltas.add(delta);
                 continue;
             }
-            var context = RuntimeStructureContext.builder(rootInstance)
-                    .revision(delta.context().revision());
+            var context = RuntimeStructureContext.builder(rootInstance).revision(delta.context().revision());
             var retained = new LinkedHashMap<ContextKey<?>, Object>();
             for (var entry : delta.context().values().entrySet()) {
                 if (!isSubstructureSyncKey(entry.getKey(), occurrences)) {
@@ -108,28 +97,16 @@ final class SubstructureLifecycleState {
         return List.copyOf(synchronizedDeltas);
     }
 
-    private static InstanceDelta rootDelta(
-            StructureInstanceKey rootInstance,
-            StructureCheckResult rootResult,
-            List<RuntimeSubstructureOccurrence> occurrences,
-            List<InstanceDelta> childDeltas) {
-        var context = RuntimeStructureContext.builder(rootInstance)
-                .revision(rootResult.context().revision());
+    private static InstanceDelta rootDelta(StructureInstanceKey rootInstance, StructureCheckResult rootResult, List<RuntimeSubstructureOccurrence> occurrences, List<InstanceDelta> childDeltas) {
+        var context = RuntimeStructureContext.builder(rootInstance).revision(rootResult.context().revision());
         context.putAll(rootResult.context().values());
         for (var index = 0; index < occurrences.size(); index++) {
-            putSynchronizedChildContext(
-                    context,
-                    occurrences.get(index),
-                    childDeltas.get(index),
-                    SubstructureSyncPolicy.statusOnly);
+            putSynchronizedChildContext(context, occurrences.get(index), childDeltas.get(index), SubstructureSyncPolicy.statusOnly);
         }
         return new InstanceDelta(rootInstance, rootResult.status(), context.build());
     }
 
-    static Map<StructureInstanceKey, DiagnosticGraph> diagnostics(
-            BlockPos rootAnchor,
-            StructureCheckResult rootResult,
-            List<RuntimeSubstructureOccurrence> occurrences) {
+    static Map<StructureInstanceKey, DiagnosticGraph> diagnostics(BlockPos rootAnchor, StructureCheckResult rootResult, List<RuntimeSubstructureOccurrence> occurrences) {
         if (rootAnchor == null) {
             throw new IllegalArgumentException("Root anchor must not be null");
         }
@@ -147,17 +124,9 @@ final class SubstructureLifecycleState {
         return diagnostics;
     }
 
-    private static InstanceDelta delta(
-            StructureInstanceKey rootInstance,
-            StructureCheckResult rootResult,
-            RuntimeSubstructureOccurrence occurrence) {
+    private static InstanceDelta delta(StructureInstanceKey rootInstance, StructureCheckResult rootResult, RuntimeSubstructureOccurrence occurrence) {
         var key = key(rootInstance.anchor(), occurrence);
-        var context = RuntimeStructureContext.builder(key)
-                .revision(rootResult.context().revision())
-                .put(WellKnownContextKeys.parentOccurrence, occurrence.occurrenceId())
-                .put(WellKnownContextKeys.parentStructure, rootInstance.structureId().toString())
-                .put(WellKnownContextKeys.parentAnchor, format(rootInstance.anchor()))
-                .put(WellKnownContextKeys.parentStatus, rootResult.status().name());
+        var context = RuntimeStructureContext.builder(key).revision(rootResult.context().revision()).put(WellKnownContextKeys.parentOccurrence, occurrence.occurrenceId()).put(WellKnownContextKeys.parentStructure, rootInstance.structureId().toString()).put(WellKnownContextKeys.parentAnchor, format(rootInstance.anchor())).put(WellKnownContextKeys.parentStatus, rootResult.status().name());
         var prefix = occurrence.occurrenceId() + "/";
         var scoped = new LinkedHashMap<ContextKey<?>, Object>();
         for (var entry : rootResult.context().values().entrySet()) {
@@ -170,11 +139,7 @@ final class SubstructureLifecycleState {
         return new InstanceDelta(key, statusFor(rootResult, occurrence), context.build());
     }
 
-    private static void putSynchronizedChildContext(
-            RuntimeStructureContext.Builder context,
-            RuntimeSubstructureOccurrence occurrence,
-            InstanceDelta childDelta,
-            SubstructureSyncPolicy syncPolicy) {
+    private static void putSynchronizedChildContext(RuntimeStructureContext.Builder context, RuntimeSubstructureOccurrence occurrence, InstanceDelta childDelta, SubstructureSyncPolicy syncPolicy) {
         var prefix = "substructure." + occurrence.occurrenceId() + ".";
         context.put(ContextKey.string(prefix + "status"), childDelta.status().name());
         if (syncPolicy != SubstructureSyncPolicy.statusAndContext) {
@@ -191,9 +156,7 @@ final class SubstructureLifecycleState {
         context.putAll(mirrored);
     }
 
-    private static boolean isSubstructureSyncKey(
-            ContextKey<?> key,
-            List<RuntimeSubstructureOccurrence> occurrences) {
+    private static boolean isSubstructureSyncKey(ContextKey<?> key, List<RuntimeSubstructureOccurrence> occurrences) {
         var name = key.name();
         for (var occurrence : occurrences) {
             if (name.startsWith("substructure." + occurrence.occurrenceId() + ".")) {
@@ -206,34 +169,23 @@ final class SubstructureLifecycleState {
     private static StructureInstanceKey key(BlockPos rootAnchor, RuntimeSubstructureOccurrence occurrence) {
         var offset = occurrence.anchorOffsetFromRoot();
         return new StructureInstanceKey(
-                occurrence.definitionId(),
-                rootAnchor.offset(offset.x(), offset.y(), offset.z()));
+                        occurrence.definitionId(),
+                        rootAnchor.offset(offset.x(), offset.y(), offset.z()));
     }
 
-    private static InstanceStatus statusFor(
-            StructureCheckResult rootResult,
-            RuntimeSubstructureOccurrence occurrence) {
+    private static InstanceStatus statusFor(StructureCheckResult rootResult, RuntimeSubstructureOccurrence occurrence) {
         if (rootResult.status() == InstanceStatus.valid) {
             return InstanceStatus.valid;
         }
         var occurrencePrefix = occurrence.occurrenceId() + "/";
-        var hasOccurrenceDiagnostic = rootResult.diagnostics().nodes().stream()
-                .filter(node -> !node.id().equals(rootResult.diagnostics().rootNodeId()))
-                .anyMatch(node -> node.id().equals(occurrence.occurrenceId()) || node.id().startsWith(occurrencePrefix));
-        var hasOccurrenceRequest = rootResult.requests().stream()
-                .anyMatch(request -> request.consumerId().contains(occurrencePrefix));
+        var hasOccurrenceDiagnostic = rootResult.diagnostics().nodes().stream().filter(node -> !node.id().equals(rootResult.diagnostics().rootNodeId())).anyMatch(node -> node.id().equals(occurrence.occurrenceId()) || node.id().startsWith(occurrencePrefix));
+        var hasOccurrenceRequest = rootResult.requests().stream().anyMatch(request -> request.consumerId().contains(occurrencePrefix));
         return hasOccurrenceDiagnostic || hasOccurrenceRequest ? rootResult.status() : InstanceStatus.valid;
     }
 
-    private static DiagnosticGraph diagnosticFor(
-            DiagnosticGraph rootDiagnostics,
-            RuntimeSubstructureOccurrence occurrence) {
+    private static DiagnosticGraph diagnosticFor(DiagnosticGraph rootDiagnostics, RuntimeSubstructureOccurrence occurrence) {
         var occurrencePrefix = occurrence.occurrenceId() + "/";
-        var nodes = rootDiagnostics.nodes().stream()
-                .filter(node -> !node.id().equals(rootDiagnostics.rootNodeId()))
-                .filter(node -> node.id().equals(occurrence.occurrenceId()) || node.id().startsWith(occurrencePrefix))
-                .map(node -> scopedNode(node, occurrence))
-                .toList();
+        var nodes = rootDiagnostics.nodes().stream().filter(node -> !node.id().equals(rootDiagnostics.rootNodeId())).filter(node -> node.id().equals(occurrence.occurrenceId()) || node.id().startsWith(occurrencePrefix)).map(node -> scopedNode(node, occurrence)).toList();
         if (nodes.isEmpty()) {
             return new DiagnosticGraph("root", List.of(), List.of());
         }
@@ -248,32 +200,19 @@ final class SubstructureLifecycleState {
         var occurrencePrefix = occurrence.occurrenceId() + "/";
         var scopedId = stripPrefix(node.id(), occurrencePrefix);
         return new DiagnosticNode(
-                scopedId,
-                node.severity(),
-                node.message(),
-                node.localizationKey(),
-                node.evidence().stream()
-                        .map(evidence -> scopedEvidence(evidence, occurrence))
-                        .toList(),
-                "runtime/substructures/" + scopedId,
-                node.fixHints());
+                        scopedId,
+                        node.severity(),
+                        node.message(),
+                        node.localizationKey(),
+                        node.evidence().stream().map(evidence -> scopedEvidence(evidence, occurrence)).toList(),
+                        "runtime/substructures/" + scopedId,
+                        node.fixHints());
     }
 
-    private static DiagnosticEvidence scopedEvidence(
-            DiagnosticEvidence evidence,
-            RuntimeSubstructureOccurrence occurrence) {
+    private static DiagnosticEvidence scopedEvidence(DiagnosticEvidence evidence, RuntimeSubstructureOccurrence occurrence) {
         var occurrencePrefix = occurrence.occurrenceId() + "/";
         var offset = occurrence.anchorOffsetFromRoot();
-        return DiagnosticEvidence.relative(
-                RelativeBlockPos.of(
-                        evidence.relativePosition().x() - offset.x(),
-                        evidence.relativePosition().y() - offset.y(),
-                        evidence.relativePosition().z() - offset.z()),
-                evidence.targetId(),
-                evidence.predicateId(),
-                stripPrefix(evidence.componentPath(), occurrencePrefix),
-                evidence.detail(),
-                evidence.descriptors());
+        return DiagnosticEvidence.relative(RelativeBlockPos.of(evidence.relativePosition().x() - offset.x(), evidence.relativePosition().y() - offset.y(), evidence.relativePosition().z() - offset.z()), evidence.targetId(), evidence.predicateId(), stripPrefix(evidence.componentPath(), occurrencePrefix), evidence.detail(), evidence.descriptors());
     }
 
     private static String stripPrefix(String value, String prefix) {

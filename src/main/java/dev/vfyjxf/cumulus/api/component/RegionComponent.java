@@ -8,17 +8,18 @@ import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticMetadata;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptor;
 import dev.vfyjxf.cumulus.api.target.TargetPattern;
 import dev.vfyjxf.cumulus.api.target.Targets;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 public record RegionComponent(
-        String name,
-        RelativeBlockPos from,
-        RelativeBlockPos to,
-        TargetPattern target,
-        PointRequirement requirement,
-        Set<String> groups,
-        DiagnosticMetadata diagnostics) implements StructureComponent {
+                String name,
+                RelativeBlockPos from,
+                RelativeBlockPos to,
+                TargetPattern target,
+                PointRequirement requirement,
+                Set<String> groups,
+                DiagnosticMetadata diagnostics) implements StructureComponent {
     public RegionComponent {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Region component name must not be blank");
@@ -57,13 +58,13 @@ public record RegionComponent(
     @Override
     public void emit(ComponentEmitter emitter) {
         emitter.point(new StructurePointDefinition(
-                new StructurePointId(name),
-                from,
-                target.target(),
-                target.predicates(),
-                requirement,
-                target.captures(),
-                groups,
-                diagnostics));
+                        new StructurePointId(name),
+                        from,
+                        target.target(),
+                        target.predicates(),
+                        requirement,
+                        target.captures(),
+                        groups,
+                        diagnostics));
     }
 }

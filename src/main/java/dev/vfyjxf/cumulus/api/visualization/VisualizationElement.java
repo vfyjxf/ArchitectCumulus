@@ -4,13 +4,13 @@ import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
 
 public record VisualizationElement(
-        String id,
-        String type,
-        VisualizationRegion region,
-        Severity severity,
-        String group,
-        String labelKey,
-        int priority) {
+                String id,
+                String type,
+                VisualizationRegion region,
+                Severity severity,
+                String group,
+                String labelKey,
+                int priority) {
     public VisualizationElement {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("Visualization element id must not be blank");
@@ -32,15 +32,7 @@ public record VisualizationElement(
         }
     }
 
-    public static VisualizationElement region(
-            String id,
-            String type,
-            RelativeBlockPos min,
-            RelativeBlockPos max,
-            Severity severity,
-            String group,
-            String labelKey,
-            int priority) {
+    public static VisualizationElement region(String id, String type, RelativeBlockPos min, RelativeBlockPos max, Severity severity, String group, String labelKey, int priority) {
         return new VisualizationElement(id, type, new VisualizationRegion(min, max), severity, group, labelKey, priority);
     }
 }

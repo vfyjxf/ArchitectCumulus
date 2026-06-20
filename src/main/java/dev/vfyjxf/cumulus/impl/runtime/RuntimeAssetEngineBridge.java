@@ -3,11 +3,13 @@ package dev.vfyjxf.cumulus.impl.runtime;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinitionRegistry;
 import dev.vfyjxf.cumulus.impl.codec.RuntimeAssetRepository;
+
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import net.minecraft.resources.ResourceLocation;
 
 public final class RuntimeAssetEngineBridge {
     private final RuntimeAssetRepository repository;
@@ -19,16 +21,16 @@ public final class RuntimeAssetEngineBridge {
     }
 
     public RuntimeAssetEngineBridge(
-            RuntimeAssetRepository repository,
-            RuntimeCheckEngine engine,
-            StructureDefinitionRegistry definitionRegistry) {
+                    RuntimeAssetRepository repository,
+                    RuntimeCheckEngine engine,
+                    StructureDefinitionRegistry definitionRegistry) {
         this(repository, engine, requireRegistry(definitionRegistry)::resolve);
     }
 
     public RuntimeAssetEngineBridge(
-            RuntimeAssetRepository repository,
-            RuntimeCheckEngine engine,
-            Function<ResourceLocation, Optional<StructureDefinition>> definitionResolver) {
+                    RuntimeAssetRepository repository,
+                    RuntimeCheckEngine engine,
+                    Function<ResourceLocation, Optional<StructureDefinition>> definitionResolver) {
         if (repository == null) {
             throw new IllegalArgumentException("Runtime asset repository must not be null");
         }
@@ -53,8 +55,7 @@ public final class RuntimeAssetEngineBridge {
     public List<ResourceLocation> registerDefinitions() {
         var registered = new ArrayList<ResourceLocation>();
         for (var asset : repository.assets()) {
-            var definition = asset.definition()
-                    .or(() -> definitionResolver.apply(asset.definitionId()));
+            var definition = asset.definition().or(() -> definitionResolver.apply(asset.definitionId()));
             definition.ifPresent(value -> {
                 engine.register(value);
                 registered.add(value.id());

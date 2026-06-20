@@ -3,8 +3,10 @@ package dev.vfyjxf.cumulus.api.target.types;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.target.TargetProperties;
 import dev.vfyjxf.cumulus.api.target.TargetType;
-import java.util.Objects;
+
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.Objects;
 
 /**
  * Target category: a rectangular region (inclusive bounds). Used for "any block in
@@ -16,8 +18,7 @@ public final class RegionTargetType implements TargetType {
     public static final ResourceLocation id = ResourceLocation.parse("cumulus:region");
     public static final RegionTargetType instance = new RegionTargetType();
 
-    private RegionTargetType() {
-    }
+    private RegionTargetType() {}
 
     @Override
     public ResourceLocation id() {

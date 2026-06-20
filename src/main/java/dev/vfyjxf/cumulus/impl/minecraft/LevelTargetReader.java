@@ -1,9 +1,11 @@
 package dev.vfyjxf.cumulus.impl.minecraft;
 
 import dev.vfyjxf.cumulus.impl.check.SnapshotTarget;
+
+import net.minecraft.core.BlockPos;
+
 import java.util.List;
 import java.util.Map;
-import net.minecraft.core.BlockPos;
 
 public interface LevelTargetReader {
     boolean isLoaded(BlockPos pos);

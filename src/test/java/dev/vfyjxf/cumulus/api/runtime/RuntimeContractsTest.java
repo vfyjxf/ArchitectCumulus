@@ -1,7 +1,6 @@
 package dev.vfyjxf.cumulus.api.runtime;
 
 import dev.vfyjxf.cumulus.api.ownership.ClaimMode;
-import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.ownership.PartClaim;
 import dev.vfyjxf.cumulus.api.ownership.StructureClaimIndex;
 import dev.vfyjxf.cumulus.api.partition.SectionKey;
@@ -9,12 +8,11 @@ import dev.vfyjxf.cumulus.api.request.DataRequest;
 import dev.vfyjxf.cumulus.api.request.RequestLedger;
 import dev.vfyjxf.cumulus.api.request.RequestPriority;
 import dev.vfyjxf.cumulus.api.request.RequestReason;
-import dev.vfyjxf.cumulus.api.runtime.InstanceDelta;
-import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
-import dev.vfyjxf.cumulus.api.runtime.RuntimeStructureContext;
-import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,11 +26,11 @@ class RuntimeContractsTest {
 
         var ledger = new RequestLedger();
         var request = new DataRequest(
-                section,
-                RequestReason.bindNeedsSection,
-                RequestPriority.high,
-                20,
-                "cumulus:test/checker");
+                        section,
+                        RequestReason.bindNeedsSection,
+                        RequestPriority.high,
+                        20,
+                        "cumulus:test/checker");
 
         assertEquals(1, ledger.record(0, 10, request).size());
         assertEquals(0, ledger.record(5, 10, request).size());
@@ -42,11 +40,7 @@ class RuntimeContractsTest {
     @Test
     void runtimeDeltaCarriesVersionedContextForMachineLogic() {
         var key = new StructureInstanceKey(ResourceLocation.parse("cumulus:blast_furnace"), new BlockPos(10, 64, 10));
-        var context = RuntimeStructureContext.builder(key)
-                .revision(7)
-                .put(ContextKey.string("facing"), "north")
-                .put(ContextKey.string("controller"), "10,64,10")
-                .build();
+        var context = RuntimeStructureContext.builder(key).revision(7).put(ContextKey.string("facing"), "north").put(ContextKey.string("controller"), "10,64,10").build();
 
         var delta = new InstanceDelta(key, InstanceStatus.valid, context);
 

@@ -1,15 +1,16 @@
 package dev.vfyjxf.cumulus.api.target;
 
+import dev.vfyjxf.cumulus.api.target.types.UnknownTargetType;
+
+import net.minecraft.resources.ResourceLocation;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import dev.vfyjxf.cumulus.api.target.types.BlockTargetType;
-import dev.vfyjxf.cumulus.api.target.types.CapabilityTargetType;
-import dev.vfyjxf.cumulus.api.target.types.UnknownTargetType;
-import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
-import org.junit.jupiter.api.Test;
 
 /**
  * Verifies the open {@link TargetType} / {@link TargetTypes} registry and the
@@ -46,16 +47,16 @@ class CustomTargetTypeTest {
     @Test
     void targetDescriptorTypeIdExposesUnderlyingTypeId() {
         var desc = new TargetDescriptor(
-                ResourceLocation.parse("cumulus:capability"),
-                java.util.Map.of("name", "cumulus:energy"));
+                        ResourceLocation.parse("cumulus:capability"),
+                        java.util.Map.of("name", "cumulus:energy"));
         assertEquals(ResourceLocation.parse("cumulus:capability"), desc.typeId());
     }
 
     @Test
     void targetDescriptorPropertiesExposesStringMapView() {
         var desc = new TargetDescriptor(
-                ResourceLocation.parse("cumulus:capability"),
-                java.util.Map.of("name", "cumulus:energy"));
+                        ResourceLocation.parse("cumulus:capability"),
+                        java.util.Map.of("name", "cumulus:energy"));
         var props = desc.properties();
         assertEquals("cumulus:energy", props.get("name"));
     }
@@ -63,8 +64,8 @@ class CustomTargetTypeTest {
     @Test
     void targetDescriptorRejectsNullTypeId() {
         assertThrows(IllegalArgumentException.class, () -> new TargetDescriptor(
-                null,
-                java.util.Map.of()));
+                        null,
+                        java.util.Map.of()));
     }
 
     @Test

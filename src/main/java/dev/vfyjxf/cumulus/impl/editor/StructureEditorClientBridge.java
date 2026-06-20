@@ -1,7 +1,9 @@
 package dev.vfyjxf.cumulus.impl.editor;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import dev.vfyjxf.cumulus.Cumulus;
+
+import com.mojang.blaze3d.platform.InputConstants;
+
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.IEventBus;
@@ -10,28 +12,28 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 public final class StructureEditorClientBridge {
-    private static final String category = "key.categories." + Cumulus.MODID + ".editor";
+    private static final String category = "key.categories." + Cumulus.modId + ".editor";
 
     private final StructureEditorController controller;
     private final GhostPreviewRenderer renderer;
     private final KeyMapping selectNextKey = new KeyMapping(
-            "key." + Cumulus.MODID + ".editor.select_next",
-            InputConstants.Type.KEYSYM,
-            InputConstants.KEY_RIGHT,
-            category);
+                    "key." + Cumulus.modId + ".editor.select_next",
+                    InputConstants.Type.KEYSYM,
+                    InputConstants.KEY_RIGHT,
+                    category);
     private final KeyMapping closeKey = new KeyMapping(
-            "key." + Cumulus.MODID + ".editor.close",
-            InputConstants.Type.KEYSYM,
-            InputConstants.KEY_ESCAPE,
-            category);
+                    "key." + Cumulus.modId + ".editor.close",
+                    InputConstants.Type.KEYSYM,
+                    InputConstants.KEY_ESCAPE,
+                    category);
 
     public StructureEditorClientBridge(StructureEditorController controller) {
         this(controller, new GhostPreviewRenderer());
     }
 
     StructureEditorClientBridge(
-            StructureEditorController controller,
-            GhostPreviewRenderer renderer) {
+                    StructureEditorController controller,
+                    GhostPreviewRenderer renderer) {
         if (controller == null) {
             throw new IllegalArgumentException("Structure editor controller must not be null");
         }
@@ -76,10 +78,6 @@ public final class StructureEditorClientBridge {
         if (minecraft.level == null) {
             return;
         }
-        controller.renderPlan().ifPresent(plan -> renderer.render(
-                plan,
-                event.getPoseStack(),
-                minecraft.renderBuffers().bufferSource(),
-                event.getCamera()));
+        controller.renderPlan().ifPresent(plan -> renderer.render(plan, event.getPoseStack(), minecraft.renderBuffers().bufferSource(), event.getCamera()));
     }
 }
