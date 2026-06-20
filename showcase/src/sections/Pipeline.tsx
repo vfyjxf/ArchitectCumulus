@@ -17,7 +17,7 @@ const STAGES: {
   badge: string;
 }[] = [
   { id: "dsl", num: "1", label: "Definition DSL", hint: "Structures.define(...).build()", color: "from-brand-400 to-brand-600", badge: "author-facing" },
-  { id: "ir", num: "2", label: "StructureDefinition IR", hint: "immutable records · schema v1", color: "from-cyan-400 to-cyan-600", badge: "immutable" },
+  { id: "ir", num: "2", label: "StructureDefinition IR", hint: "immutable records · schema v2", color: "from-cyan-400 to-cyan-600", badge: "immutable" },
   { id: "assets", num: "3", label: "Runtime / Debug Assets", hint: "data/*/cumulus/structures/*.json", color: "from-pink-400 to-pink-600", badge: "datagen" },
   { id: "plan", num: "4", label: "Check Plan", hint: "precomputed bounds × transform", color: "from-amber-400 to-amber-600", badge: "compiled" },
   { id: "runtime", num: "5", label: "RuntimeCheckEngine", hint: "dirty sections · budget · delta", color: "from-violet-400 to-violet-600", badge: "scheduler" },
@@ -44,7 +44,8 @@ const STAGE_DATA: Record<StageId, { code: string; title: string; out: { kind: st
         .target(Targets.block())
         .where(PredicateDescriptors.id("cumulus:casing")))
     .context(ContextRuleDescriptor.derive(
-        "facing", "controller.facing"))
+        ContextKey.string("facing"),
+        ContextSources.capture("controller").property("facing")))
     .version(new StructureVersionDescriptor(2,
         ResourceLocation.parse("cumulus:machine/v2")))
     .build();`,
@@ -60,13 +61,13 @@ const STAGE_DATA: Record<StageId, { code: string; title: string; out: { kind: st
     title: "不可变 IR（编译结果）",
     code: `record StructureDefinition(
     ResourceLocation id,
-    int schemaVersion,                // = 1
+    int schemaVersion,                // = 2 (irSchemaVersion)
     List<TransformDescriptor> transforms,
     List<StructurePointDefinition> points,
     List<ContextRuleDescriptor> contextRules,
     DiagnosticMetadata diagnostics) {
 
-    public static final int IR_SCHEMA_VERSION = 1;
+    public static final int irSchemaVersion = 2;
     // canonical 6-arg constructor for schema-version compat
     // convenience 5-arg constructor used by builders
 }
@@ -76,12 +77,12 @@ record StructurePointDefinition(
     RelativeBlockPos location,
     TargetDescriptor target,
     List<PredicateDescriptor> predicates,
-    PointRequirement requirement,    // REQUIRED / OPTIONAL
+    PointRequirement requirement,    // required / optional
     Set<String> captures,
     Set<String> groups,
     DiagnosticMetadata diagnostics) { }`,
     out: [
-      { kind: "schema", value: "IR_SCHEMA_VERSION = 1" },
+      { kind: "schema", value: "irSchemaVersion = 2" },
       { kind: "records", value: "13 immutable record types" },
       { kind: "validation", value: "duplicate id / capture / spatial" },
       { kind: "guarantee", value: "Map.copyOf / List.copyOf at ctor" },
@@ -92,7 +93,7 @@ record StructurePointDefinition(
     title: "Runtime Asset（JSON）",
     code: `{
   "id": "cumulus:machine",
-  "schema_version": 1,
+  "schema_version": 2,
   "transforms": [
     {"id": "cumulus:identity"},
     {"id": "cumulus:horizontal_facing"},
@@ -105,7 +106,7 @@ record StructurePointDefinition(
       "target": {"type": "cumulus:block"},
       "predicates": [{"id": "cumulus:controller"}],
       "captures": ["controller"],
-      "requirement": "REQUIRED"
+      "requirement": "required"
     },
     ...
   ],

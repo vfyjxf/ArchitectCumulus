@@ -13,17 +13,17 @@ import {
 import { cn } from "@/lib/utils";
 
 const statusColor: Record<OccurrenceStatus, string> = {
-  VALID: "#a3e635",
-  INVALID: "#fb7185",
-  PENDING: "#fbbf24",
-  ABSENT: "#666",
+  valid: "#a3e635",
+  invalid: "#fb7185",
+  incomplete: "#fbbf24",
+  stale: "#7c5cff",
 };
 
 const statusLabel: Record<OccurrenceStatus, string> = {
-  VALID: "VALID",
-  INVALID: "INVALID",
-  PENDING: "PENDING",
-  ABSENT: "ABSENT",
+  valid: "valid",
+  invalid: "invalid",
+  incomplete: "incomplete",
+  stale: "stale",
 };
 
 const childColor: Record<string, string> = {
@@ -228,9 +228,8 @@ function OccNode({
 }
 
 const transitionTone = {
-  ADDED: { color: "text-lime2", bg: "bg-lime-400/5", border: "border-lime-400/20", icon: "Plus" },
-  STATUS_CHANGED: { color: "text-amber2", bg: "bg-amber-400/5", border: "border-amber-400/20", icon: "ArrowRight" },
-  REMOVED: { color: "text-rose2", bg: "bg-rose-500/5", border: "border-rose-500/20", icon: "Minus" },
+  added: { color: "text-lime2", bg: "bg-lime-400/5", border: "border-lime-400/20", icon: "Plus" },
+  statusChanged: { color: "text-amber2", bg: "bg-amber-400/5", border: "border-amber-400/20", icon: "ArrowRight" },
 } as const;
 
 export function LifecycleLab() {
@@ -261,7 +260,7 @@ export function LifecycleLab() {
       }
       lede={
         <>
-          这一段把 SubstructureLifecycleListener 的 3 种 transition（ADDED / STATUS_CHANGED / REMOVED）
+          这一段把 SubstructureLifecycleListener 的 2 种 transition（added / statusChanged）
           做成可点按钮的演示。<strong className="text-white/80">点击任意 occurrence 展开</strong>，
           可以"破坏某个 block"看 status 变化、添加/删除子结构、切换 SubstructureSyncPolicy 看父上下文镜像如何变。
         </>
@@ -310,7 +309,7 @@ export function LifecycleLab() {
             <span className="text-[10px] uppercase tracking-wider text-white/40 font-mono mr-2">
               SubstructureSyncPolicy:
             </span>
-            {(["NONE", "STATUS_ONLY", "STATUS_AND_CONTEXT"] as const).map((p) => (
+            {(["NONE", "statusOnly", "statusAndContext"] as const).map((p) => (
               <button
                 key={p}
                 onClick={() => setPolicy(p)}
@@ -422,32 +421,24 @@ export function LifecycleLab() {
       </div>
 
       {/* explainer */}
-      <div className="mt-5 grid md:grid-cols-3 gap-3">
+      <div className="mt-5 grid md:grid-cols-2 gap-3">
         <div className="rounded-xl border border-lime-400/20 bg-lime-400/5 p-3">
           <div className="text-[11px] uppercase tracking-wider text-lime2 font-mono mb-1">
-            ADDED
+            added
           </div>
           <p className="text-[12px] text-white/65 leading-relaxed">
             父 check 完成时，composer 检测到新 child occurrence 没在上次快照里 →
-            立即触发 ADDED 事件。listener 拿到 occurrenceId / parentAnchor / offsetInParent。
+            立即触发 added 事件。listener 拿到 occurrenceId / parentAnchor / offsetInParent。
           </p>
         </div>
         <div className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-3">
           <div className="text-[11px] uppercase tracking-wider text-amber2 font-mono mb-1">
-            STATUS_CHANGED
+            statusChanged
           </div>
           <p className="text-[12px] text-white/65 leading-relaxed">
-            child occurrence 的 status 从 VALID→INVALID（或反向）时触发。
+            child occurrence 的 status 从 valid→invalid（或反向）时触发。
             previousStatus 字段告诉你之前是什么状态。这是最频繁的事件，建议用 revision 去重。
-          </p>
-        </div>
-        <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-3">
-          <div className="text-[11px] uppercase tracking-wider text-rose2 font-mono mb-1">
-            REMOVED
-          </div>
-          <p className="text-[12px] text-white/65 leading-relaxed">
-            父 check 时 occurrence 不再存在（玩家破坏了 child 的 anchor block）→
-            触发 REMOVED。listener 应该清理与该 occurrence 关联的客户端状态。
+            child 被移除时父结构通过 statusChanged 反映（没有单独的 removed transition）。
           </p>
         </div>
       </div>

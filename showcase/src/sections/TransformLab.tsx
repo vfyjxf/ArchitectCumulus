@@ -206,7 +206,7 @@ export function TransformLab() {
             ) : (
               <>
                 <div className="font-mono text-[13px] text-rose2 mb-1">
-                  ✗ TRANSFORM_REJECTED
+                  ✗ transformRejected
                 </div>
                 <div className="text-[11.5px] text-white/60">
                   所有启用的候选都不能让结构匹配。玩家会看到{" "}

@@ -4,7 +4,7 @@ import { create } from "zustand";
 // Lifecycle Event Lab: 父+子+孙 三层嵌套的 lifecycle 事件可交互演示
 // ============================================================
 
-export type OccurrenceStatus = "VALID" | "INVALID" | "PENDING" | "ABSENT";
+export type OccurrenceStatus = "valid" | "invalid" | "incomplete" | "stale";
 
 export interface Occurrence {
   id: string;
@@ -22,7 +22,7 @@ export interface Occurrence {
 
 export interface LifecycleEvent {
   ts: number;
-  transition: "ADDED" | "STATUS_CHANGED" | "REMOVED";
+  transition: "added" | "statusChanged";
   occurrenceId: string;
   childPath: string;
   previousStatus: OccurrenceStatus | null;
@@ -35,14 +35,14 @@ interface State {
   events: LifecycleEvent[];
   parentContext: Record<string, string>; // 镜像的 context
   selected: string | null;
-  policy: "NONE" | "STATUS_ONLY" | "STATUS_AND_CONTEXT";
+  policy: "NONE" | "statusOnly" | "statusAndContext";
 
   // actions
   addOccurrence: (parentId: string, childDef: string, name: string, offset: string) => void;
   removeOccurrence: (id: string) => void;
   toggleBlock: (occId: string, block: string) => void;
   select: (id: string | null) => void;
-  setPolicy: (p: "NONE" | "STATUS_ONLY" | "STATUS_AND_CONTEXT") => void;
+  setPolicy: (p: "NONE" | "statusOnly" | "statusAndContext") => void;
   reset: () => void;
 }
 
@@ -53,8 +53,8 @@ function makeId() {
 }
 
 function evaluateStatus(occ: Occurrence): OccurrenceStatus {
-  if (occ.brokenBlocks.length > 0) return "INVALID";
-  return "VALID";
+  if (occ.brokenBlocks.length > 0) return "invalid";
+  return "valid";
 }
 
 function buildChildPath(occurrences: Occurrence[], id: string): string {
@@ -74,11 +74,11 @@ function recomputeContext(state: State): Record<string, string> {
   // walk all occurrences, mirror status
   for (const occ of state.occurrences) {
     if (occ.id === root.id) continue;
-    if (state.policy === "STATUS_ONLY" || state.policy === "STATUS_AND_CONTEXT") {
+    if (state.policy === "statusOnly" || state.policy === "statusAndContext") {
       ctx[`substructure.${occ.instanceName}.status`] = occ.status;
       ctx[`substructure.${occ.instanceName}.anchor_offset`] = occ.offsetInParent;
     }
-    if (state.policy === "STATUS_AND_CONTEXT") {
+    if (state.policy === "statusAndContext") {
       for (const [k, v] of Object.entries(occ.context)) {
         ctx[`substructure.${occ.instanceName}.context.${k}`] = v;
       }
@@ -120,7 +120,7 @@ export const useLifecycle = create<State>((set, get) => ({
       parentId: null,
       childDef: "factory",
       instanceName: "factory#0",
-      status: "VALID",
+      status: "valid",
       offsetInParent: "(0,0,0)",
       context: { controller: "(10,64,10)", facing: "north" },
       requiredBlocks: ["controller", "casing_x5"],
@@ -130,7 +130,7 @@ export const useLifecycle = create<State>((set, get) => ({
   events: [],
   parentContext: { controller: "(10,64,10)", facing: "north" },
   selected: "factory",
-  policy: "STATUS_AND_CONTEXT",
+  policy: "statusAndContext",
 
   addOccurrence: (parentId, childDef, name, offset) => {
     const parent = get().occurrences.find((o) => o.id === parentId);
@@ -141,7 +141,7 @@ export const useLifecycle = create<State>((set, get) => ({
       parentId,
       childDef,
       instanceName: name,
-      status: "VALID",
+      status: "valid",
       offsetInParent: offset,
       context: childDef === "tool"
         ? { spell_book: "ars_nouveau:flight", charge: "100" }
@@ -160,10 +160,10 @@ export const useLifecycle = create<State>((set, get) => ({
     const occurrences = [...get().occurrences, newOcc];
     const events = pushEvent(
       { ...get(), occurrences },
-      "ADDED",
+      "added",
       newOcc.id,
       null,
-      "VALID",
+      "valid",
       `parent ${parent.instanceName} composed new child`
     );
     set((s) => ({
@@ -177,14 +177,18 @@ export const useLifecycle = create<State>((set, get) => ({
     const occ = get().occurrences.find((o) => o.id === id);
     if (!occ || !occ.parentId) return; // 不能删 root
 
-    const events = pushEvent(
-      get(),
-      "REMOVED",
-      id,
-      occ.status,
-      "ABSENT",
-      `parent removed occurrence`
-    );
+    // 真实 API 没有 "removed" transition：子结构被移除时父结构通过 statusChanged 反映
+    const parent = get().occurrences.find((o) => o.id === occ.parentId);
+    const events = parent
+      ? pushEvent(
+          get(),
+          "statusChanged",
+          parent.id,
+          parent.status,
+          parent.status,
+          `child ${occ.instanceName} removed from parent`
+        )
+      : get().events;
     const occurrences = get().occurrences.filter((o) => o.id !== id && o.parentId !== id);
     set((s) => ({
       occurrences,
@@ -214,7 +218,7 @@ export const useLifecycle = create<State>((set, get) => ({
     if (updated.status !== prevStatus) {
       events = pushEvent(
         { ...get(), occurrences },
-        "STATUS_CHANGED",
+        "statusChanged",
         occId,
         prevStatus,
         updated.status,
@@ -247,7 +251,7 @@ export const useLifecycle = create<State>((set, get) => ({
           parentId: null,
           childDef: "factory",
           instanceName: "factory#0",
-          status: "VALID",
+          status: "valid",
           offsetInParent: "(0,0,0)",
           context: { controller: "(10,64,10)", facing: "north" },
           requiredBlocks: ["controller", "casing_x5"],
@@ -257,7 +261,7 @@ export const useLifecycle = create<State>((set, get) => ({
       events: [],
       parentContext: { controller: "(10,64,10)", facing: "north" },
       selected: "factory",
-      policy: "STATUS_AND_CONTEXT",
+      policy: "statusAndContext",
     }),
 }));
 

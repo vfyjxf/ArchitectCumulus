@@ -36,7 +36,7 @@ export interface IRPointRow {
   targetColor: string;
   predicate: string;
   predicateKind: "id" | "tag";
-  requirement: "REQUIRED" | "OPTIONAL";
+  requirement: "required" | "optional";
   captures: string[];
   isController: boolean;
 }
@@ -115,7 +115,7 @@ export function summarizeIR(blocks: PlacedBlock[]): IRSummary {
       targetColor: targetColor[targetType] ?? "#666",
       predicate: predId,
       predicateKind: predId.startsWith("#") ? "tag" : "id",
-      requirement: "REQUIRED",
+      requirement: "required",
       captures,
       isController: b.kind === "controller",
     });
@@ -141,7 +141,7 @@ export function summarizeIR(blocks: PlacedBlock[]): IRSummary {
 
   return {
     id: "cumulus:showcase_machine",
-    schemaVersion: 1,
+    schemaVersion: 2,
     transforms: [
       { typeId: "cumulus:identity", label: "identity", candidateCount: 1, color: "#7c5cff" },
       { typeId: "cumulus:horizontal_facing", label: "horizontal_facing", candidateCount: 4, color: "#22d3ee" },
@@ -367,7 +367,7 @@ export function summarizeComposerIR(state: ComposerState): IRSummary {
     targetColor: targetColor[p.targetType] ?? "#666",
     predicate: p.predicate,
     predicateKind: p.predicate.startsWith("#") ? "tag" : "id",
-    requirement: "REQUIRED",
+    requirement: "required",
     captures: p.captures,
     isController: p.isController,
   }));
@@ -402,7 +402,7 @@ export function summarizeComposerIR(state: ComposerState): IRSummary {
     for (const cap of p.captures) {
       seenCaptures.set(cap, (seenCaptures.get(cap) ?? 0) + 1);
     }
-    if (p.requirement === "REQUIRED") {
+    if (p.requirement === "required") {
       const k = `${p.location.join(",")}:${p.targetType}`;
       seenLocs.set(k, (seenLocs.get(k) ?? 0) + 1);
     }

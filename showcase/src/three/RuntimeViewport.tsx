@@ -1,81 +1,68 @@
 import { Canvas } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { SceneEnv } from "./SceneEnv";
-import { useRuntimeSim, type SectionState } from "./runtimeSim";
+import { useRuntimeSim, type InstanceStatus } from "./runtimeSim";
 
 const N = 8; // 8x8 sections
+
+/** 视觉映射：InstanceStatus → 颜色 / 高度 / 发光强度 */
+const VISUAL: Record<
+  string,
+  { color: string; height: number; emissive: number }
+> = {
+  valid: { color: "#a3e635", height: 0.18, emissive: 0.12 },
+  invalid: { color: "#fb7185", height: 0.18, emissive: 0.2 },
+  incomplete: { color: "#fbbf24", height: 0.4, emissive: 0.35 },
+  stale: { color: "#7c5cff", height: 0.6, emissive: 0.45 },
+};
+
+const FLAT_LOADED = { color: "#1a1a3a", height: 0.06, emissive: 0.05 };
+const FLAT_UNLOADED = { color: "#0a0a12", height: 0.04, emissive: 0.02 };
 
 function Section({
   x,
   z,
-  state,
-  checked,
+  status,
+  hasInstance,
+  loaded,
+  isCursor,
 }: {
   x: number;
   z: number;
-  state: SectionState;
-  checked: boolean;
+  status: InstanceStatus;
+  hasInstance: boolean;
+  loaded: boolean;
+  isCursor: boolean;
 }) {
   const ref = useRef<THREE.Mesh>(null);
-  const colorMap = {
-    idle: "#0a0a18",
-    loaded: "#1a1a3a",
-    dirty: "#fb923c",
-    queued: "#fbbf24",
-    checking: "#22d3ee",
-    valid: "#a3e635",
-    invalid: "#fb7185",
-    requested: "#7c5cff",
-  };
-  const heightMap = {
-    idle: 0.06,
-    loaded: 0.06,
-    dirty: 0.45,
-    queued: 0.32,
-    checking: 0.6,
-    valid: 0.18,
-    invalid: 0.18,
-    requested: 0.24,
-  };
-  const color = colorMap[state];
-  const h = heightMap[state];
+  const v = hasInstance
+    ? VISUAL[status]
+    : loaded
+    ? FLAT_LOADED
+    : FLAT_UNLOADED;
 
   return (
     <group position={[x * 1.1 - (N - 1) * 0.55, 0, z * 1.1 - (N - 1) * 0.55]}>
-      <mesh ref={ref} position={[0, h / 2, 0]} castShadow receiveShadow>
-        <boxGeometry args={[1, h, 1]} />
+      <mesh ref={ref} position={[0, v.height / 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[1, v.height, 1]} />
         <meshStandardMaterial
-          color={color}
-          emissive={color}
-          emissiveIntensity={
-            state === "checking"
-              ? 0.6
-              : state === "dirty" || state === "queued"
-              ? 0.35
-              : 0.1
-          }
+          color={v.color}
+          emissive={v.color}
+          emissiveIntensity={v.emissive}
           metalness={0.2}
           roughness={0.6}
         />
       </mesh>
-      {/* outline */}
+      {/* outline: cursor 高亮 */}
       <mesh position={[0, 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[1.02, 1.02]} />
         <meshBasicMaterial
-          color={
-            checked
-              ? "#a3e635"
-              : state === "checking"
-              ? "#22d3ee"
-              : state === "dirty"
-              ? "#fb923c"
-              : "#222250"
-          }
+          color={isCursor ? "#22d3ee" : status === "stale" ? "#7c5cff" : "#222250"}
           wireframe
           transparent
-          opacity={checked || state === "checking" || state === "dirty" ? 1 : 0.5}
+          opacity={isCursor || status === "stale" ? 1 : 0.4}
         />
       </mesh>
     </group>
@@ -111,26 +98,25 @@ function SceneImpl() {
         cameraTarget={[0, 0, 0]}
         enablePan={false}
       />
-      {/* sections */}
       {Array.from({ length: N }, (_, x) =>
         Array.from({ length: N }, (_, z) => {
           const idx = x * N + z;
           const sec = sections[idx];
-          const checkedThisTick =
-            cursor.x === x && cursor.z === z && tick > 0;
+          const isCursor = cursor?.x === x && cursor?.z === z && tick > 0;
           return (
             <Section
               key={`${x}-${z}`}
               x={x}
               z={z}
-              state={sec.state}
-              checked={checkedThisTick}
+              status={sec.status}
+              hasInstance={sec.hasInstance}
+              loaded={sec.loaded}
+              isCursor={isCursor}
             />
           );
         })
       )}
-      {/* cursor */}
-      {tick > 0 && <Cursor x={cursor.x} z={cursor.z} />}
+      {tick > 0 && cursor && <Cursor x={cursor.x} z={cursor.z} />}
       <Html position={[0, 0, 0]} center>
         <div className="pointer-events-none" />
       </Html>

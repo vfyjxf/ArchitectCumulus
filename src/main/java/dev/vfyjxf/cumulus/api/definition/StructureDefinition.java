@@ -2,6 +2,7 @@ package dev.vfyjxf.cumulus.api.definition;
 
 import dev.vfyjxf.cumulus.api.component.ComponentDescriptor;
 import dev.vfyjxf.cumulus.api.context.ContextRuleDescriptor;
+import dev.vfyjxf.cumulus.api.context.plan.CheckPhase;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticMetadata;
 import dev.vfyjxf.cumulus.api.migration.MigrationDescriptor;
 import dev.vfyjxf.cumulus.api.migration.StructureVersionDescriptor;
@@ -18,6 +19,7 @@ public record StructureDefinition(
                 List<StructurePointDefinition> points,
                 List<ComponentDescriptor> components,
                 List<ContextRuleDescriptor<?>> contextRules,
+                CheckPhase checkPhase,
                 List<StructureVersionDescriptor> versions,
                 List<MigrationDescriptor> migrations,
                 DiagnosticMetadata diagnostics) {
@@ -35,6 +37,7 @@ public record StructureDefinition(
         migrations = List.copyOf(migrations);
         if (diagnostics == null)
             throw new IllegalArgumentException("Diagnostics must not be null");
+        // checkPhase is intentionally nullable: null means no dynamic expansion.
     }
 
     public StructureDefinition(
@@ -43,6 +46,6 @@ public record StructureDefinition(
                     List<StructurePointDefinition> points,
                     List<ContextRuleDescriptor<?>> contextRules,
                     DiagnosticMetadata diagnostics) {
-        this(id, irSchemaVersion, transforms, points, List.of(), contextRules, List.of(), List.of(), diagnostics);
+        this(id, irSchemaVersion, transforms, points, List.of(), contextRules, null, List.of(), List.of(), diagnostics);
     }
 }

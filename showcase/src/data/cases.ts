@@ -297,7 +297,7 @@ public static final StructureDefinition FACTORY =
 
 // 注册时 arm/tool 自动被发现并复合
 RuntimeCheckEngine engine = new RuntimeCheckEngine()
-    .substructureSyncPolicy(STATUS_AND_CONTEXT)
+    .substructureSyncPolicy(statusAndContext)
     .register(FACTORY)
     .register(ARM)
     .register(TOOL)
@@ -372,7 +372,7 @@ public class ForgeBlockEntity extends BlockEntity {
 //    data/my_pack/cumulus/structures/mega_forge.json
 {
   "id": "my_pack:mega_forge",
-  "schema_version": 1,
+  "schema_version": 2,
   "transforms": [
     {"id": "cumulus:identity"},
     {"id": "cumulus:horizontal_facing"}

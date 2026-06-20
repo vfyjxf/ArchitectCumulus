@@ -159,6 +159,7 @@ class StructureCheckExecutorTest {
                                         definition.points().get(1).diagnostics())),
                         definition.components(),
                         definition.contextRules(),
+                        null, // no checkPhase
                         definition.versions(),
                         definition.migrations(),
                         definition.diagnostics());

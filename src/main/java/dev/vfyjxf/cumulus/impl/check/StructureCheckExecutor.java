@@ -2,6 +2,10 @@ package dev.vfyjxf.cumulus.impl.check;
 
 import dev.vfyjxf.cumulus.api.context.CheckContext;
 import dev.vfyjxf.cumulus.api.context.ContextRuleDescriptor;
+import dev.vfyjxf.cumulus.api.context.plan.MatchResults;
+import dev.vfyjxf.cumulus.api.context.plan.MatchedPoint;
+import dev.vfyjxf.cumulus.api.context.plan.PhaseContext;
+import dev.vfyjxf.cumulus.api.context.plan.PhaseResult;
 import dev.vfyjxf.cumulus.api.definition.PointRequirement;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
@@ -19,6 +23,7 @@ import dev.vfyjxf.cumulus.api.request.RequestPriority;
 import dev.vfyjxf.cumulus.api.request.RequestReason;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
+import dev.vfyjxf.cumulus.api.transform.Transforms;
 import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.visualization.VisualizationElement;
 import dev.vfyjxf.cumulus.api.visualization.VisualizationModel;
@@ -212,53 +217,56 @@ public final class StructureCheckExecutor {
         var edges = new ArrayList<DiagnosticEdge>();
         var requests = new ArrayList<DataRequest>();
         var visualization = new ArrayList<VisualizationElement>();
+        var matchedPoints = new ArrayList<MatchedPoint>();
 
         var entries = candidate == null ? fallbackEntries(definition) : candidate.entries();
+        var transform = candidate == null ? null : candidate.transform();
         for (var entry : entries) {
-            var point = entry.point();
-            var bounds = new Bounds(entry.min(), entry.max());
-            if (!supportedTargets.contains(point.target().typeId())) {
-                if (point.requirement() == PointRequirement.optional) {
-                    continue;
-                }
-                addProblem(point, bounds, "WRONG_TARGET_TYPE", "Unsupported target", "diagnostic.cumulus.wrong_target_type", null, nodes, edges, visualization);
-                continue;
-            }
-            var target = resolveTarget(point, bounds, snapshot);
-            if (target == null) {
-                if (point.requirement() == PointRequirement.optional) {
-                    continue;
-                }
-                var code = contextTarget.equals(point.target().typeId()) ? "CONTEXT_CAPTURE_FAILED" : "MISSING_TARGET";
-                var localizationKey = contextTarget.equals(point.target().typeId()) ? "diagnostic.cumulus.context_capture_failed" : "diagnostic.cumulus.missing_target";
-                addProblem(point, bounds, code, "Missing target", localizationKey, null, nodes, edges, visualization);
-                requests.add(new DataRequest(
-                                SectionKey.fromBlock(anchor.offset(bounds.min().x(), bounds.min().y(), bounds.min().z())),
-                                RequestReason.checkNeedsContext,
-                                RequestPriority.high,
-                                20,
-                                definition.id() + "/" + point.id().value()));
-                continue;
-            }
-
-            var failed = evaluatePredicates(point, target, predicateRegistry);
-            if (failed != null) {
-                if (point.requirement() == PointRequirement.optional) {
-                    continue;
-                }
-                addProblem(point, bounds, failed.code(), failed.message(), failed.localizationKey(), failed.predicate(), nodes, edges, visualization);
-                continue;
-            }
-
-            var absolute = anchor.offset(bounds.min().x(), bounds.min().y(), bounds.min().z());
-            for (var capture : point.captures()) {
-                var formatted = format(absolute);
-                checkCtx.putCapture(capture, formatted);
-                checkCtx.putDerived(ContextKey.string(capture), formatted);
-            }
-            checkCtx.putResolvedTarget(point.id(), new CheckContext.ResolvedTarget(target.value(), target.properties(), format(absolute)));
+            matchPoint(entry.point(), new Bounds(entry.min(), entry.max()), definition, anchor, snapshot,
+                    predicateRegistry, checkCtx, nodes, edges, requests, visualization, matchedPoints);
         }
         applyContextRules(definition.contextRules(), checkCtx);
+
+        // ── CheckPhase: dynamic point expansion + constraints ───────────
+        if (definition.checkPhase() != null) {
+            var matchResults = new MatchResults(matchedPoints);
+            var phaseCtx = new PhaseContext(matchResults, checkCtx, anchor,
+                    transform != null ? transform : Transforms.identity());
+            PhaseResult phaseResult;
+            try {
+                phaseResult = definition.checkPhase().evaluate(phaseCtx);
+            } catch (RuntimeException e) {
+                phaseResult = PhaseResult.empty();
+            }
+            if (phaseResult == null) {
+                phaseResult = PhaseResult.empty();
+            }
+            // Match extra points
+            for (var extraPoint : phaseResult.extraPoints()) {
+                var extraBounds = new Bounds(extraPoint.location(), extraPoint.location());
+                matchPoint(extraPoint, extraBounds, definition, anchor, snapshot,
+                        predicateRegistry, checkCtx, nodes, edges, requests, visualization, matchedPoints);
+            }
+            // Verify count constraints
+            var finalMatches = new MatchResults(matchedPoints);
+            for (var constraint : phaseResult.constraints()) {
+                int count = (int) finalMatches.count(constraint.filter());
+                if (!constraint.isSatisfied(count)) {
+                    nodes.add(new DiagnosticNode(
+                            "constraint_violation",
+                            Severity.error,
+                            "Count constraint violated: expected " + constraint.min() + "~" + constraint.max()
+                                    + " matching points, got " + count,
+                            "diagnostic.cumulus.constraint_violation",
+                            List.of(),
+                            "runtime/check/constraint",
+                            List.of()));
+                    if (nodes.size() > 1) {
+                        edges.add(new DiagnosticEdge("root", "constraint_violation", "caused_by"));
+                    }
+                }
+            }
+        }
 
         var diagnostics = graph(nodes, edges);
         var status = status(nodes, requests);
@@ -268,6 +276,68 @@ public final class StructureCheckExecutor {
                         diagnostics,
                         new VisualizationModel(definition.id() + "/check", visualization),
                         requests);
+    }
+
+    /**
+     * Match a single point against the world snapshot: resolve target, evaluate
+     * predicates, record captures, and build a {@link MatchedPoint} for
+     * downstream phases/operations. Shared by static entries and dynamic
+     * CheckPhase expansion.
+     */
+    private static void matchPoint(
+            StructurePointDefinition point, Bounds bounds,
+            StructureDefinition definition, BlockPos anchor, InMemoryTargetSnapshot snapshot,
+            PredicateRegistry predicateRegistry, CheckContext checkCtx,
+            List<DiagnosticNode> nodes, List<DiagnosticEdge> edges,
+            List<DataRequest> requests, List<VisualizationElement> visualization,
+            List<MatchedPoint> matchedPoints) {
+        if (!supportedTargets.contains(point.target().typeId())) {
+            if (point.requirement() == PointRequirement.optional) {
+                return;
+            }
+            addProblem(point, bounds, "WRONG_TARGET_TYPE", "Unsupported target", "diagnostic.cumulus.wrong_target_type", null, nodes, edges, visualization);
+            return;
+        }
+        var target = resolveTarget(point, bounds, snapshot);
+        if (target == null) {
+            if (point.requirement() == PointRequirement.optional) {
+                return;
+            }
+            var code = contextTarget.equals(point.target().typeId()) ? "CONTEXT_CAPTURE_FAILED" : "MISSING_TARGET";
+            var localizationKey = contextTarget.equals(point.target().typeId()) ? "diagnostic.cumulus.context_capture_failed" : "diagnostic.cumulus.missing_target";
+            addProblem(point, bounds, code, "Missing target", localizationKey, null, nodes, edges, visualization);
+            requests.add(new DataRequest(
+                            SectionKey.fromBlock(anchor.offset(bounds.min().x(), bounds.min().y(), bounds.min().z())),
+                            RequestReason.checkNeedsContext,
+                            RequestPriority.high,
+                            20,
+                            definition.id() + "/" + point.id().value()));
+            return;
+        }
+
+        var failed = evaluatePredicates(point, target, predicateRegistry);
+        if (failed != null) {
+            if (point.requirement() == PointRequirement.optional) {
+                return;
+            }
+            addProblem(point, bounds, failed.code(), failed.message(), failed.localizationKey(), failed.predicate(), nodes, edges, visualization);
+            return;
+        }
+
+        var absolute = anchor.offset(bounds.min().x(), bounds.min().y(), bounds.min().z());
+        for (var capture : point.captures()) {
+            var formatted = format(absolute);
+            checkCtx.putCapture(capture, formatted);
+            checkCtx.putDerived(ContextKey.string(capture), formatted);
+        }
+        checkCtx.putResolvedTarget(point.id(), new CheckContext.ResolvedTarget(target.value(), target.properties(), format(absolute)));
+        matchedPoints.add(new MatchedPoint(
+                        point.id(),
+                        point.groups(),
+                        target.value(),
+                        target.properties(),
+                        bounds.min(),
+                        absolute));
     }
 
     private static List<CheckPlanEntry> fallbackEntries(StructureDefinition definition) {

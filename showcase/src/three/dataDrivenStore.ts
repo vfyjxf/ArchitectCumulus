@@ -78,7 +78,7 @@ export const JSON_PRESETS: Record<string, { label: string; description: string; 
     description: "1 个 controller 方块",
     json: `{
   "id": "cumulus:pylon",
-  "schema_version": 1,
+  "schema_version": 2,
   "transforms": [
     { "id": "cumulus:identity" },
     { "id": "cumulus:horizontal_facing" }
@@ -138,7 +138,7 @@ export const JSON_PRESETS: Record<string, { label: string; description: string; 
     description: "故意写错（少了逗号）",
     json: `{
   "id": "cumulus:broken",
-  "schema_version": 1,
+  "schema_version": 2,
   "transforms": [
     { "id": "cumulus:identity" }
   ],
@@ -159,7 +159,7 @@ export const JSON_PRESETS: Record<string, { label: string; description: string; 
     description: "两个 point 同名 → 验证失败",
     json: `{
   "id": "cumulus:duplicate",
-  "schema_version": 1,
+  "schema_version": 2,
   "transforms": [
     { "id": "cumulus:identity" }
   ],
@@ -427,7 +427,7 @@ function validateStructure(parsed: any): {
 
   const structure: ParsedStructure = {
     id: String(parsed.id ?? "<unknown>"),
-    schemaVersion: Number(parsed.schema_version ?? 1),
+    schemaVersion: Number(parsed.schema_version ?? 2),
     transforms: Array.isArray(parsed.transforms) ? parsed.transforms.map((t: any) => t.id ?? "?") : [],
     components: components.map((c: any) => ({
       kind: c.kind ?? "point",

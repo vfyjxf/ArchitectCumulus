@@ -72,18 +72,22 @@ export function IRVisualization({ summary }: { summary: IRSummary }) {
       {summary.contextRules.length > 0 && (
         <div className="rounded-xl border border-white/8 bg-white/[0.02] p-3">
           <div className="text-[10px] uppercase tracking-wider text-white/40 font-mono mb-2">
-            contextRules · List({summary.contextRules.length})
+            contextRules · List({summary.contextRules.length}) · typed derive
           </div>
           <div className="space-y-1">
             {summary.contextRules.map((r) => (
               <div
                 key={r.name}
-                className="flex items-baseline gap-2 font-mono text-[11.5px]"
+                className="flex items-baseline gap-2 font-mono text-[11.5px] flex-wrap"
               >
                 <span className="text-magenta">←</span>
-                <code className="text-magenta font-semibold w-20">{r.name}</code>
+                <code className="text-magenta font-semibold w-24 shrink-0">
+                  {r.name}
+                </code>
                 <span className="text-white/30">=</span>
-                <code className="text-white/70">{r.expression}</code>
+                <code className="text-white/70">
+                  ContextSources.capture(...).{r.expression.includes(".") ? "property" : "value"}(...)
+                </code>
               </div>
             ))}
           </div>

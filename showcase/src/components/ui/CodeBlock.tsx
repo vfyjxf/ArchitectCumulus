@@ -28,6 +28,12 @@ const types = new Set([
   "Transforms", "Structures", "PredicateDescriptors", "MinecraftServer",
   "ServerTickEvent", "LevelAccessor", "BlockPos", "Direction", "String",
   "List", "Map", "Set", "Optional", "var", "int", "boolean", "void",
+  "ContextKey", "ContextSources", "ContextPlan", "ContextPlanBuilder",
+  "ContextOperation", "OperationContext", "MatchResults", "MatchedPoint",
+  "Bounds3d", "Operations", "CheckContext", "MigrationOps",
+  "CheckPhase", "PhaseContext", "CheckPhases", "Axis",
+  "PartPattern", "ShapeEmitter", "ShapeEmitterContext", "DefaultShapeEmitter",
+  "StructurePredicate", "StructurePredicates", "CountConstraint", "PhaseResult",
 ]);
 
 function highlight(line: string): JSX.Element[] {

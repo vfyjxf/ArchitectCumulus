@@ -4,8 +4,10 @@ import { Hero } from "@/sections/Hero";
 import { Pipeline } from "@/sections/Pipeline";
 import { Rationale } from "@/sections/Rationale";
 import { Builder } from "@/sections/Builder";
+import { ShapeDslLab } from "@/sections/ShapeDslLab";
 import { TransformLab } from "@/sections/TransformLab";
 import { Composer } from "@/sections/Composer";
+import { ContextPlanLab } from "@/sections/ContextPlanLab";
 import { Targets } from "@/sections/Targets";
 import { PredicateComposer } from "@/sections/PredicateComposer";
 import { Components } from "@/sections/Components";
@@ -30,8 +32,10 @@ export default function App() {
         <Pipeline />
         <Rationale />
         <Builder />
+        <ShapeDslLab />
         <TransformLab />
         <Composer />
+        <ContextPlanLab />
         <Targets />
         <PredicateComposer />
         <Components />

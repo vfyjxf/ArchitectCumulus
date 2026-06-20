@@ -29,6 +29,8 @@ public final class StructureDefinitionCompiler {
         for (var point : builder.points()) {
             points.add(point.build());
         }
+        // Shape-emitted points (from .shape(PartPattern[][][]))
+        points.addAll(builder.shapePoints());
         for (var component : builder.components()) {
             component.descriptor().ifPresent(componentDescriptors::add);
             component.emit(points::add);
@@ -41,6 +43,7 @@ public final class StructureDefinitionCompiler {
                         points,
                         componentDescriptors,
                         castContextRules(builder.contextRules()),
+                        builder.checkPhase(),
                         builder.versions(),
                         builder.migrations(),
                         DiagnosticMetadata.empty());

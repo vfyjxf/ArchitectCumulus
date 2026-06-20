@@ -605,7 +605,7 @@ export function Composer() {
                     animate={{ opacity: 1, x: 0 }}
                     className={cn(
                       "rounded-lg border p-2.5 text-[12px]",
-                      iss.severity === "ERROR"
+                      iss.severity === "error"
                         ? "border-rose-500/30 bg-rose-500/8 text-rose2"
                         : "border-amber-400/30 bg-amber-400/5 text-amber2"
                     )}

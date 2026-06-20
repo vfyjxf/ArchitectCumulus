@@ -140,7 +140,8 @@ const FACTORY_CODE = `var factory = Structures.define(
         ResourceLocation.parse("cumulus:base"),
         RelativeBlockPos.of(0, -1, 0)))
     .context(ContextRuleDescriptor.derive(
-        "facing", "controller.facing"))
+        ContextKey.string("facing"),
+        ContextSources.capture("controller").property("facing")))
     .build();`;
 
 const ARM_CODE = `var arm = Structures.define(
@@ -238,7 +239,7 @@ export function Substructure() {
             上下文镜像
           </div>
           <div className="text-[12.5px] text-white/70 leading-relaxed">
-            STATUS_AND_CONTEXT 模式下，每个 child occurrence 把 status / context 派生回父上下文：
+            statusAndContext 模式下，每个 child occurrence 把 status / context 派生回父上下文：
             <code className="block mt-1 text-cyan2 text-[11px]">substructure.&lt;id&gt;.status<br />substructure.&lt;id&gt;.context.&lt;key&gt;</code>
           </div>
         </div>
@@ -248,7 +249,7 @@ export function Substructure() {
           </div>
           <div className="text-[12.5px] text-white/70 leading-relaxed">
             两个父结构同时 claim 同一个 child occurrence → SubstructureClaimState 抛出{" "}
-            <code className="text-rose2">SHARED_PART_CONFLICT</code>，
+            <code className="text-rose2">sharedPartConflict</code>，
             child delta 被作废，第二次父结构会被拒绝。
           </div>
         </div>

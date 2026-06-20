@@ -63,7 +63,7 @@ export interface PlacedBlock {
 }
 
 export interface DiagnosticIssue {
-  severity: "ERROR" | "WARN" | "INFO";
+  severity: "error" | "warn" | "info";
   code: string;
   point: string;
   location: [number, number, number];
@@ -152,8 +152,8 @@ function runValidation(blocks: PlacedBlock[]): {
   const controllers = blocks.filter((b) => b.kind === "controller");
   if (controllers.length === 0) {
     diags.push({
-      severity: "ERROR",
-      code: "MISSING_TARGET",
+      severity: "error",
+      code: "missingTarget",
       point: "controller",
       location: [0, 0, 0],
       message: "no controller found anywhere; structure is anonymous",
@@ -162,8 +162,8 @@ function runValidation(blocks: PlacedBlock[]): {
   } else if (controllers.length > 1) {
     for (let i = 1; i < controllers.length; i++) {
       diags.push({
-        severity: "ERROR",
-        code: "COMPONENT_CONFLICT",
+        severity: "error",
+        code: "componentConflict",
         point: `controller#${i}`,
         location: [controllers[i].x, controllers[i].y, controllers[i].z],
         message: "duplicate controller; only one is allowed",
@@ -190,8 +190,8 @@ function runValidation(blocks: PlacedBlock[]): {
     }).length;
     if (casingNbrs < 2) {
       diags.push({
-        severity: "WARN",
-        code: "PREDICATE_FAILED",
+        severity: "warn",
+        code: "predicateFailed",
         point: "controller",
         location: [c.x, c.y, c.z],
         message: `controller only has ${casingNbrs} casing neighbor(s); a frame needs ≥2`,
@@ -203,8 +203,8 @@ function runValidation(blocks: PlacedBlock[]): {
   // 3. require at least one energy port
   if (!blocks.some((b) => b.kind === "energy_port")) {
     diags.push({
-      severity: "WARN",
-      code: "MISSING_TARGET",
+      severity: "warn",
+      code: "missingTarget",
       point: "energy_in",
       location: [0, 0, 1],
       message: "no Energy Port — engine cannot receive power",
@@ -234,8 +234,8 @@ function runValidation(blocks: PlacedBlock[]): {
       });
       if (!hasCasing) {
         diags.push({
-          severity: "ERROR",
-          code: "PREDICATE_FAILED",
+          severity: "error",
+          code: "predicateFailed",
           point: `${b.kind}`,
           location: [b.x, b.y, b.z],
           message: `${b.kind} is floating — must touch casing or controller`,
@@ -270,8 +270,8 @@ function runValidation(blocks: PlacedBlock[]): {
     }
     if (visited.size !== blocks.length) {
       diags.push({
-        severity: "ERROR",
-        code: "COMPONENT_CONFLICT",
+        severity: "error",
+        code: "componentConflict",
         point: "graph",
         location: [0, 0, 0],
         message: `structure is disconnected (${blocks.length - visited.size} orphan blocks)`,
@@ -283,7 +283,7 @@ function runValidation(blocks: PlacedBlock[]): {
   const status =
     diags.length === 0
       ? "valid"
-      : diags.some((d) => d.severity === "ERROR")
+      : diags.some((d) => d.severity === "error")
       ? "invalid"
       : "valid";
   return { diagnostics: diags, status };
@@ -416,7 +416,9 @@ export function generateDSL(blocks: PlacedBlock[]): string {
 
   if (ctrl) {
     lines.push(
-      `    .context(ContextRuleDescriptor.derive("facing", "controller.facing"))`
+      `    .context(ContextRuleDescriptor.derive(
+        ContextKey.string("facing"),
+        ContextSources.capture("controller").property("facing")))`
     );
   }
   lines.push(`    .build();`);
@@ -434,7 +436,7 @@ interface IRPoint {
   location: [number, number, number];
   target: { type: string; props: Record<string, string> };
   predicates: { id: string; props?: Record<string, string> }[];
-  requirement: "REQUIRED" | "OPTIONAL";
+  requirement: "required" | "optional";
   captures: string[];
   groups: string[];
 }
@@ -474,7 +476,7 @@ function blocksToIRPoints(blocks: PlacedBlock[]): IRPoint[] {
       location: [b.x, b.y, b.z],
       target,
       predicates: [{ id: predId }],
-      requirement: "REQUIRED",
+      requirement: "required",
       captures: b.kind === "controller" ? ["controller"] : [],
       groups: [],
     });
@@ -501,7 +503,7 @@ export function generateIR(blocks: PlacedBlock[]): string {
   lines.push(`StructureDefinition {`);
   lines.push(`  // ── 不可变 record · build() 之后冻结 ──`);
   lines.push(`  id            = cumulus:showcase_machine`);
-  lines.push(`  schemaVersion = 1                              // IR_SCHEMA_VERSION`);
+  lines.push(`  schemaVersion = 2                              // irSchemaVersion`);
   lines.push(`  transforms    = List(${points.length > 0 ? "2" : "0"} TransformDescriptor)`);
   lines.push(`    [0] TransformDescriptor {`);
   lines.push(`        typeId = cumulus:identity`);
@@ -562,7 +564,7 @@ export function generateIR(blocks: PlacedBlock[]): string {
     lines.push(`  contextRules = List(1 ContextRuleDescriptor) {`);
     lines.push(`    [0] ContextRuleDescriptor {`);
     lines.push(`        name       = "facing"`);
-    lines.push(`        expression = "controller.facing"`);
+    lines.push(`        source    = capture("controller").property("facing")`);
     lines.push(`    }`);
     lines.push(`  }`);
   } else {
@@ -616,7 +618,7 @@ export function generateCheckPlan(blocks: PlacedBlock[]): string {
 
   lines.push(`StructureCheckPlan {`);
   lines.push(`  // ── compile 时一次性预算，运行时 hot path 仅 O(候选数) lookup ──`);
-  lines.push(`  source    = cumulus:showcase_machine  (schemaVersion 1)`);
+  lines.push(`  source    = cumulus:showcase_machine  (schemaVersion 2)`);
   lines.push(`  candidates = List(${candidates} CheckPlanCandidate)`);
   lines.push(``);
   lines.push(`  candidate[0] = identity {`);

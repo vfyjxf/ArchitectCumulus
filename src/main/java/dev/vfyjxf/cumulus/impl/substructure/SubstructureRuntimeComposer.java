@@ -66,6 +66,7 @@ public final class SubstructureRuntimeComposer {
                         points,
                         components,
                         contextRules,
+                        rootDefinition.checkPhase(),
                         rootDefinition.versions(),
                         rootDefinition.migrations(),
                         rootDefinition.diagnostics());

@@ -7,9 +7,9 @@ import { DIAG_NODES, DIAG_EDGES, DIAGNOSTIC_CODES, type DiagNode } from "@/data/
 import { cn } from "@/lib/utils";
 
 const severityColor = {
-  ERROR: { fill: "#fb7185", text: "text-rose2", bg: "bg-rose-500/10", border: "border-rose-500/30" },
-  WARN: { fill: "#fbbf24", text: "text-amber2", bg: "bg-amber-400/10", border: "border-amber-400/30" },
-  INFO: { fill: "#22d3ee", text: "text-cyan2", bg: "bg-cyan-400/10", border: "border-cyan-400/30" },
+  error: { fill: "#fb7185", text: "text-rose2", bg: "bg-rose-500/10", border: "border-rose-500/30" },
+  warn: { fill: "#fbbf24", text: "text-amber2", bg: "bg-amber-400/10", border: "border-amber-400/30" },
+  info: { fill: "#22d3ee", text: "text-cyan2", bg: "bg-cyan-400/10", border: "border-cyan-400/30" },
 };
 
 const NODE_POSITIONS: Record<string, { x: number; y: number }> = {
@@ -213,13 +213,13 @@ export function Diagnostics() {
                   exit={{ opacity: 0 }}
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    {active.severity === "ERROR" && (
+                    {active.severity === "error" && (
                       <AlertCircle className="w-4 h-4 text-rose2" />
                     )}
-                    {active.severity === "WARN" && (
+                    {active.severity === "warn" && (
                       <AlertTriangle className="w-4 h-4 text-amber2" />
                     )}
-                    {active.severity === "INFO" && (
+                    {active.severity === "info" && (
                       <Info className="w-4 h-4 text-cyan2" />
                     )}
                     <span className="font-mono text-[10.5px] uppercase tracking-wider text-white/40">

@@ -19,7 +19,7 @@ const stats = [
   {
     num: "11",
     label: "诊断 Code",
-    detail: "MISSING_TARGET / WRONG_TYPE / PREDICATE_FAILED ...",
+    detail: "missingTarget / wrongTargetType / predicateFailed ...",
     color: "text-magenta",
   },
   {

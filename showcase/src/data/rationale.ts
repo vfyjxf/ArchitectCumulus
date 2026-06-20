@@ -53,7 +53,7 @@ export const RATIONALE: RationaleCard[] = [
       "13 个 record 类型；构造器拒绝 null + defensive copy 是 CPU 开销；不支持的修改需要回 builder 重 build。但比起 mutable 带来的 debug 时间，划算。",
     codeSnippet: `public record StructureDefinition(
         ResourceLocation id,
-        int schemaVersion,                     // IR_SCHEMA_VERSION = 1
+        int schemaVersion,                     // irSchemaVersion = 2
         List<TransformDescriptor> transforms,
         List<StructurePointDefinition> points,
         List<ContextRuleDescriptor> contextRules,
@@ -198,7 +198,7 @@ public interface TargetSnapshotSource {
 if (snapshot.isEmpty() && point.requirement() == REQUIRED) {
     requests.add(new DataRequest(point, candidate, sectionKey));
     status = InstanceStatus.PENDING;          // 不是 INVALID
-    diagnostics.add(UNLOADED_AREA);            // severity = INFO
+    diagnostics.add(unloadedArea);            // severity = INFO
     continue;
 }
 
@@ -359,7 +359,7 @@ if (anyInvalid(frame)) {
       "节点/边 allocation 比单 string 多 50× 字节。所以默认 fastTick 不构建 graph，只在 INVALID 后按需构建。构建后 projection 到 4 种格式是 cheap 的（只是遍历）。",
     codeSnippet: `// 节点：
 public record DiagnosticNode(
-    String code,                    // MISSING_TARGET, PREDICATE_FAILED, ...
+    String code,                    // missingTarget, predicateFailed, ...
     Severity severity,              // ERROR / WARN / INFO
     String localizationKey,         // i18n 入口
     DiagnosticEvidence evidence,    // target + actual + expected

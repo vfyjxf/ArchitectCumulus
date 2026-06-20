@@ -80,7 +80,7 @@ const PRESETS: Record<string, Omit<ComposerState, "setStructureId" | "toggleTran
     contextRules: [
       { id: "r1", name: "facing", expression: "controller.facing" },
     ],
-    schemaVersion: 1,
+    schemaVersion: 2,
   },
   forge: {
     structureId: "cumulus:mini_forge",
@@ -121,7 +121,7 @@ const PRESETS: Record<string, Omit<ComposerState, "setStructureId" | "toggleTran
     ],
     transforms: ["identity", "horizontal_facing"],
     contextRules: [],
-    schemaVersion: 1,
+    schemaVersion: 2,
   },
 };
 
@@ -214,10 +214,15 @@ export function generateDSL(s: ComposerState): string {
     }
   }
 
-  // context rules
+  // context rules — emit typed derive form (ContextKey + ContextSources)
   for (const r of s.contextRules) {
+    const dot = r.expression.indexOf('.');
+    const point = dot > 0 ? r.expression.slice(0, dot) : r.expression;
+    const prop = dot > 0 ? r.expression.slice(dot + 1) : '';
+    const source = prop ? `.property("${prop}")` : `.value()`;
     lines.push(`    .context(ContextRuleDescriptor.derive(`);
-    lines.push(`        "${r.name}", "${r.expression}"))`);
+    lines.push(`        ContextKey.string("${r.name}"),`);
+    lines.push(`        ContextSources.capture("${point}")${source}))`);
   }
 
   lines.push(`    .build();`);
@@ -250,7 +255,7 @@ function renderTarget(c: ComposerComponent): string {
     s += `\n        .where(${pred})`;
   }
   if (c.capture) s += `\n        .capture("${c.capture}")`;
-  if (!c.required) s += `\n        .optional() // OPTIONAL`;
+  if (!c.required) s += `\n        .optional() // optional`;
   return s;
 }
 
@@ -267,14 +272,14 @@ export function generateIRSummary(s: ComposerState): {
   footprint: number;
   estimatedCheckMs: number;
   estimatedMemoryKb: number;
-  issues: { severity: "ERROR" | "WARN"; code: string; msg: string }[];
+  issues: { severity: "error" | "warn"; code: string; msg: string }[];
 } {
   let points = 0;
   let regions = 0;
   let substructures = 0;
   let footprint = 0;
   const captures: string[] = [];
-  const issues: { severity: "ERROR" | "WARN"; code: string; msg: string }[] = [];
+  const issues: { severity: "error" | "warn"; code: string; msg: string }[] = [];
 
   // 模拟 transform 候选数
   let candidates = 1; // identity always exists
@@ -311,8 +316,8 @@ export function generateIRSummary(s: ComposerState): {
       const key = `${c.from.join(",")}:${c.target}`;
       if (locationMap.has(key)) {
         issues.push({
-          severity: "ERROR",
-          code: "COMPONENT_CONFLICT",
+          severity: "error",
+          code: "componentConflict",
           msg: `${c.name} conflicts with ${locationMap.get(key)} at (${c.from.join(", ")})`,
         });
       } else {
@@ -326,8 +331,8 @@ export function generateIRSummary(s: ComposerState): {
   for (const cap of captures) {
     if (captureSeen.has(cap)) {
       issues.push({
-        severity: "ERROR",
-        code: "CONTEXT_CAPTURE_FAILED",
+        severity: "error",
+        code: "contextCaptureFailed",
         msg: `duplicate capture "${cap}"`,
       });
     }
@@ -337,8 +342,8 @@ export function generateIRSummary(s: ComposerState): {
   // missing controller
   if (!captures.includes("controller") && s.components.length > 0) {
     issues.push({
-      severity: "WARN",
-      code: "MISSING_TARGET",
+      severity: "warn",
+      code: "missingTarget",
       msg: 'no capture named "controller" — context rule "controller.facing" will fail',
     });
   }
@@ -347,8 +352,8 @@ export function generateIRSummary(s: ComposerState): {
   for (const c of s.components) {
     if (c.kind === "substructure" && !c.childId) {
       issues.push({
-        severity: "ERROR",
-        code: "DEPENDENCY_UNRESOLVED",
+        severity: "error",
+        code: "dependencyUnresolved",
         msg: `substructure "${c.name}" has no childId`,
       });
     }
@@ -468,6 +473,6 @@ export const useComposer = create<ComposerState>((set, get) => ({
       components: [],
       transforms: ["identity"],
       contextRules: [],
-      schemaVersion: 1,
+      schemaVersion: 2,
     }),
 }));

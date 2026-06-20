@@ -142,6 +142,7 @@ public final class RuntimeAssetLoader {
                         points,
                         components,
                         List.of(),
+                        null,
                         versions,
                         migrations,
                         DiagnosticMetadata.empty());

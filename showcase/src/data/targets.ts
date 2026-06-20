@@ -53,7 +53,7 @@ export const TARGETS: TargetCard[] = [
       },
     ],
     predicate: ["id", "tag", "state", "block_state_property"],
-    diagnostic: "PREDICATE_FAILED · MISSING_TARGET",
+    diagnostic: "predicateFailed · missingTarget",
   },
   {
     id: "block_entity",
@@ -83,7 +83,7 @@ export const TARGETS: TargetCard[] = [
       },
     ],
     predicate: ["block_entity_type", "nbt_path", "block_entity_field"],
-    diagnostic: "WRONG_TARGET_TYPE · CONTEXT_CAPTURE_FAILED",
+    diagnostic: "wrongTargetType · contextCaptureFailed",
   },
   {
     id: "entity",
@@ -112,7 +112,7 @@ export const TARGETS: TargetCard[] = [
       },
     ],
     predicate: ["entity_type", "entity_distance", "entity_count", "entity_nbt"],
-    diagnostic: "MISSING_TARGET · UNLOADED_AREA",
+    diagnostic: "missingTarget · unloadedArea",
   },
   {
     id: "fluid",
@@ -140,7 +140,7 @@ export const TARGETS: TargetCard[] = [
       },
     ],
     predicate: ["fluid_id", "fluid_tag", "fluid_state"],
-    diagnostic: "MISSING_TARGET · PREDICATE_FAILED",
+    diagnostic: "missingTarget · predicateFailed",
   },
   {
     id: "capability",
@@ -168,7 +168,7 @@ export const TARGETS: TargetCard[] = [
       },
     ],
     predicate: ["capability_present", "capability_amount", "capability_side"],
-    diagnostic: "MISSING_TARGET · PREDICATE_FAILED",
+    diagnostic: "missingTarget · predicateFailed",
   },
   {
     id: "context",
@@ -196,7 +196,7 @@ export const TARGETS: TargetCard[] = [
       },
     ],
     predicate: ["context_present", "context_equals", "context_range"],
-    diagnostic: "CONTEXT_DERIVATION_FAILED · CONTEXT_CAPTURE_FAILED",
+    diagnostic: "contextDerivationFailed · contextCaptureFailed",
   },
   {
     id: "region",
@@ -226,6 +226,6 @@ export const TARGETS: TargetCard[] = [
       },
     ],
     predicate: ["region_all_match", "region_count_in_range", "region_center_in"],
-    diagnostic: "PREDICATE_FAILED · COMPONENT_CONFLICT",
+    diagnostic: "predicateFailed · componentConflict",
   },
 ];

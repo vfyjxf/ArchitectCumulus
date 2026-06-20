@@ -37,11 +37,12 @@ const STEPS: Step[] = [
         .target(Targets.block())
         .where(PredicateDescriptors.tag("cumulus:heat_casing")))
     .context(ContextRuleDescriptor.derive(
-        "facing", "controller.facing"))
+        ContextKey.string("facing"),
+        ContextSources.capture("controller").property("facing")))
     .build();`,
     output: `✓ StructureDefinition compiled
   id          = cumulus:machine
-  schema      = IR_SCHEMA_VERSION = 1
+  schema      = irSchemaVersion = 2
   transforms  = [identity, horizontalFacing]
   points      = 26 (1 controller + 25 casing)
   context     = [facing ← controller.facing]
@@ -55,7 +56,7 @@ const STEPS: Step[] = [
     code: `RuntimeCheckEngine engine = new RuntimeCheckEngine()
     .register(MACHINE)
     .substructureSyncPolicy(
-        SubstructureSyncPolicy.STATUS_AND_CONTEXT)
+        SubstructureSyncPolicy.statusAndContext)
     .addSubstructureLifecycleListener(event -> {
         log.info("child {}: {} -> {}",
             event.occurrenceId(),
@@ -72,7 +73,7 @@ engine.track(
     output: `✓ engine registered
   definitions : 1 (cumulus:machine)
   anchors     : 1 @ (10,64,10)
-  policy      : STATUS_AND_CONTEXT
+  policy      : statusAndContext
   listener    : SubstructureLifecycleListener#1
   plan cache  : StructureCheckPlan built
                 (3 transform candidates × 26 points = 78 bounds)`,
@@ -141,8 +142,8 @@ public void onTick(ServerTickEvent.Post event) {
     output: `[machine #3] started · revision=7 · facing=north
 [machine #3] controller captured: cumulus:controller @ (10,65,10)
 [machine #2] stopping · 2 diagnostic nodes projected to player:
-            ⚠ MISSING_TARGET @ (10,64,9) "place heat casing"
-            ⚠ PREDICATE_FAILED @ (11,64,10) "wrong tag"`,
+            ⚠ missingTarget @ (10,64,9) "place heat casing"
+            ⚠ predicateFailed @ (11,64,10) "wrong tag"`,
   },
   {
     id: 5,

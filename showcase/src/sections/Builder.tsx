@@ -349,8 +349,8 @@ export function Builder() {
                     transition={{ delay: i * 0.05 }}
                     className={cn(
                       "p-2.5 rounded-lg border text-[12px]",
-                      d.severity === "ERROR" && "border-rose-500/30 bg-rose-500/8",
-                      d.severity === "WARN" && "border-amber-400/30 bg-amber-400/5"
+                      d.severity === "error" && "border-rose-500/30 bg-rose-500/8",
+                      d.severity === "warn" && "border-amber-400/30 bg-amber-400/5"
                     )}
                   >
                     <div className="flex items-center gap-2 mb-1">

@@ -138,8 +138,8 @@ function ChainPredicateRow({
           }
           className="bg-ink-950 border border-white/10 rounded-md px-1.5 py-0.5 text-[10.5px] font-mono outline-none"
         >
-          <option value="required">REQUIRED</option>
-          <option value="optional">OPTIONAL</option>
+          <option value="required">required</option>
+          <option value="optional">optional</option>
         </select>
 
         <div className="ml-auto flex items-center gap-0.5">
@@ -560,7 +560,7 @@ export function PredicateComposer() {
                 </span>
               ) : (
                 <span className="text-rose2 font-bold">
-                  ✗ final: INVALID → 发 DiagnosticNode(PREDICATE_FAILED)
+                  ✗ final: INVALID → 发 DiagnosticNode(predicateFailed)
                 </span>
               )}
             </div>
@@ -582,7 +582,7 @@ function generatePredicateCode(chain: ChainPredicate[]): string {
     const args = def.fields
       .map((f) => `"${p.fields[f.key] ?? ""}"`)
       .join(", ");
-    lines.push(`    .where(PredicateDescriptors.${p.type}(${args}))${!p.required ? " // OPTIONAL" : ""}`);
+    lines.push(`    .where(PredicateDescriptors.${p.type}(${args}))${!p.required ? " // optional" : ""}`);
   }
   lines.push(`    .capture("controller")  // 链通过后捕获`);
   return lines.join("\n");

@@ -39,15 +39,16 @@ export function Runtime() {
   const mutationRate = useRuntimeSim((s) => s.mutationRate);
   const loadedRate = useRuntimeSim((s) => s.loadedRate);
   const paused = useRuntimeSim((s) => s.paused);
-  const fast = useRuntimeSim((s) => s.fast);
+  const mode = useRuntimeSim((s) => s.mode);
   const stats = useRuntimeSim((s) => s.stats);
   const log = useRuntimeSim((s) => s.log);
   const setBudget = useRuntimeSim((s) => s.setBudget);
   const setMutation = useRuntimeSim((s) => s.setMutation);
   const setLoaded = useRuntimeSim((s) => s.setLoaded);
   const togglePause = useRuntimeSim((s) => s.togglePause);
-  const toggleFast = useRuntimeSim((s) => s.toggleFast);
+  const toggleMode = useRuntimeSim((s) => s.toggleMode);
   const reset = useRuntimeSim((s) => s.reset);
+  const isFast = mode === "fastTick";
 
   return (
     <Section
@@ -82,22 +83,19 @@ export function Runtime() {
               </span>
             </div>
             <div className="chip bg-ink-950/70 backdrop-blur-md">
-              <Zap className={cn("w-3 h-3", fast ? "text-amber2" : "text-white/40")} />
+              <Zap className={cn("w-3 h-3", isFast ? "text-amber2" : "text-white/40")} />
               <span className="font-mono text-[11px] text-white/60">
-                {fast ? "fastTick" : "tick"} · budget {budget}
+                {mode} · budget {budget}
               </span>
             </div>
           </div>
 
           {/* legend */}
           <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-x-3 gap-y-1 text-[10.5px] font-mono">
-            <LegendItem color="#1a1a3a" label="loaded" />
-            <LegendItem color="#fb923c" label="dirty" />
-            <LegendItem color="#fbbf24" label="queued" />
-            <LegendItem color="#22d3ee" label="checking" />
             <LegendItem color="#a3e635" label="valid" />
             <LegendItem color="#fb7185" label="invalid" />
-            <LegendItem color="#7c5cff" label="requested" />
+            <LegendItem color="#fbbf24" label="incomplete" />
+            <LegendItem color="#7c5cff" label="stale (待检)" />
           </div>
         </div>
 
@@ -107,7 +105,7 @@ export function Runtime() {
             <div className="flex items-center gap-2 mb-3">
               <Activity className="w-4 h-4 text-brand-300" />
               <span className="text-[13px] font-semibold">调度器参数</span>
-              {fast && <Badge tone="amber">fast mode</Badge>}
+              {isFast && <Badge tone="amber">fastTick</Badge>}
             </div>
 
             <label className="block mb-3">
@@ -176,19 +174,19 @@ export function Runtime() {
             <Button variant="outline" onClick={reset}>
               <RotateCcw className="w-3.5 h-3.5" /> Reset
             </Button>
-            <Button variant={fast ? "primary" : "outline"} onClick={toggleFast}>
-              <Zap className="w-3.5 h-3.5" /> Fast Tick
+            <Button variant={isFast ? "primary" : "outline"} onClick={toggleMode}>
+              <Zap className="w-3.5 h-3.5" /> {isFast ? "fastTick" : "tick"}
             </Button>
           </div>
 
           {/* stats */}
           <div className="grid grid-cols-3 gap-2">
             <StatBox label="checked" value={stats.checked} color="text-cyan2" />
-            <StatBox label="queued" value={stats.queued} color="text-amber2" />
             <StatBox label="requests" value={stats.requests} color="text-brand-300" />
+            <StatBox label="stale" value={stats.stale} color="text-brand-300" />
             <StatBox label="valid" value={stats.valid} color="text-lime2" />
             <StatBox label="invalid" value={stats.invalid} color="text-rose2" />
-            <StatBox label="fps" value="3 t/s" color="text-white/70" />
+            <StatBox label="incomplete" value={stats.incomplete} color="text-amber2" />
           </div>
 
           {/* log */}

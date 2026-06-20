@@ -90,7 +90,7 @@ public final class SkyLightPredicate implements PredicateMatcher {
 }
 
 // 2. mod 启动时注册
-@Mod(Cumulus.MODID)
+@Mod(Cumulus.modId)
 public final class Cumulus {
     public Cumulus(IEventBus bus, ModContainer c) {
         PredicateRegistry.register(
@@ -111,7 +111,7 @@ public final class Cumulus {
       "PredicateMatcher 是单方法接口：接受 TargetSnapshot（封装 block state、block entity NBT、capability 等）+ properties map，返回 boolean。",
       "注册到 PredicateRegistry 时给一个 factory：properties map → matcher 实例。Cumulus 用 factory 而不是直接注册 matcher 实例，是因为 properties 可能不同（同一 predicate id 用不同阈值多处使用）。",
       "DSL 用 PredicateDescriptors.id(typeId).withProperty(key, value) 构造 descriptor。datagen 阶段只看 typeId + properties 拼写，不调用 matcher；运行时 check 才从 registry 取 factory 造 matcher。",
-      "未注册的 typeId 在 check 时报 RUNTIME_ONLY_UNAVAILABLE（severity=WARN），结构进入 INVALID 但不会 crash。",
+      "未注册的 typeId 在 check 时报 runtimeOnlyUnavailable（severity=WARN），结构进入 INVALID 但不会 crash。",
     ],
     trace: [
       { step: "mod 加载", internal: "PredicateRegistry.register(typeId, factory) → registry.put(typeId, factory)" },
@@ -206,25 +206,34 @@ public Tag serialize(PredicateDescriptor d) {
     .point("input_w", at(0, 1, -1), Targets.blockEntity()
         .where(PredicateDescriptors.id("cumulus:item_bus"))
         .capture("input_w"))
-    // 派生 context 键
-    .context(ContextRuleDescriptor.derive(
-        "total_items", "input_n.size + input_e.size + input_s.size + input_w.size"))
-    .context(ContextRuleDescriptor.derive(
-        "primary_input", "max(input_n, input_e, input_s, input_w).id"))
+    // 聚合 + 派生：通用 context 操作管线在 check 之后顺序执行
+    .contextPlan(plan -> plan
+        // sum: 把每个 input 的 size 属性加起来
+        .op(Operations.sum(
+            TOTAL_ITEMS,
+            p -> Set.of("input_n","input_e","input_s","input_w").contains(p.id().value()),
+            p -> p.intProperty("size").orElse(0)))
+        // compute: 读已聚合的 TOTAL_ITEMS，自定义逻辑选出主输入
+        .op(Operations.compute(PRIMARY_INPUT, (matches, ctx) ->
+            matches.all().stream()
+                .filter(p -> Set.of("input_n","input_e","input_s","input_w").contains(p.id().value()))
+                .max(java.util.Comparator.comparingInt(p -> p.intProperty("size").orElse(0)))
+                .map(MatchedPoint::value).orElse("none"))))
     .build();
 
 // 机器逻辑读取：
 @Override
 public void onDelta(InstanceDelta delta) {
     var ctx = delta.context();
-    int total = (int) ctx.value("total_items");
-    String primary = (String) ctx.value("primary_input");
+    int total = ctx.get(TOTAL_ITEMS).orElse(0);
+    String primary = ctx.get(PRIMARY_INPUT).orElse("none");
     log.info("total {} items, primary = {}", total, primary);
 }`,
     explanation: [
       "每个 point 用 capture(name) 声明它捕获的上下文键名。check 通过后，捕获的 BlockState/NBT/capability 会写入 RuntimeStructureContext 对应的键。",
-      "ContextRuleDescriptor.derive(name, expression) 用简单表达式（点路径 + 算术）派生新键。表达式在 check 完成后求值。",
-      "ctx.value(key) 拿到派生值，类型是 Object（具体类型由表达式决定）。机器逻辑负责强转。",
+      ".contextPlan(plan -> ...) 声明一个通用操作管线：操作按声明顺序执行，每个操作通过 OperationContext 访问匹配点 (MatchResults) 和已计算的上下文值 (anyValue)。",
+      "标准库操作 Operations.sum / compute / count / derive / interiorVolume 等通过 .op(...) 加入；操作结果用 typed ContextKey 写入 computed 层。",
+      "ctx.get(TOTAL_ITEMS) 拿到 typed 派生值，编译期类型安全（无需强转）。context 是 revision 版本化的：每次 check 通过 revision+1。",
       "context 是 revision 版本化的：每次 check 通过 revision+1，机器逻辑用 revision 判断是否要重新处理。",
     ],
     trace: [
@@ -257,7 +266,7 @@ public void onDelta(InstanceDelta delta) {
     icon: "CircleDot",
     code: `// 1. 创建引擎（一般作为单例）
 public static final RuntimeCheckEngine ENGINE = new RuntimeCheckEngine()
-    .substructureSyncPolicy(SubstructureSyncPolicy.STATUS_AND_CONTEXT);
+    .substructureSyncPolicy(SubstructureSyncPolicy.statusAndContext);
 
 // 2. 注册所有定义（启动时一次性）
 public void onCommonSetup(FMLCommonSetupEvent e) {
@@ -393,7 +402,7 @@ public class ForgeBlockEntity extends BlockEntity {
         running = true;
         // v2 typed read: ctx.get(ContextKey<Direction>) → Optional<Direction>
         // 没有 String key、没有强转、编译器知道类型
-        Direction facing = ctx.get(ModContextKeys.FACING).orElse(Direction.NORTH);
+        Direction facing = ctx.get(ModContextKeys.facing).orElse(Direction.NORTH);
         setInputSide(facing);
         markDirty();
     }
@@ -474,14 +483,14 @@ public void onStructureDelta(InstanceDelta delta) {
     }
 }`,
     explanation: [
-      "TargetSnapshotSource 返回 Optional.empty() 时，executor 把必需 point 标为 UNLOADED_AREA（severity=INFO），整体 status=PENDING。",
+      "TargetSnapshotSource 返回 Optional.empty() 时，executor 把必需 point 标为 unloadedArea（severity=INFO），整体 status=PENDING。",
       "PENDING 不算 INVALID，机器不停机。机器逻辑要显式处理 PENDING（一般是显示 'loading...'）。",
       "RequestLedger 监听 ChunkEvent.LOAD，区块到时自动 markDirty 触发重检。",
       "如果一直未加载（玩家远离），PENDING 持续，不会消耗 CPU 重试。",
     ],
     trace: [
       { step: "check 尝试", internal: "snapshot.read(remote_pos) 返回 Optional.empty()" },
-      { step: "诊断记录", internal: "DiagnosticNode(UNLOADED_AREA, INFO, 'chunk not loaded')" },
+      { step: "诊断记录", internal: "DiagnosticNode(unloadedArea, INFO, 'chunk not loaded')" },
       { step: "status = PENDING", internal: "InstanceStatus 不是 INVALID" },
       { step: "request 入账", internal: "RequestLedger.add(sectionKey, instanceKey)" },
       { step: "chunk 加载", internal: "ChunkEvent.LOAD → ledger.onSectionLoaded(secKey)" },
@@ -559,16 +568,16 @@ public void onStructureDelta(InstanceDelta delta) {
   {
     id: "status-context-mirror",
     category: "Substructure",
-    api: "SubstructureSyncPolicy.STATUS_AND_CONTEXT",
+    api: "SubstructureSyncPolicy.statusAndContext",
     title: "把子结构上下文镜像回父",
     scenario:
       "工厂要读 left_arm 内部工具的 spell_book NBT，决定工厂做什么配方。但工厂自己 check 不到 tool（tool 是 arm 的子结构）。",
     difficulty: "advanced",
     accent: "magenta",
     icon: "Copy",
-    code: `// 启用 STATUS_AND_CONTEXT 策略
+    code: `// 启用 statusAndContext 策略
 RuntimeCheckEngine engine = new RuntimeCheckEngine()
-    .substructureSyncPolicy(SubstructureSyncPolicy.STATUS_AND_CONTEXT);
+    .substructureSyncPolicy(SubstructureSyncPolicy.statusAndContext);
 
 // 父上下文会自动收到子结构镜像键：
 //   substructure.<occurrenceId>.status           = VALID / INVALID
@@ -594,20 +603,20 @@ public void onDelta(InstanceDelta delta) {
     }
 }`,
     explanation: [
-      "SubstructureSyncPolicy 有三档：NONE（只看父 status）、STATUS_ONLY（额外镜像 child status）、STATUS_AND_CONTEXT（再额外镜像 child context）。",
+      "SubstructureSyncPolicy 有三档：NONE（只看父 status）、statusOnly（额外镜像 child status）、statusAndContext（再额外镜像 child context）。",
       "镜像 key 命名规范：substructure.<occId>.context.<captureName>，嵌套 capture 用点连。",
-      "STATUS_AND_CONTEXT 会显著增大父 ctx 体积（每个 child occurrence 增加几十个 key）。生产场景按需选择。",
+      "statusAndContext 会显著增大父 ctx 体积（每个 child occurrence 增加几十个 key）。生产场景按需选择。",
       "镜像值是引用共享的（不是 copy）；机器逻辑不能 mutate，要修改先 deep copy。",
     ],
     trace: [
       { step: "child check pass", internal: "child RuntimeStructureContext revision++" },
-      { step: "镜像策略应用", internal: "STATUS_AND_CONTEXT：把 child ctx 拷贝到 parent 的 substructure.<occId>.context.* 键" },
+      { step: "镜像策略应用", internal: "statusAndContext：把 child ctx 拷贝到 parent 的 substructure.<occId>.context.* 键" },
       { step: "parent ctx 更新", internal: "parent revision++ (因为镜像内容变了)" },
       { step: "delta 发布", internal: "changedKeys 包含所有 substructure.* 变化" },
       { step: "机器读取", internal: "ctx.value('substructure.left_arm#0.context.tool.spell_book')" },
     ],
     pitfalls: [
-      "STATUS_AND_CONTEXT 性能成本：每次 child check 都会 rebuild parent ctx。child 多时慎用。",
+      "statusAndContext 性能成本：每次 child check 都会 rebuild parent ctx。child 多时慎用。",
       "镜像键名很长（'substructure.left_arm#0.context.tool.spell_book'），频繁读取要 cache。",
       "嵌套深度大时 ctx 体积膨胀快。一般 2-3 层是上限。",
       "如果 child occurrence 被移除，对应镜像键会被删除（不是 null）。ctx.value 返回 null。",
@@ -629,14 +638,14 @@ public void onDelta(InstanceDelta delta) {
 //   factory_b @ (-6,64,0) claims arm @ (-3,64,0)  ← 冲突！
 
 // 第一个 claim 成功（factory_a），第二个会被拒绝
-// factory_b 的 check 报 SHARED_PART_CONFLICT 诊断
+// factory_b 的 check 报 sharedPartConflict 诊断
 // factory_b 整体 status = INVALID
 
 // 机器逻辑处理：
 ENGINE.addInstanceListener(delta -> {
     if (delta.status() == InstanceStatus.INVALID) {
         var conflictNodes = delta.diagnostics().nodes().stream()
-            .filter(n -> n.code().equals("SHARED_PART_CONFLICT"))
+            .filter(n -> n.code().equals("sharedPartConflict"))
             .toList();
         if (!conflictNodes.isEmpty()) {
             // 通知玩家：哪个 occurrence 被谁抢了
@@ -661,7 +670,7 @@ ENGINE.addInstanceListener(delta -> {
     trace: [
       { step: "factory_a check", internal: "composer 生成 left_arm#0 occurrence; claimState.tryClaim(occ, factory_a) → OK" },
       { step: "factory_b check", internal: "composer 也生成 left_arm#0 occurrence; claimState.tryClaim(occ, factory_b) → FAIL" },
-      { step: "诊断构造", internal: "DiagnosticNode(SHARED_PART_CONFLICT, ERROR, owner=factory_a)" },
+      { step: "诊断构造", internal: "DiagnosticNode(sharedPartConflict, ERROR, owner=factory_a)" },
       { step: "factory_b INVALID", internal: "child delta 被 invalidate; parent status 也 INVALID" },
       { step: "玩家解除", internal: "factory_a 被破坏 → untrack → claimState.release(occ)" },
       { step: "factory_b 重检", internal: "下一 tick factory_b 重新 check; 这次 tryClaim 成功" },
@@ -998,7 +1007,7 @@ ENGINE.track(def.id(), anchorPos, source);
 public Optional<TargetSnapshot> read(TargetReadRequest req) {
     BlockPos pos = req.pos();
     if (!level.hasChunkAt(pos)) {
-        return Optional.empty();  // UNLOADED_AREA
+        return Optional.empty();  // unloadedArea
     }
 
     return switch (req.targetType()) {
@@ -1189,7 +1198,7 @@ public class CumulusRuntimeAssetProvider
         extends RuntimeAssetDatagenProvider {
 
     public CumulusRuntimeAssetProvider(PackOutput output) {
-        super(output, Cumulus.MODID);
+        super(output, Cumulus.modId);
     }
 
     @Override
@@ -1261,7 +1270,7 @@ public void onGatherData(GatherDataEvent.Server event) {
 public void onCommonSetup(FMLCommonSetupEvent e) {
     NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
         event.addListener(new RuntimeAssetReloadListener(
-            Cumulus.MODID,
+            Cumulus.modId,
             "structures",
             new RuntimeAssetJsonLoader()));
     });
@@ -1338,7 +1347,9 @@ public class RuntimeAssetReloadListener implements PreparableReloadListener {
 public static final StructureDefinition MACHINE_V1 =
     Structures.define(id("machine"))
         .version(new StructureVersionDescriptor(1, null))
-        .context(ContextRuleDescriptor.derive("facing", "controller.facing"))
+        .context(ContextRuleDescriptor.derive(
+        ContextKey.string("facing"),
+        ContextSources.capture("controller").property("facing")))
         .build();
 
 // v1.1:
@@ -1346,8 +1357,12 @@ public static final StructureDefinition MACHINE_V2 =
     Structures.define(id("machine"))
         .version(new StructureVersionDescriptor(2,
             ResourceLocation.parse("cumulus:machine/v2")))
-        .context(ContextRuleDescriptor.derive("orientation", "controller.facing"))
-        .context(ContextRuleDescriptor.derive("tier", "controller.tier"))
+        .context(ContextRuleDescriptor.derive(
+        ContextKey.string("orientation"),
+        ContextSources.capture("controller").property("facing")))
+        .context(ContextRuleDescriptor.derive(
+        ContextKey.string("tier"),
+        ContextSources.capture("controller").property("tier")))
         .build();
 
 // 注册 migration chain：
@@ -1473,6 +1488,326 @@ public class DataDrivenMigrationLoader {
       "JSON migration 和 Java migration 可以共存；按 version 顺序执行。",
     ],
     related: ["versioned-migration"],
+  },
+  // ============================================================
+  // CheckPhase — 动态结构判定
+  // ============================================================
+  {
+    id: "check-phase-repeat",
+    category: "Definition",
+    api: "CheckPhase + CheckPhases.repeatRange",
+    title: "动态结构：轴向区间重复",
+    scenario:
+      "结构的外壳层数不固定——比如一座塔，外壳至少 2 层（必须存在），最多 5 层（尽量多）。层数由实际世界方块决定，定义期无法预知。",
+    difficulty: "advanced",
+    accent: "magenta",
+    icon: "Layers",
+    code: `import static dev.vfyjxf.cumulus.api.context.plan.stdlib.CheckPhases.*;
+
+public static final ContextKey<Integer> TOWER_HEIGHT =
+    ContextKey.integer("tower_height");
+
+public static final StructureDefinition ADAPTIVE_TOWER =
+    Structures.define(id("adaptive_tower"))
+        .point("controller", at(0,0,0), Targets.block()
+            .where(PredicateDescriptors.id("cumulus:controller"))
+            .capture("controller"))
+        // repeatRange: min 层必须存在，max 层尽量多
+        .checkPhase(repeatRange(
+            "ring",
+            Components.hollowBox("ring", at(-1,0,-1), at(1,0,2)),
+            Axis.y, 2, 5, TOWER_HEIGHT))
+        .build();
+
+// 运行时：
+// executor 先匹配 controller (静态 point)
+// → 调用 CheckPhase.evaluate()
+// → repeatRange 生成 2~5 层 point（L0,L1 required; L2,L3,L4 optional）
+// → executor 逐层匹配世界方块
+// → L0,L1 必须满足（否则 invalid），L2+ 尽量多
+// → 匹配的层数写入 TOWER_HEIGHT context key
+// → 机器逻辑读 TOWER_HEIGHT 决定输出倍率`,
+    explanation: [
+      "CheckPhase 是通用的动态判定钩子：在静态 point 匹配后运行，能读已匹配数据、判断合规性、写上下文、返回额外 point。",
+      "repeatRange 是 CheckPhase 的便利用法：沿指定轴重复模板 component，min 层 required、max 层 optional。",
+      "executor 对 phase 返回的 point 执行同样的匹配流程（resolve target + predicate），匹配结果加入 MatchResults。",
+      "后续的 ContextPlan 操作能看到所有匹配点（静态 + 动态），比如 derive(tower_height) 算输出倍率。",
+    ],
+    trace: [
+      { step: "静态匹配 controller", internal: "checkCandidate → matchPoint(controller)" },
+      { step: "CheckPhase.evaluate(ctx)", internal: "repeatRange 生成 L0~L4 共 5 层 point" },
+      { step: "逐层匹配 L0,L1 (required)", internal: "matchPoint × 2 → 都满足 → 继续" },
+      { step: "逐层匹配 L2,L3 (optional)", internal: "matchPoint × 2 → L2 满足、L3 不满足 → 停" },
+      { step: "putComputed(TOWER_HEIGHT, 3)", internal: "3 层匹配成功" },
+      { step: "toRuntime()", internal: "derived ∪ computed → RuntimeStructureContext" },
+    ],
+    pitfalls: [
+      "min 设太高会导致结构永远 invalid（玩家无法满足）",
+      "max 层的 optional point 如果数据未加载会发 DataRequest（incomplete），不会直接 invalid",
+      "CheckPhase 回调里不要做重计算——它在每次 check 时同步执行",
+    ],
+    related: ["custom-context-plan"],
+  },
+  {
+    id: "check-phase-custom",
+    category: "Definition",
+    api: "CheckPhase (custom)",
+    title: "动态结构：完全自定义形态",
+    scenario:
+      "结构的形态无法用简单的重复表达——比如根据 controller 旁边是否有特殊方块决定检测半径，或者根据 context 值决定检测哪些 component。",
+    difficulty: "advanced",
+    accent: "brand",
+    icon: "Shuffle",
+    code: `// CheckPhase 是一个 @FunctionalInterface：
+// List<StructurePointDefinition> evaluate(PhaseContext ctx)
+//
+// ctx.matches()    — 当前已匹配的点
+// ctx.context()    — 活的计算上下文（读/写）
+// ctx.anchor()     — 结构锚点的绝对坐标
+// ctx.transform()  — 当前 transform candidate
+
+Structures.define(id("adaptive_forge"))
+    .point("controller", at(0,0,0), Targets.block()
+        .where(PredicateDescriptors.id("cumulus:controller")))
+    .checkPhase(ctx -> {
+        var ctrl = ctx.matches()
+            .first(p -> p.id().value().equals("controller"));
+        if (ctrl.isEmpty()) return List.of();
+
+        // 根据 controller 的 block state 决定检测半径
+        var facing = ctrl.get().properties().get("facing");
+        var points = new ArrayList<StructurePointDefinition>();
+        for (int r = 1; r <= 3; r++) {
+            for (int dx = -r; dx <= r; dx++) {
+                for (int dz = -r; dz <= r; dz++) {
+                    // 只检测 ring 外壳
+                    if (Math.abs(dx) != r && Math.abs(dz) != r) continue;
+                    points.add(new StructurePointDefinition(
+                        new StructurePointId("casing_" + r + "_" + dx + "_" + dz),
+                        RelativeBlockPos.of(dx, 0, dz),
+                        Targets.block().target(),
+                        List.of(), PointRequirement.required,
+                        Set.of("casing"), Set.of(),
+                        DiagnosticMetadata.empty()));
+                }
+            }
+        }
+        ctx.context().putComputed(SHELL_RADIUS, detectedRadius);
+        return points;
+    })
+    .build();`,
+    explanation: [
+      "CheckPhase 不限于重复——它可以返回任意 point 列表，完全由 modder 逻辑决定。",
+      "PhaseContext 暴露 matches()（已匹配点的值/属性/位置）、context()（读写计算上下文）、anchor()、transform()。",
+      "phase 返回的 point 被 executor 匹配后，结果加入 MatchResults，后续操作（如果有的话）能看到它们。",
+      "这是两阶段匹配的本质：先匹配锚点（controller），再根据锚点的实际世界数据决定结构的完整形态。",
+    ],
+    trace: [
+      { step: "匹配 controller", internal: "controller 的 block state 被读入 matches()" },
+      { step: "CheckPhase 读 controller.facing", internal: "ctrl.get().properties().get(\"facing\")" },
+      { step: "根据 facing 生成外壳 ring", internal: "1~3 格半径 ring point 列表" },
+      { step: "executor 匹配 ring point", internal: "逐个 resolveTarget + predicate" },
+      { step: "putComputed(SHELL_RADIUS)", internal: "写入检测到的半径" },
+    ],
+    pitfalls: [
+      "phase 回调里返回的 point 位置是相对于 anchor 的 RelativeBlockPos，executor 自动加 anchor 偏移",
+      "如果 phase 返回的 point 是 required 且缺失，会发 DataRequest（incomplete）",
+      "phase 回调抛异常会被 executor 捕获（静默跳过扩展），不会让整个 check 崩溃",
+    ],
+    related: ["check-phase-repeat"],
+  },
+  // ============================================================
+  // PartPattern Shape DSL
+  // ============================================================
+  {
+    id: "shape-matrix",
+    category: "Definition",
+    api: "PartPattern + ShapeEmitter + .shape()",
+    title: "PartPattern 矩阵：用多维数组画结构",
+    scenario:
+      "不想逐个写 .point() 和 .component()，想用类似 GregTech aisle 的方式直观画出 3D 结构——但要强类型，不用字符/字符串。",
+    difficulty: "intermediate",
+    accent: "brand",
+    icon: "Grid3x3",
+    code: `import static dev.vfyjxf.cumulus.api.definition.Structures.*;
+import static dev.vfyjxf.cumulus.api.predicate.PredicateDescriptors.*;
+
+// 整个结构在一个 static final 表达式里
+public static final StructureDefinition FORGE = Structures.define(
+    "cumulus:forge",
+    def -> {
+        // 声明 PartPattern（强类型，预绑定具体值）
+        var casing = PartPattern.block("casing")
+            .where(tag("cumulus:heat_casing"))
+            .group("casing");
+        var ctrl = PartPattern.block("controller")
+            .where(id("cumulus:controller"))
+            .capture("controller");
+        var energy = PartPattern.capability("energy",
+            "cumulus:energy").group("port");
+        var air = PartPattern.air();
+
+        // 多维数组 [y][z][x] 画出 3D 结构
+        return def.shape(new PartPattern[][][]{ {
+            // Y=0 底层
+            { casing, casing,  casing },
+            { casing, ctrl,    casing },
+            { casing, casing,  casing },
+        }, {
+            // Y=1 顶层
+            { casing, casing, casing },
+            { casing, casing, casing },
+            { casing, casing, casing },
+        }, {
+            // Y=2 前层
+            { casing, energy, casing },
+            { casing, air,    casing },
+            { casing, casing, casing },
+        } })
+        .transforms(Transforms.horizontalFacing())
+        .build();
+    });`,
+    explanation: [
+      "PartPattern 持有完整的 point 定义（target + predicates + captures + group + requirement），放进多维数组 [y][z][x] 直观画出结构。",
+      "数组里每个格子就是一个配置好的 PartPattern，不需要后绑定（不用 GT 的 where(char, predicate)）。",
+      "PartPattern.air() 标记的格子被 DefaultShapeEmitter 跳过（= 空位）。",
+      "Structures.define(id, lambda) 把整个定义包在一个 static final 表达式里，不泄漏局部变量。",
+    ],
+    trace: [
+      { step: "声明 PartPattern", internal: "PartPattern.block(...).where(...).group(...)" },
+      { step: "填充多维数组", internal: "new PartPattern[][][]{ { {...}, {...} } }" },
+      { step: ".shape(matrix)", internal: "DefaultShapeEmitter 遍历 [y][z][x]" },
+      { step: "展开为 StructurePointDefinition", internal: "每个格子 → toPoint(RelativeBlockPos)" },
+      { step: ".build()", internal: "StructureDefinitionCompiler 编译为 IR" },
+    ],
+    pitfalls: [
+      "数组维度必须是 [y][z][x]（第一维是层，第二维是行，第三维是列）",
+      "同一 PartPattern 实例可以在数组里多次引用（共享配置）",
+      "null 也会被 DefaultShapeEmitter 跳过，但建议用 PartPattern.air() 显式标记",
+    ],
+    related: ["check-phase-repeat", "check-phase-custom"],
+  },
+  {
+    id: "custom-shape-emitter",
+    category: "Definition",
+    api: "ShapeEmitter (custom)",
+    title: "自定义 Emitter：镜像/旋转/条件展开",
+    scenario:
+      "默认 emitter 只是逐格展开。如果需要更复杂的布局逻辑（比如根据某个 PartPattern 的存在决定其他格子是否展开），可以实现自定义 ShapeEmitter。",
+    difficulty: "advanced",
+    accent: "cyan",
+    icon: "Layers",
+    code: `// 自定义 emitter：只展开对称轴一侧，镜像复制到另一侧
+public final class MirrorEmitter implements ShapeEmitter {
+    private final Axis mirrorAxis;
+
+    public MirrorEmitter(Axis mirrorAxis) {
+        this.mirrorAxis = mirrorAxis;
+    }
+
+    @Override
+    public void emit(PartPattern[][][] shape, ShapeEmitterContext ctx) {
+        int depth = shape.length;
+        for (int y = 0; y < depth; y++) {
+            for (int z = 0; z < shape[y].length; z++) {
+                for (int x = 0; x < shape[y][z].length; x++) {
+                    var part = shape[y][z][x];
+                    if (part == null || part.isAir()) continue;
+                    // 原始位置
+                    ctx.point(x, y, z, part);
+                    // 镜像位置（沿 mirrorAxis 对称）
+                    var mirrored = mirrorAxis == Axis.x
+                        ? new int[]{shape[y][z].length - 1 - x, y, z}
+                        : mirrorAxis == Axis.z
+                        ? new int[]{x, y, shape[y].length - 1 - z}
+                        : new int[]{x, shape.length - 1 - y, z};
+                    ctx.point(mirrored[0], mirrored[1], mirrored[2], part);
+                }
+            }
+        }
+    }
+}
+
+// 使用：
+.shape(shape, new MirrorEmitter(Axis.x))`,
+    explanation: [
+      "ShapeEmitter 是 @FunctionalInterface：emit(PartPattern[][][], ShapeEmitterContext)。",
+      "ShapeEmitterContext.point(x, y, z, part) 向 builder 发射一个 point。",
+      "自定义 emitter 可以实现镜像、旋转、条件展开、跨层复制等任何布局逻辑。",
+      ".shape(matrix) 使用 DefaultShapeEmitter；.shape(matrix, customEmitter) 使用自定义的。",
+    ],
+    trace: [
+      { step: "遍历原始数组", internal: "for y, z, x → 跳过 null/air" },
+      { step: "发射原始位置", internal: "ctx.point(x, y, z, part)" },
+      { step: "计算镜像位置", internal: "mirrorAxis 决定对称轴" },
+      { step: "发射镜像位置", internal: "ctx.point(mx, my, mz, part)" },
+    ],
+    pitfalls: [
+      "emitter 里不要修改 shape 数组本身（它可能是共享的）",
+      "镜像/旋转后如果位置重叠，builder 会产生重复 point id — 使用 PartPattern.name + 坐标自动去重",
+    ],
+    related: ["shape-matrix"],
+  },
+  {
+    id: "count-constraint",
+    category: "Definition",
+    api: "CountConstraint + PhaseResult",
+    title: "Count 约束：全局/分组数量限制",
+    scenario:
+      "需要限制结构中某类方块的数量——比如至少 8 个 casing、最多 4 个 energy port、恰好 4 个线圈。",
+    difficulty: "intermediate",
+    accent: "amber",
+    icon: "Hash",
+    code: `import static dev.vfyjxf.cumulus.api.predicate.StructurePredicates.*;
+
+public static final StructureDefinition COIL_MACHINE =
+    Structures.define("cumulus:coil_machine", def -> {
+        var coil = PartPattern.block("coil")
+            .where(tag("cumulus:coil")).group("coil");
+        var port = PartPattern.capability("port",
+            "cumulus:energy").group("port");
+
+        return def.shape(new PartPattern[][][]{ {
+            { coil, coil, coil },
+            { coil, port, coil },
+            { coil, coil, coil },
+        } })
+        // 静态约束写在 checkPhase 里
+        .checkPhase(ctx -> PhaseResult.of(
+            List.of(),
+            List.of(
+                // 至少 8 个 coil
+                CountConstraint.atLeast(group("coil"), 8),
+                // 最多 4 个 port
+                CountConstraint.atMost(group("port"), 4),
+                // 恰好 4 个 coil（等价于 range 4~4）
+                CountConstraint.exactly(
+                    StructurePredicates.tag("cumulus:coil"), 4)
+            )))
+        .build();
+    });
+
+// executor 在所有匹配完成后验证 constraints：
+// 如果某个 constraint 不满足 → status = invalid
+// 错误信息："Count constraint violated: expected 8~MAX matching points, got 5"`,
+    explanation: [
+      "CountConstraint 在 CheckPhase 返回的 PhaseResult 里声明，executor 匹配完成后自动验证。",
+      "filter 是 StructurePredicate（强类型，支持 and/or/not 组合）。",
+      "atLeast/atMost/exactly/range 四种工厂覆盖常见场景。",
+      "约束不满足时产生 diagnostic node（status → invalid），包含期望值和实际值。",
+    ],
+    trace: [
+      { step: "静态 + phase point 匹配完成", internal: "MatchResults 包含所有匹配点" },
+      { step: "验证每个 constraint", internal: "count(filter) vs min~max" },
+      { step: "atLeast(coil, 8) 检查", internal: "count(group(\"coil\")) = 8 ✓" },
+      { step: "atMost(port, 4) 检查", internal: "count(group(\"port\")) = 1 ✓" },
+      { step: "全部通过 → valid", internal: "否则 → invalid + diagnostic" },
+    ],
+    pitfalls: [
+      "constraint 在 phase 之后验证，所以 phase 返回的额外 point 也参与计数",
+      "StructurePredicate 继承 Predicate<MatchedPoint>，可以直接用 lambda：p -> p.value().startsWith(\"cumulus:\")",
+    ],
+    related: ["check-phase-custom", "shape-matrix"],
   },
 ];
 
