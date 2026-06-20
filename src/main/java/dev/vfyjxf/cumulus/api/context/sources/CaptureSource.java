@@ -10,8 +10,8 @@ import java.util.Optional;
 /**
  * Unified capture source — reads a field from a matched point's
  * {@link CheckContext.ResolvedTarget}. Replaces the former
- * {@code CaptureValueSource}, {@code CapturePositionSource}, and
- * {@code CapturePropertySource} with a single type discriminated by
+ * the former CaptureValueSource, CapturePositionSource, and
+ * CapturePropertySource with a single type discriminated by
  * {@link CaptureField}.
  */
 public record CaptureSource(StructurePointId point, CaptureField field) implements ContextSource<String> {

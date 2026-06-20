@@ -9,13 +9,4 @@ package dev.vfyjxf.cumulus.api.context.plan;
 @FunctionalInterface
 public interface CheckPhase extends EvaluationPhase {
 
-    /**
-     * Evaluate this phase. Return a {@link PhaseResult} containing additional
-     * points to match and/or count constraints to verify. Implementations may
-     * also write computed values directly to the context.
-     *
-     * @param ctx access to matched points, live context, anchor, and transform
-     * @return phase result (extra points + constraints); never null
-     */
-    PhaseResult evaluate(PhaseContext ctx);
 }

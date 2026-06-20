@@ -40,8 +40,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class StructureCheckExecutor {
-    private static final ResourceLocation regionTarget = ResourceLocation.parse("cumulus:region");
-    private static final ResourceLocation contextTarget = ResourceLocation.parse("cumulus:context");
 
     // Typed dispatch: use TargetTypes registry instead of hardcoded ResourceLocation list
     private static boolean isSupportedTarget(ResourceLocation typeId) {

@@ -6,8 +6,8 @@ import java.util.Objects;
 
 /**
  * Which field of a {@link CheckContext.ResolvedTarget} a {@link CaptureSource}
- * reads. Replaces the three former source types (CaptureValueSource,
- * CapturePositionSource, CapturePropertySource) with a discriminated field.
+ * reads. Replaces the three former source types (the former CaptureValueSource,
+ * CapturePositionSource, and CapturePropertySource with a discriminated field.
  *
  * <p>Sealed interface with three permitted records so the codec can
  * pattern-match for serialization without probe-testing.

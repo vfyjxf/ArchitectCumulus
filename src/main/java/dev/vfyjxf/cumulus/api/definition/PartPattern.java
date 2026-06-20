@@ -42,24 +42,26 @@ public final class PartPattern {
     private final TargetPattern target;
     private final PointRequirement requirement;
     private final Set<String> groups;
+    private final DiagnosticMetadata diagnostics;
 
-    private PartPattern(String name, TargetPattern target, PointRequirement requirement, Set<String> groups) {
+    private PartPattern(String name, TargetPattern target, PointRequirement requirement, Set<String> groups, DiagnosticMetadata diagnostics) {
         this.name = Objects.requireNonNull(name, "PartPattern name must not be null");
         if (name.isBlank())
             throw new IllegalArgumentException("PartPattern name must not be blank");
         this.target = Objects.requireNonNull(target, "PartPattern target must not be null");
         this.requirement = Objects.requireNonNull(requirement, "PartPattern requirement must not be null");
         this.groups = Set.copyOf(groups);
+        this.diagnostics = diagnostics == null ? DiagnosticMetadata.empty() : diagnostics;
     }
 
     // ── Factory: from TargetPattern ───────────────────────────────────
 
     public static PartPattern of(TargetPattern target) {
-        return new PartPattern("part", target, PointRequirement.required, Set.of());
+        return new PartPattern("part", target, PointRequirement.required, Set.of(), DiagnosticMetadata.empty());
     }
 
     public static PartPattern of(String name, TargetPattern target) {
-        return new PartPattern(name, target, PointRequirement.required, Set.of());
+        return new PartPattern(name, target, PointRequirement.required, Set.of(), DiagnosticMetadata.empty());
     }
 
     // ── Factory: convenient presets ───────────────────────────────────
@@ -96,35 +98,40 @@ public final class PartPattern {
 
     /** An optional air/any cell — skipped by the default emitter. */
     public static PartPattern air() {
-        return new PartPattern("air", Targets.block(), PointRequirement.optional, Set.of());
+        return new PartPattern("air", Targets.block(), PointRequirement.optional, Set.of(), DiagnosticMetadata.empty());
     }
 
     // ── Fluent modifiers (return new PartPattern) ─────────────────────
 
     public PartPattern target(TargetPattern target) {
-        return new PartPattern(name, target, requirement, groups);
+        return new PartPattern(name, target, requirement, groups, diagnostics);
     }
 
     public PartPattern where(PredicateDescriptor predicate) {
-        return new PartPattern(name, target.where(predicate), requirement, groups);
+        return new PartPattern(name, target.where(predicate), requirement, groups, diagnostics);
     }
 
     public PartPattern capture(String captureName) {
-        return new PartPattern(name, target.capture(captureName), requirement, groups);
+        return new PartPattern(name, target.capture(captureName), requirement, groups, diagnostics);
     }
 
     public PartPattern optional() {
-        return new PartPattern(name, target, PointRequirement.optional, groups);
+        return new PartPattern(name, target, PointRequirement.optional, groups, diagnostics);
     }
 
     public PartPattern required() {
-        return new PartPattern(name, target, PointRequirement.required, groups);
+        return new PartPattern(name, target, PointRequirement.required, groups, diagnostics);
     }
 
     public PartPattern group(String group) {
         var next = new LinkedHashSet<>(groups);
         next.add(group);
-        return new PartPattern(name, target, requirement, next);
+        return new PartPattern(name, target, requirement, next, diagnostics);
+    }
+
+    /** Attach diagnostic metadata (flows to DiagnosticNode evidence). */
+    public PartPattern metadata(DiagnosticMetadata meta) {
+        return new PartPattern(name, target, requirement, groups, meta);
     }
 
     // ── Accessors ─────────────────────────────────────────────────────
@@ -139,6 +146,10 @@ public final class PartPattern {
 
     public PointRequirement requirement() {
         return requirement;
+    }
+
+    public DiagnosticMetadata diagnostics() {
+        return diagnostics;
     }
 
     public Set<String> groups() {

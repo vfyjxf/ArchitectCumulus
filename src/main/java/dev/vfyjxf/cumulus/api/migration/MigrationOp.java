@@ -18,7 +18,7 @@ import net.minecraft.resources.ResourceLocation;
  *
  * <h2>Custom ops</h2>
  * Implement this interface directly, then the op will work in both DSL and datapack
- * (provided a {@link MigrationOpRegistry} entry exists for the {@link #id()}).
+ * (identified by its {@link #id()}).
  *
  * <pre>{@code
  * public final class MyCustomOp implements MigrationOp {
