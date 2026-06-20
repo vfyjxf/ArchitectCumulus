@@ -25,6 +25,7 @@ import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
 import dev.vfyjxf.cumulus.api.target.TargetTypes;
 import dev.vfyjxf.cumulus.api.target.types.ContextTargetType;
+import dev.vfyjxf.cumulus.api.target.types.RegionTargetType;
 import dev.vfyjxf.cumulus.api.transform.Transforms;
 import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.visualization.VisualizationElement;
@@ -246,7 +247,8 @@ public final class StructureCheckExecutor {
             }
             // Match extra points
             for (var extraPoint : phaseResult.extraPoints()) {
-                var extraBounds = new Bounds(extraPoint.location(), extraPoint.location());
+                // Region targets need from/to bounds; other targets use single-cell
+                var extraBounds = computeBounds(extraPoint);
                 matchPoint(extraPoint, extraBounds, definition, anchor, snapshot, predicateRegistry, checkCtx, nodes, edges, requests, visualization, matchedPoints);
             }
             // Verify count constraints
@@ -254,6 +256,17 @@ public final class StructureCheckExecutor {
             for (var constraint : phaseResult.constraints()) {
                 int count = (int) finalMatches.count(constraint.filter());
                 if (!constraint.isSatisfied(count)) {
+                    // Ensure a root node exists before adding constraint node
+                    if (nodes.isEmpty()) {
+                        nodes.add(new DiagnosticNode(
+                                        "root",
+                                        Severity.error,
+                                        "Structure check failed",
+                                        "diagnostic.cumulus.structure_failed",
+                                        List.of(),
+                                        "runtime/check",
+                                        List.of()));
+                    }
                     nodes.add(new DiagnosticNode(
                                     "constraint_violation",
                                     Severity.error,
@@ -262,9 +275,7 @@ public final class StructureCheckExecutor {
                                     List.of(),
                                     "runtime/check/constraint",
                                     List.of()));
-                    if (nodes.size() > 1) {
-                        edges.add(new DiagnosticEdge("root", "constraint_violation", "caused_by"));
-                    }
+                    edges.add(new DiagnosticEdge("root", "constraint_violation", "caused_by"));
                 }
             }
         }
@@ -333,6 +344,34 @@ public final class StructureCheckExecutor {
                         target.properties(),
                         bounds.min(),
                         absolute));
+    }
+
+    /**
+     * Compute bounds for a point: region targets use from/to properties,
+     * everything else uses the point's location as a single-cell bounds.
+     */
+    private static Bounds computeBounds(StructurePointDefinition point) {
+        if (RegionTargetType.instance.id().equals(point.target().typeId())) {
+            var fromStr = point.target().properties().get("from");
+            var toStr = point.target().properties().get("to");
+            if (fromStr != null && toStr != null) {
+                var from = parseRelativePos(fromStr);
+                var to = parseRelativePos(toStr);
+                if (from != null && to != null) {
+                    return new Bounds(from, to);
+                }
+            }
+        }
+        return new Bounds(point.location(), point.location());
+    }
+
+    private static RelativeBlockPos parseRelativePos(String value) {
+        if (value == null || value.isBlank())
+            return null;
+        var parts = value.split(",");
+        if (parts.length != 3)
+            return null;
+        return RelativeBlockPos.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
     }
 
     private static List<CheckPlanEntry> fallbackEntries(StructureDefinition definition) {
