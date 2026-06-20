@@ -25,6 +25,6 @@ public record SubstructureGraphResolution(
 
     public boolean hasErrors() {
         return diagnostics.nodes().stream().anyMatch(node -> node.severity().ordinal()
-                >= dev.vfyjxf.cumulus.api.diagnostic.Severity.ERROR.ordinal());
+                >= dev.vfyjxf.cumulus.api.diagnostic.Severity.error.ordinal());
     }
 }

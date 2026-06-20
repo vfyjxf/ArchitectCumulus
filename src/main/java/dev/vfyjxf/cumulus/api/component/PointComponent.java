@@ -38,7 +38,7 @@ public record PointComponent(
     }
 
     public PointComponent(String name, RelativeBlockPos location) {
-        this(name, location, Targets.block(), PointRequirement.REQUIRED, Set.of(), DiagnosticMetadata.empty());
+        this(name, location, Targets.block(), PointRequirement.required, Set.of(), DiagnosticMetadata.empty());
     }
 
     public PointComponent target(TargetPattern target) {
@@ -50,7 +50,7 @@ public record PointComponent(
     }
 
     public PointComponent optional() {
-        return new PointComponent(name, location, target, PointRequirement.OPTIONAL, groups, diagnostics);
+        return new PointComponent(name, location, target, PointRequirement.optional, groups, diagnostics);
     }
 
     public PointComponent group(String group) {

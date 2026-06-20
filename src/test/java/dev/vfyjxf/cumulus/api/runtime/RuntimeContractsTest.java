@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.api.runtime;
 
 import dev.vfyjxf.cumulus.api.ownership.ClaimMode;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.ownership.PartClaim;
 import dev.vfyjxf.cumulus.api.ownership.StructureClaimIndex;
 import dev.vfyjxf.cumulus.api.partition.SectionKey;
@@ -28,8 +29,8 @@ class RuntimeContractsTest {
         var ledger = new RequestLedger();
         var request = new DataRequest(
                 section,
-                RequestReason.BIND_NEEDS_SECTION,
-                RequestPriority.HIGH,
+                RequestReason.bindNeedsSection,
+                RequestPriority.high,
                 20,
                 "cumulus:test/checker");
 
@@ -43,14 +44,14 @@ class RuntimeContractsTest {
         var key = new StructureInstanceKey(ResourceLocation.parse("cumulus:blast_furnace"), new BlockPos(10, 64, 10));
         var context = RuntimeStructureContext.builder(key)
                 .revision(7)
-                .put("facing", "north")
-                .put("controller", "10,64,10")
+                .put(ContextKey.string("facing"), "north")
+                .put(ContextKey.string("controller"), "10,64,10")
                 .build();
 
-        var delta = new InstanceDelta(key, InstanceStatus.VALID, context);
+        var delta = new InstanceDelta(key, InstanceStatus.valid, context);
 
         assertEquals(7, delta.context().revision());
-        assertEquals("north", delta.context().values().get("facing"));
+        assertEquals("north", delta.context().get(ContextKey.string("facing")).orElse(null));
         assertEquals(key, delta.key());
     }
 
@@ -61,10 +62,10 @@ class RuntimeContractsTest {
         var second = new StructureInstanceKey(ResourceLocation.parse("cumulus:child"), new BlockPos(1, 64, 0));
         var index = new StructureClaimIndex();
 
-        assertTrue(index.claim(new PartClaim(part, first, ClaimMode.SHARED)).isEmpty());
-        assertTrue(index.claim(new PartClaim(part, second, ClaimMode.SHARED)).isEmpty());
+        assertTrue(index.claim(new PartClaim(part, first, ClaimMode.shared)).isEmpty());
+        assertTrue(index.claim(new PartClaim(part, second, ClaimMode.shared)).isEmpty());
 
-        var conflict = index.claim(new PartClaim(part, second, ClaimMode.EXCLUSIVE));
+        var conflict = index.claim(new PartClaim(part, second, ClaimMode.exclusive));
 
         assertTrue(conflict.isPresent());
         assertEquals(first, conflict.orElseThrow().existing().owner());

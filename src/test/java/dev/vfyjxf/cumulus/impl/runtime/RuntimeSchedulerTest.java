@@ -6,6 +6,7 @@ import dev.vfyjxf.cumulus.api.request.DataRequest;
 import dev.vfyjxf.cumulus.api.request.RequestPriority;
 import dev.vfyjxf.cumulus.api.request.RequestReason;
 import dev.vfyjxf.cumulus.api.runtime.InstanceDelta;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.RuntimeStructureContext;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
@@ -73,8 +74,8 @@ class RuntimeSchedulerTest {
         var instance = key("cumulus:machine", new BlockPos(0, 64, 0));
         var request = new DataRequest(
                 new SectionKey(1, 4, 0),
-                RequestReason.CHECK_NEEDS_CONTEXT,
-                RequestPriority.HIGH,
+                RequestReason.checkNeedsContext,
+                RequestPriority.high,
                 20,
                 "cumulus:machine/controller");
         scheduler.register(instance, plan("cumulus:machine", 0, 0));
@@ -94,9 +95,9 @@ class RuntimeSchedulerTest {
         var instance = key("cumulus:machine", new BlockPos(0, 64, 0));
         var context = RuntimeStructureContext.builder(instance)
                 .revision(7)
-                .put("controller", "0,64,0")
+                .put(ContextKey.string("controller"), "0,64,0")
                 .build();
-        var delta = new InstanceDelta(instance, InstanceStatus.VALID, context);
+        var delta = new InstanceDelta(instance, InstanceStatus.valid, context);
         scheduler.register(instance, plan("cumulus:machine", 0, 0));
 
         scheduler.markDirty(new SectionKey(0, 4, 0));

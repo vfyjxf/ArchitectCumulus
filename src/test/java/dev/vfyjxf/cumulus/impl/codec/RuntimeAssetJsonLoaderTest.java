@@ -84,7 +84,7 @@ class RuntimeAssetJsonLoaderTest {
 
         assertFalse(result.valid());
         assertEquals(List.of("INVALID_JSON"), result.diagnostics().nodes().stream()
-                .filter(node -> node.severity() == dev.vfyjxf.cumulus.api.diagnostic.Severity.ERROR)
+                .filter(node -> node.severity() == dev.vfyjxf.cumulus.api.diagnostic.Severity.error)
                 .map(node -> node.id())
                 .toList());
     }

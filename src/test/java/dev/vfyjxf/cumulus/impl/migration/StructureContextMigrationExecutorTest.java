@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.impl.migration;
 
 import dev.vfyjxf.cumulus.api.definition.Structures;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.migration.MigrationDescriptor;
 import dev.vfyjxf.cumulus.api.migration.StructureVersionDescriptor;
 import dev.vfyjxf.cumulus.api.runtime.RuntimeStructureContext;
@@ -23,9 +24,9 @@ class StructureContextMigrationExecutorTest {
                 .version(new StructureVersionDescriptor(2, ResourceLocation.parse("cumulus:machine")))
                 .migration(rename(1, 2, "cumulus:migrations/machine_1_to_2", "facing", "orientation"))
                 .build();
-        var context = context(Map.of(
-                "facing", "north",
-                "controller", "1,64,1"));
+        var context = context(java.util.Map.of(
+                ContextKey.string("facing"), "north",
+                ContextKey.string("controller"), "1,64,1"));
 
         var result = StructureContextMigrationExecutor.migrate(definition, context, 1, 2);
 
@@ -34,8 +35,8 @@ class StructureContextMigrationExecutorTest {
         assertEquals(ResourceLocation.parse("cumulus:migrations/machine_1_to_2"),
                 result.appliedMigrations().getFirst().migrationId());
         assertEquals(Map.of(
-                "orientation", "north",
-                "controller", "1,64,1"),
+                ContextKey.string("orientation"), "north",
+                ContextKey.string("controller"), "1,64,1"),
                 result.context().values());
         assertEquals(1, result.context().revision());
         assertEquals(0, result.diagnostics().nodes().size());
@@ -50,7 +51,7 @@ class StructureContextMigrationExecutorTest {
                 .migration(rename(1, 2, "cumulus:migrations/machine_1_to_2", "facing", "orientation"))
                 .migration(rename(2, 3, "cumulus:migrations/machine_2_to_3", "orientation", "direction"))
                 .build();
-        var context = context(Map.of("facing", "east"));
+        var context = context(java.util.Map.of(ContextKey.string("facing"), "east"));
 
         var result = StructureContextMigrationExecutor.migrate(definition, context, 1, 3);
 
@@ -59,7 +60,7 @@ class StructureContextMigrationExecutorTest {
                         ResourceLocation.parse("cumulus:migrations/machine_1_to_2"),
                         ResourceLocation.parse("cumulus:migrations/machine_2_to_3")),
                 result.appliedMigrations().stream().map(MigrationDescriptor::migrationId).toList());
-        assertEquals(Map.of("direction", "east"), result.context().values());
+        assertEquals(java.util.Map.of(ContextKey.string("direction"), "east"), result.context().values());
     }
 
     @Test
@@ -69,7 +70,7 @@ class StructureContextMigrationExecutorTest {
                 .version(new StructureVersionDescriptor(3, ResourceLocation.parse("cumulus:machine")))
                 .migration(rename(1, 2, "cumulus:migrations/machine_1_to_2", "facing", "orientation"))
                 .build();
-        var context = context(Map.of("facing", "south"));
+        var context = context(java.util.Map.of(ContextKey.string("facing"), "south"));
 
         var error = assertThrows(MigrationPathException.class,
                 () -> StructureContextMigrationExecutor.migrate(definition, context, 1, 3));
@@ -95,15 +96,15 @@ class StructureContextMigrationExecutorTest {
                                 "from_context", "owner",
                                 "to_context", "primary_owner")))
                 .build();
-        var context = context(Map.of(
-                "owner", "alex",
-                "facing", "west"));
+        var context = context(java.util.Map.of(
+                ContextKey.string("owner"), "alex",
+                ContextKey.string("facing"), "west"));
 
         var result = StructureContextMigrationExecutor.migrate(definition, context, 2, 4);
 
         assertEquals(Map.of(
-                "primary_owner", "alex",
-                "facing", "west"),
+                ContextKey.string("primary_owner"), "alex",
+                ContextKey.string("facing"), "west"),
                 result.context().values());
         assertEquals(1, result.context().revision());
     }
@@ -113,7 +114,7 @@ class StructureContextMigrationExecutorTest {
         var definition = Structures.define(ResourceLocation.parse("cumulus:machine"))
                 .migration(rename(1, 2, "cumulus:migrations/machine_1_to_2", "facing", "orientation"))
                 .build();
-        var context = context(Map.of("facing", "north"));
+        var context = context(java.util.Map.of(ContextKey.string("facing"), "north"));
 
         var result = StructureContextMigrationExecutor.migrate(definition, context, 2, 2);
 
@@ -134,13 +135,11 @@ class StructureContextMigrationExecutorTest {
                         "to_context", toKey));
     }
 
-    private static RuntimeStructureContext context(Map<String, String> values) {
+    private static RuntimeStructureContext context(java.util.Map<ContextKey<?>, Object> values) {
         var builder = RuntimeStructureContext.builder(new StructureInstanceKey(
                 ResourceLocation.parse("cumulus:machine"),
                 new BlockPos(1, 64, 1))).revision(1);
-        for (var entry : values.entrySet()) {
-            builder.put(entry.getKey(), entry.getValue());
-        }
+        builder.putAll(values);
         return builder.build();
     }
 }

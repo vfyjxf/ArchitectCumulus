@@ -38,7 +38,7 @@ class MinecraftBuildTargetTest {
         var target = new MinecraftBuildTarget(BlockPos.ZERO, writer);
         var action = new BuildAction(
                 "frame",
-                BuildActionKind.REGION,
+                BuildActionKind.region,
                 ResourceLocation.parse("cumulus:region"),
                 RelativeBlockPos.of(0, 0, 0),
                 RelativeBlockPos.of(1, 1, 0),
@@ -63,7 +63,7 @@ class MinecraftBuildTargetTest {
         var target = new MinecraftBuildTarget(BlockPos.ZERO, blockWriter, fluidWriter);
         var action = new BuildAction(
                 "water",
-                BuildActionKind.POINT,
+                BuildActionKind.point,
                 ResourceLocation.parse("cumulus:fluid"),
                 RelativeBlockPos.of(0, 1, 0),
                 RelativeBlockPos.of(0, 1, 0),
@@ -86,7 +86,7 @@ class MinecraftBuildTargetTest {
         var target = new MinecraftBuildTarget(BlockPos.ZERO, blockWriter);
         var action = new BuildAction(
                 "energy",
-                BuildActionKind.POINT,
+                BuildActionKind.point,
                 ResourceLocation.parse("cumulus:capability"),
                 RelativeBlockPos.of(0, 1, 0),
                 RelativeBlockPos.of(0, 1, 0),
@@ -111,7 +111,7 @@ class MinecraftBuildTargetTest {
         var target = new MinecraftBuildTarget(BlockPos.ZERO, blockWriter);
         var action = new BuildAction(
                 "energy",
-                BuildActionKind.POINT,
+                BuildActionKind.point,
                 ResourceLocation.parse("cumulus:capability"),
                 RelativeBlockPos.of(0, 0, 0),
                 RelativeBlockPos.of(0, 0, 0),
@@ -130,7 +130,7 @@ class MinecraftBuildTargetTest {
         var target = new MinecraftBuildTarget(BlockPos.ZERO, blockWriter);
         var action = new BuildAction(
                 "energy",
-                BuildActionKind.POINT,
+                BuildActionKind.point,
                 ResourceLocation.parse("cumulus:capability"),
                 RelativeBlockPos.of(0, 0, 0),
                 RelativeBlockPos.of(0, 0, 0),
@@ -161,7 +161,7 @@ class MinecraftBuildTargetTest {
                 capabilityWriter);
         var action = new BuildAction(
                 "energy",
-                BuildActionKind.POINT,
+                BuildActionKind.point,
                 ResourceLocation.parse("cumulus:capability"),
                 RelativeBlockPos.of(0, 1, 0),
                 RelativeBlockPos.of(0, 1, 0),
@@ -201,7 +201,7 @@ class MinecraftBuildTargetTest {
                 capabilityWriter);
         var action = new BuildAction(
                 "energy",
-                BuildActionKind.POINT,
+                BuildActionKind.point,
                 ResourceLocation.parse("cumulus:capability"),
                 RelativeBlockPos.of(0, 1, 0),
                 RelativeBlockPos.of(0, 1, 0),
@@ -230,7 +230,7 @@ class MinecraftBuildTargetTest {
         var target = new MinecraftBuildTarget(BlockPos.ZERO, blockWriter, fluidWriter, blockEntityWriter);
         var action = new BuildAction(
                 "controller",
-                BuildActionKind.POINT,
+                BuildActionKind.point,
                 ResourceLocation.parse("cumulus:block_entity"),
                 RelativeBlockPos.of(2, 0, 0),
                 RelativeBlockPos.of(2, 0, 0),
@@ -265,7 +265,7 @@ class MinecraftBuildTargetTest {
                 entityWriter);
         var action = new BuildAction(
                 "worker",
-                BuildActionKind.POINT,
+                BuildActionKind.point,
                 ResourceLocation.parse("cumulus:entity"),
                 RelativeBlockPos.of(0, 1, -1),
                 RelativeBlockPos.of(0, 1, -1),
@@ -307,7 +307,7 @@ class MinecraftBuildTargetTest {
                 entityWriter);
         var action = new BuildAction(
                 "worker",
-                BuildActionKind.POINT,
+                BuildActionKind.point,
                 ResourceLocation.parse("cumulus:entity"),
                 RelativeBlockPos.of(0, 0, 0),
                 RelativeBlockPos.of(0, 0, 0));
@@ -325,7 +325,7 @@ class MinecraftBuildTargetTest {
         var target = new MinecraftBuildTarget(BlockPos.ZERO, writer);
         var unsupported = new BuildAction(
                 "fluid",
-                BuildActionKind.POINT,
+                BuildActionKind.point,
                 ResourceLocation.parse("cumulus:fluid"),
                 RelativeBlockPos.of(0, 0, 0),
                 RelativeBlockPos.of(0, 0, 0));
@@ -342,7 +342,7 @@ class MinecraftBuildTargetTest {
     private static BuildAction blockAction(String id, String blockId, RelativeBlockPos pos) {
         return new BuildAction(
                 id,
-                BuildActionKind.POINT,
+                BuildActionKind.point,
                 ResourceLocation.parse("cumulus:block"),
                 pos,
                 pos,

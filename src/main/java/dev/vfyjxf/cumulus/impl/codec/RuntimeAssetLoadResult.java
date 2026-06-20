@@ -15,6 +15,6 @@ public record RuntimeAssetLoadResult(
 
     public boolean valid() {
         return diagnostics.nodes().stream()
-                .noneMatch(node -> node.severity() == dev.vfyjxf.cumulus.api.diagnostic.Severity.ERROR);
+                .noneMatch(node -> node.severity() == dev.vfyjxf.cumulus.api.diagnostic.Severity.error);
     }
 }

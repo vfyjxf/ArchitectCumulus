@@ -42,7 +42,7 @@ public final class StructureDefinitionValidator {
                 }
             }
 
-            if (point.requirement() != PointRequirement.REQUIRED) {
+            if (point.requirement() != PointRequirement.required) {
                 continue;
             }
 

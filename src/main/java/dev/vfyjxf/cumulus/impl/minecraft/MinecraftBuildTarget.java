@@ -19,14 +19,14 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public final class MinecraftBuildTarget implements BuildTarget {
-    private static final ResourceLocation BLOCK = ResourceLocation.parse("cumulus:block");
-    private static final ResourceLocation BLOCK_ENTITY = ResourceLocation.parse("cumulus:block_entity");
-    private static final ResourceLocation CAPABILITY = ResourceLocation.parse("cumulus:capability");
-    private static final ResourceLocation ENTITY = ResourceLocation.parse("cumulus:entity");
-    private static final ResourceLocation FLUID = ResourceLocation.parse("cumulus:fluid");
-    private static final ResourceLocation REGION = ResourceLocation.parse("cumulus:region");
-    private static final ResourceLocation DEFAULT_BLOCK = ResourceLocation.parse("minecraft:air");
-    private static final ResourceLocation DEFAULT_FLUID = ResourceLocation.parse("minecraft:water");
+    private static final ResourceLocation block = ResourceLocation.parse("cumulus:block");
+    private static final ResourceLocation blockEntity = ResourceLocation.parse("cumulus:block_entity");
+    private static final ResourceLocation capability = ResourceLocation.parse("cumulus:capability");
+    private static final ResourceLocation entity = ResourceLocation.parse("cumulus:entity");
+    private static final ResourceLocation fluid = ResourceLocation.parse("cumulus:fluid");
+    private static final ResourceLocation region = ResourceLocation.parse("cumulus:region");
+    private static final ResourceLocation defaultBlock = ResourceLocation.parse("minecraft:air");
+    private static final ResourceLocation defaultFluid = ResourceLocation.parse("minecraft:water");
 
     private final BlockPos anchor;
     private final BlockBuildWriter writer;
@@ -36,11 +36,11 @@ public final class MinecraftBuildTarget implements BuildTarget {
     private final CapabilityBuildWriter capabilityWriter;
 
     public MinecraftBuildTarget(BlockPos anchor, BlockBuildWriter writer) {
-        this(anchor, writer, NoopFluidBuildWriter.INSTANCE);
+        this(anchor, writer, NoopFluidBuildWriter.instance);
     }
 
     public MinecraftBuildTarget(BlockPos anchor, BlockBuildWriter writer, FluidBuildWriter fluidWriter) {
-        this(anchor, writer, fluidWriter, NoopBlockEntityBuildWriter.INSTANCE);
+        this(anchor, writer, fluidWriter, NoopBlockEntityBuildWriter.instance);
     }
 
     public MinecraftBuildTarget(
@@ -48,7 +48,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
             BlockBuildWriter writer,
             FluidBuildWriter fluidWriter,
             BlockEntityBuildWriter blockEntityWriter) {
-        this(anchor, writer, fluidWriter, blockEntityWriter, NoopEntityBuildWriter.INSTANCE);
+        this(anchor, writer, fluidWriter, blockEntityWriter, NoopEntityBuildWriter.instance);
     }
 
     public MinecraftBuildTarget(
@@ -57,7 +57,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
             FluidBuildWriter fluidWriter,
             BlockEntityBuildWriter blockEntityWriter,
             EntityBuildWriter entityWriter) {
-        this(anchor, writer, fluidWriter, blockEntityWriter, entityWriter, NoopCapabilityBuildWriter.INSTANCE);
+        this(anchor, writer, fluidWriter, blockEntityWriter, entityWriter, NoopCapabilityBuildWriter.instance);
     }
 
     public MinecraftBuildTarget(
@@ -111,7 +111,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
         if (action == null) {
             throw new IllegalArgumentException("Build action must not be null");
         }
-        if (CAPABILITY.equals(action.targetType())
+        if (capability.equals(action.targetType())
                 && !action.properties().getOrDefault("operation", "").isBlank()
                 && action.properties().getOrDefault("block", "").isBlank()) {
             return capabilityWriter.canWrite(capabilityName(action), capabilityOperation(action));
@@ -121,16 +121,16 @@ public final class MinecraftBuildTarget implements BuildTarget {
 
     @Override
     public boolean contains(BuildAction action) {
-        if (FLUID.equals(action.targetType())) {
+        if (fluid.equals(action.targetType())) {
             return containsFluid(action);
         }
-        if (BLOCK_ENTITY.equals(action.targetType())) {
+        if (blockEntity.equals(action.targetType())) {
             return containsBlockEntity(action);
         }
-        if (ENTITY.equals(action.targetType())) {
+        if (entity.equals(action.targetType())) {
             return containsEntity(action);
         }
-        if (CAPABILITY.equals(action.targetType())) {
+        if (capability.equals(action.targetType())) {
             return containsCapability(action);
         }
         var blockId = blockId(action);
@@ -145,19 +145,19 @@ public final class MinecraftBuildTarget implements BuildTarget {
         if (!supports(action)) {
             return;
         }
-        if (FLUID.equals(action.targetType())) {
+        if (fluid.equals(action.targetType())) {
             applyFluid(action);
             return;
         }
-        if (BLOCK_ENTITY.equals(action.targetType())) {
+        if (blockEntity.equals(action.targetType())) {
             applyBlockEntity(action);
             return;
         }
-        if (ENTITY.equals(action.targetType())) {
+        if (entity.equals(action.targetType())) {
             applyEntity(action);
             return;
         }
-        if (CAPABILITY.equals(action.targetType())) {
+        if (capability.equals(action.targetType())) {
             applyCapability(action);
             return;
         }
@@ -195,14 +195,14 @@ public final class MinecraftBuildTarget implements BuildTarget {
     }
 
     private static ResourceLocation blockId(BuildAction action) {
-        if (!BLOCK.equals(action.targetType()) && !REGION.equals(action.targetType()) && !CAPABILITY.equals(action.targetType())) {
+        if (!block.equals(action.targetType()) && !region.equals(action.targetType()) && !capability.equals(action.targetType())) {
             return null;
         }
-        if (CAPABILITY.equals(action.targetType())
+        if (capability.equals(action.targetType())
                 && action.properties().getOrDefault("block", "").isBlank()) {
             return null;
         }
-        return ResourceLocation.parse(action.properties().getOrDefault("block", DEFAULT_BLOCK.toString()));
+        return ResourceLocation.parse(action.properties().getOrDefault("block", defaultBlock.toString()));
     }
 
     private boolean containsCapabilityMutation(BuildAction action) {
@@ -254,7 +254,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
     }
 
     private static boolean hasCapabilityMutation(BuildAction action) {
-        return CAPABILITY.equals(action.targetType())
+        return capability.equals(action.targetType())
                 && !action.properties().getOrDefault("operation", "").isBlank();
     }
 
@@ -311,7 +311,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
     }
 
     private static ResourceLocation fluidId(BuildAction action) {
-        return ResourceLocation.parse(action.properties().getOrDefault("fluid", DEFAULT_FLUID.toString()));
+        return ResourceLocation.parse(action.properties().getOrDefault("fluid", defaultFluid.toString()));
     }
 
     private boolean containsBlockEntity(BuildAction action) {
@@ -342,7 +342,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
     }
 
     private static ResourceLocation blockEntityBlockId(BuildAction action) {
-        return ResourceLocation.parse(action.properties().getOrDefault("block", DEFAULT_BLOCK.toString()));
+        return ResourceLocation.parse(action.properties().getOrDefault("block", defaultBlock.toString()));
     }
 
     private static ResourceLocation blockEntityId(BuildAction action) {
@@ -385,7 +385,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
     }
 
     private static final class LevelBlockBuildWriter implements BlockBuildWriter {
-        private static final int UPDATE_CLIENTS = Block.UPDATE_CLIENTS;
+        private static final int updateClients = Block.UPDATE_CLIENTS;
         private final LevelAccessor level;
 
         private LevelBlockBuildWriter(LevelAccessor level) {
@@ -409,12 +409,12 @@ public final class MinecraftBuildTarget implements BuildTarget {
             if (block == null) {
                 return false;
             }
-            return level.setBlock(pos, block.defaultBlockState(), UPDATE_CLIENTS);
+            return level.setBlock(pos, block.defaultBlockState(), updateClients);
         }
     }
 
     private static final class LevelFluidBuildWriter implements FluidBuildWriter {
-        private static final int UPDATE_CLIENTS = Block.UPDATE_CLIENTS;
+        private static final int updateClients = Block.UPDATE_CLIENTS;
         private final LevelAccessor level;
 
         private LevelFluidBuildWriter(LevelAccessor level) {
@@ -438,12 +438,12 @@ public final class MinecraftBuildTarget implements BuildTarget {
             if (fluid == null) {
                 return false;
             }
-            return level.setBlock(pos, fluid.defaultFluidState().createLegacyBlock(), UPDATE_CLIENTS);
+            return level.setBlock(pos, fluid.defaultFluidState().createLegacyBlock(), updateClients);
         }
     }
 
     private enum NoopFluidBuildWriter implements FluidBuildWriter {
-        INSTANCE;
+        instance;
 
         @Override
         public boolean canWrite(ResourceLocation fluidId) {
@@ -462,7 +462,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
     }
 
     private static final class LevelBlockEntityBuildWriter implements BlockEntityBuildWriter {
-        private static final int UPDATE_CLIENTS = Block.UPDATE_CLIENTS;
+        private static final int updateClients = Block.UPDATE_CLIENTS;
         private final LevelAccessor level;
 
         private LevelBlockEntityBuildWriter(LevelAccessor level) {
@@ -500,7 +500,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
             if (block == null || !canWrite(blockId, blockEntityId)) {
                 return false;
             }
-            level.setBlock(pos, block.defaultBlockState(), UPDATE_CLIENTS);
+            level.setBlock(pos, block.defaultBlockState(), updateClients);
             var blockEntity = level.getBlockEntity(pos);
             if (blockEntity == null) {
                 return false;
@@ -534,7 +534,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
     }
 
     private enum NoopBlockEntityBuildWriter implements BlockEntityBuildWriter {
-        INSTANCE;
+        instance;
 
         @Override
         public boolean canWrite(ResourceLocation blockId, ResourceLocation blockEntityId) {
@@ -626,7 +626,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
     }
 
     private enum NoopEntityBuildWriter implements EntityBuildWriter {
-        INSTANCE;
+        instance;
 
         @Override
         public boolean canWrite(ResourceLocation entityId) {
@@ -645,7 +645,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
     }
 
     private enum NoopCapabilityBuildWriter implements CapabilityBuildWriter {
-        INSTANCE;
+        instance;
 
         @Override
         public boolean canWrite(String capabilityName, String operation) {

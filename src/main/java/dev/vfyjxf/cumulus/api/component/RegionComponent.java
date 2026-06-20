@@ -45,7 +45,7 @@ public record RegionComponent(
     }
 
     public RegionComponent optional() {
-        return new RegionComponent(name, from, to, target, PointRequirement.OPTIONAL, groups, diagnostics);
+        return new RegionComponent(name, from, to, target, PointRequirement.optional, groups, diagnostics);
     }
 
     public RegionComponent group(String group) {

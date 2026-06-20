@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1200px 800px at 80% -10%, rgba(124, 92, 255, 0.15), transparent 60%),
+      radial-gradient(900px 700px at 10% 110%, rgba(34, 211, 238, 0.12), transparent 60%),
+      #07070f;
+    color: #e6e6f5;
+    font-family: "Inter", ui-sans-serif, system-ui;
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: rgba(124, 92, 255, 0.4);
+  }
+  /* custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0a0a18;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #2a2a55, #1c1c3b);
+    border-radius: 8px;
+    border: 2px solid #0a0a18;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #3a3a72, #272750);
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-ink-900/60 backdrop-blur-xl border border-white/5;
+  }
+  .glass-strong {
+    @apply bg-ink-800/80 backdrop-blur-2xl border border-white/10;
+  }
+  .grad-text {
+    @apply bg-gradient-to-r from-brand-300 via-cyan2 to-magenta bg-clip-text text-transparent;
+  }
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(124, 92, 255, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124, 92, 255, 0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridmove 8s linear infinite;
+  }
+  .code-block {
+    @apply font-mono text-[12.5px] leading-relaxed bg-ink-950/80 border border-white/5 rounded-xl p-4 overflow-auto;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium border border-white/10 bg-white/5;
+  }
+  .pill {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider;
+  }
+}
+
+@layer utilities {
+  .text-shimmer {
+    background: linear-gradient(90deg, #bcbcff 0%, #22d3ee 25%, #f0abfc 50%, #bcbcff 75%, #22d3ee 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 6s linear infinite;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+}

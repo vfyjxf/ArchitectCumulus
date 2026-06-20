@@ -12,7 +12,7 @@ import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 
 public final class RuntimeAssetExporter {
-    private static final ResourceLocation REGION_TARGET = ResourceLocation.parse("cumulus:region");
+    private static final ResourceLocation regionTarget = ResourceLocation.parse("cumulus:region");
 
     private RuntimeAssetExporter() {
     }
@@ -125,7 +125,7 @@ public final class RuntimeAssetExporter {
                 })
                 .toList());
         values.put("regions", plan.entries().stream()
-                .filter(entry -> REGION_TARGET.equals(entry.targetType()))
+                .filter(entry -> regionTarget.equals(entry.targetType()))
                 .map(entry -> {
                     var item = new LinkedHashMap<String, Object>();
                     item.put("id", entry.id());

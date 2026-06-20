@@ -10,6 +10,7 @@ import dev.vfyjxf.cumulus.api.ownership.ClaimConflict;
 import dev.vfyjxf.cumulus.api.ownership.ClaimMode;
 import dev.vfyjxf.cumulus.api.ownership.PartClaim;
 import dev.vfyjxf.cumulus.api.ownership.StructureClaimIndex;
+import dev.vfyjxf.cumulus.api.context.WellKnownContextKeys;
 import dev.vfyjxf.cumulus.api.runtime.InstanceDelta;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
@@ -18,7 +19,7 @@ import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 
 final class SubstructureClaimState {
-    private static final ResourceLocation SUBSTRUCTURE_PART =
+    private static final ResourceLocation substructurePart =
             ResourceLocation.parse("cumulus:substructure_instance");
 
     private final StructureClaimIndex claims = new StructureClaimIndex();
@@ -27,11 +28,11 @@ final class SubstructureClaimState {
         var resolved = new java.util.ArrayList<InstanceDelta>();
         var diagnostics = new java.util.LinkedHashMap<StructureInstanceKey, DiagnosticGraph>();
         for (var delta : deltas) {
-            if (isChildOccurrence(delta) && delta.status() == InstanceStatus.VALID) {
-                var claim = new PartClaim(partId(delta.key()), parentOwner(delta), ClaimMode.EXCLUSIVE);
+            if (isChildOccurrence(delta) && delta.status() == InstanceStatus.valid) {
+                var claim = new PartClaim(partId(delta.key()), parentOwner(delta), ClaimMode.exclusive);
                 var conflict = claims.conflict(claim);
                 if (conflict.isPresent()) {
-                    resolved.add(new InstanceDelta(delta.key(), InstanceStatus.INVALID, delta.context()));
+                    resolved.add(new InstanceDelta(delta.key(), InstanceStatus.invalid, delta.context()));
                     diagnostics.put(delta.key(), conflictDiagnostics(conflict.orElseThrow()));
                     continue;
                 }
@@ -43,12 +44,12 @@ final class SubstructureClaimState {
     }
 
     private static boolean isChildOccurrence(InstanceDelta delta) {
-        return delta.context().values().containsKey("parent_occurrence");
+        return delta.context().values().containsKey(WellKnownContextKeys.parentOccurrence);
     }
 
     private static ResourceLocation partId(StructureInstanceKey key) {
         return ResourceLocation.fromNamespaceAndPath(
-                SUBSTRUCTURE_PART.getNamespace(),
+                substructurePart.getNamespace(),
                 key.structureId().getNamespace()
                         + "/" + key.structureId().getPath()
                         + "/" + key.anchor().getX()
@@ -57,10 +58,9 @@ final class SubstructureClaimState {
     }
 
     private static StructureInstanceKey parentOwner(InstanceDelta delta) {
-        var values = delta.context().values();
-        return new StructureInstanceKey(
-                ResourceLocation.parse(values.get("parent_structure")),
-                parseBlockPos(values.get("parent_anchor")));
+        var structure = delta.context().get(WellKnownContextKeys.parentStructure).map(ResourceLocation::parse).orElseThrow();
+        var anchor = delta.context().get(WellKnownContextKeys.parentAnchor).orElseThrow();
+        return new StructureInstanceKey(structure, parseBlockPos(anchor));
     }
 
     private static net.minecraft.core.BlockPos parseBlockPos(String value) {
@@ -79,7 +79,7 @@ final class SubstructureClaimState {
         var attempted = conflict.attempted();
         var root = new DiagnosticNode(
                 "root",
-                Severity.ERROR,
+                Severity.error,
                 "Substructure ownership conflict",
                 "diagnostic.cumulus.substructure_ownership_conflict",
                 List.of(),
@@ -87,7 +87,7 @@ final class SubstructureClaimState {
                 List.of());
         var conflictNode = new DiagnosticNode(
                 "ownership-conflict",
-                Severity.ERROR,
+                Severity.error,
                 "Substructure instance ownership conflict",
                 "diagnostic.cumulus.ownership_conflict",
                 List.of(DiagnosticEvidence.relative(

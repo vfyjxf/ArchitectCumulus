@@ -2,6 +2,8 @@ package dev.vfyjxf.cumulus.impl.substructure;
 
 import dev.vfyjxf.cumulus.api.component.ComponentDescriptor;
 import dev.vfyjxf.cumulus.api.context.ContextRuleDescriptor;
+import dev.vfyjxf.cumulus.api.context.ContextSources;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
 import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
@@ -15,7 +17,7 @@ import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 
 public final class SubstructureRuntimeComposer {
-    private static final ResourceLocation REGION_TARGET = ResourceLocation.parse("cumulus:region");
+    private static final ResourceLocation regionTarget = ResourceLocation.parse("cumulus:region");
 
     private SubstructureRuntimeComposer() {
     }
@@ -40,7 +42,7 @@ public final class SubstructureRuntimeComposer {
 
         var offsetsByOccurrence = cumulativeOffsets(graph);
         var points = new ArrayList<StructurePointDefinition>();
-        var contextRules = new ArrayList<ContextRuleDescriptor>();
+        var contextRules = new ArrayList<ContextRuleDescriptor<?>>();
         var components = new ArrayList<ComponentDescriptor>();
         for (var node : graph.nodes()) {
             var definition = definitionsById.get(node.definitionId());
@@ -90,23 +92,22 @@ public final class SubstructureRuntimeComposer {
         return List.copyOf(occurrences);
     }
 
-    private static List<ContextRuleDescriptor> translateContextRules(
-            List<ContextRuleDescriptor> rules,
+    private static List<ContextRuleDescriptor<?>> translateContextRules(
+            List<ContextRuleDescriptor<?>> rules,
             String occurrenceId) {
-        var translated = new ArrayList<ContextRuleDescriptor>();
+        var translated = new ArrayList<ContextRuleDescriptor<?>>();
         for (var rule : rules) {
-            var properties = new LinkedHashMap<>(rule.properties());
-            var key = properties.get("key");
-            if (key != null && !key.isBlank()) {
-                properties.put("key", occurrenceId + "/" + key);
-            }
-            var source = properties.get("source");
-            if (source != null && !source.isBlank()) {
-                properties.put("source", prefixSource(occurrenceId, source));
-            }
-            translated.add(new ContextRuleDescriptor(rule.id(), properties));
+            translated.add(translateRule(rule, occurrenceId));
         }
         return translated;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static ContextRuleDescriptor<?> translateRule(ContextRuleDescriptor<?> rule, String occurrenceId) {
+        var raw = (ContextRuleDescriptor) rule;
+        var prefixedKey = ContextKey.string(occurrenceId + "/" + raw.targetKey().name());
+        var prefixedSource = ContextSources.prefix(raw.source(), occurrenceId);
+        return new ContextRuleDescriptor(prefixedKey, prefixedSource);
     }
 
     private static String prefixSource(String occurrenceId, String source) {
@@ -176,7 +177,7 @@ public final class SubstructureRuntimeComposer {
     }
 
     private static TargetDescriptor translateTarget(TargetDescriptor target, RelativeBlockPos offset) {
-        if (!REGION_TARGET.equals(target.typeId())) {
+        if (!regionTarget.equals(target.typeId())) {
             return target;
         }
         var properties = new LinkedHashMap<>(target.properties());

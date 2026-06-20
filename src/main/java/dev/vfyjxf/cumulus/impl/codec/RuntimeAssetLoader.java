@@ -579,7 +579,7 @@ public final class RuntimeAssetLoader {
         if (diagnostics.isEmpty()) {
             diagnostics.add(new DiagnosticNode(
                     "root",
-                    Severity.INFO,
+                    Severity.info,
                     "Runtime asset loading failed",
                     "diagnostic.cumulus.asset_load_failed",
                     List.of(),
@@ -588,7 +588,7 @@ public final class RuntimeAssetLoader {
         }
         diagnostics.add(new DiagnosticNode(
                 code,
-                Severity.ERROR,
+                Severity.error,
                 message,
                 "diagnostic.cumulus." + code.toLowerCase(),
                 List.of(),

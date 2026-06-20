@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.impl.minecraft;
 
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.definition.Structures;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptors;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
@@ -33,8 +34,8 @@ class MinecraftRuntimeInstanceTrackerTest {
         tracker.markChanged(new BlockPos(5, 70, 5));
 
         var frame = engine.tick(1, 4);
-        assertEquals(InstanceStatus.VALID, frame.deltas().getFirst().status());
-        assertEquals("5,70,5", frame.deltas().getFirst().context().values().get("controller"));
+        assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
+        assertEquals("5,70,5", frame.deltas().getFirst().context().get(ContextKey.string("controller")).orElse(null));
     }
 
     @Test

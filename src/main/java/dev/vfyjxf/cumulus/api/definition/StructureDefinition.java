@@ -15,11 +15,11 @@ public record StructureDefinition(
         List<TransformDescriptor> transforms,
         List<StructurePointDefinition> points,
         List<ComponentDescriptor> components,
-        List<ContextRuleDescriptor> contextRules,
+        List<ContextRuleDescriptor<?>> contextRules,
         List<StructureVersionDescriptor> versions,
         List<MigrationDescriptor> migrations,
         DiagnosticMetadata diagnostics) {
-    public static final int IR_SCHEMA_VERSION = 1;
+    public static final int IR_SCHEMA_VERSION = 2;
 
     public StructureDefinition {
         if (id == null) throw new IllegalArgumentException("Structure id must not be null");
@@ -36,7 +36,7 @@ public record StructureDefinition(
             ResourceLocation id,
             List<TransformDescriptor> transforms,
             List<StructurePointDefinition> points,
-            List<ContextRuleDescriptor> contextRules,
+            List<ContextRuleDescriptor<?>> contextRules,
             DiagnosticMetadata diagnostics) {
         this(id, IR_SCHEMA_VERSION, transforms, points, List.of(), contextRules, List.of(), List.of(), diagnostics);
     }

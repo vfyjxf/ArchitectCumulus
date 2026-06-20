@@ -32,7 +32,7 @@ public final class GhostPreviewCompiler {
                     anchor.offset(entry.min().x(), entry.min().y(), entry.min().z()),
                     anchor.offset(entry.max().x(), entry.max().y(), entry.max().z()),
                     entry.properties(),
-                    selected ? Severity.WARN : Severity.INFO,
+                    selected ? Severity.warn : Severity.info,
                     selected ? 100 : 0));
         }
         return new GhostPreviewModel(plan.definitionId() + "/ghost", anchor, elements);

@@ -6,8 +6,8 @@ import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 
 public record PredicateRegistry(Map<ResourceLocation, PredicateMatcher> matchers) {
-    private static final ResourceLocation PROPERTY = ResourceLocation.parse("cumulus:property");
-    private static final ResourceLocation ID = ResourceLocation.parse("cumulus:id");
+    private static final ResourceLocation property = ResourceLocation.parse("cumulus:property");
+    private static final ResourceLocation id = ResourceLocation.parse("cumulus:id");
 
     public PredicateRegistry {
         matchers = Map.copyOf(matchers);
@@ -15,8 +15,8 @@ public record PredicateRegistry(Map<ResourceLocation, PredicateMatcher> matchers
 
     public static PredicateRegistry defaults() {
         return new PredicateRegistry(Map.of(
-                ID, PredicateRegistry::matchesId,
-                PROPERTY, PredicateRegistry::matchesProperty));
+                id, PredicateRegistry::matchesId,
+                property, PredicateRegistry::matchesProperty));
     }
 
     public PredicateRegistry register(ResourceLocation id, PredicateMatcher matcher) {
@@ -40,7 +40,7 @@ public record PredicateRegistry(Map<ResourceLocation, PredicateMatcher> matchers
         }
         var matcher = matchers.get(predicate.id());
         if (matcher == null && predicate.properties().isEmpty()) {
-            matcher = matchers.get(ID);
+            matcher = matchers.get(id);
         }
         if (matcher == null) {
             return Optional.empty();

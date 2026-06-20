@@ -54,7 +54,7 @@ class TargetSnapshotReaderTest {
         var snapshot = TargetSnapshotReader.fromDefinition(definition, source);
         var result = StructureCheckExecutor.check(definition, new BlockPos(0, 64, 0), snapshot);
 
-        assertEquals(InstanceStatus.VALID, result.status());
+        assertEquals(InstanceStatus.valid, result.status());
     }
 
     @Test
@@ -71,7 +71,7 @@ class TargetSnapshotReaderTest {
         var snapshot = TargetSnapshotReader.fromDefinition(definition, source);
         var result = StructureCheckExecutor.check(definition, new BlockPos(0, 0, 0), snapshot);
 
-        assertEquals(InstanceStatus.VALID, result.status());
+        assertEquals(InstanceStatus.valid, result.status());
     }
 
     @Test
@@ -89,7 +89,7 @@ class TargetSnapshotReaderTest {
         var snapshot = TargetSnapshotReader.fromPlan(plan, source);
         var result = StructureCheckExecutor.check(plan, new BlockPos(0, 0, 0), snapshot);
 
-        assertEquals(InstanceStatus.VALID, result.status());
+        assertEquals(InstanceStatus.valid, result.status());
     }
 
     @Test
@@ -102,7 +102,7 @@ class TargetSnapshotReaderTest {
         var snapshot = TargetSnapshotReader.fromDefinition(definition, new FakeTargetSnapshotSource());
         var result = StructureCheckExecutor.check(definition, new BlockPos(0, 0, 0), snapshot);
 
-        assertEquals(InstanceStatus.INCOMPLETE, result.status());
+        assertEquals(InstanceStatus.incomplete, result.status());
         assertEquals(1, result.requests().size());
     }
 

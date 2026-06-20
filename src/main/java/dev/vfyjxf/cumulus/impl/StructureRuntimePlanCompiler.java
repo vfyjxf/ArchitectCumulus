@@ -18,12 +18,12 @@ import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 
 public final class StructureRuntimePlanCompiler {
-    private static final ResourceLocation REGION_TARGET = ResourceLocation.parse("cumulus:region");
-    private static final ResourceLocation SUBSTRUCTURE_COMPONENT = ResourceLocation.parse("cumulus:substructure");
-    private static final ResourceLocation ROTATE_Y_90 = ResourceLocation.parse("cumulus:rotate_y_90");
-    private static final ResourceLocation ROTATE_Y_180 = ResourceLocation.parse("cumulus:rotate_y_180");
-    private static final ResourceLocation ROTATE_Y_270 = ResourceLocation.parse("cumulus:rotate_y_270");
-    private static final ResourceLocation HORIZONTAL_MIRROR = ResourceLocation.parse("cumulus:horizontal_mirror");
+    private static final ResourceLocation regionTarget = ResourceLocation.parse("cumulus:region");
+    private static final ResourceLocation substructureComponent = ResourceLocation.parse("cumulus:substructure");
+    private static final ResourceLocation rotateY90 = ResourceLocation.parse("cumulus:rotate_y_90");
+    private static final ResourceLocation rotateY180 = ResourceLocation.parse("cumulus:rotate_y_180");
+    private static final ResourceLocation rotateY270 = ResourceLocation.parse("cumulus:rotate_y_270");
+    private static final ResourceLocation horizontalMirror = ResourceLocation.parse("cumulus:horizontal_mirror");
 
     private StructureRuntimePlanCompiler() {
     }
@@ -40,7 +40,7 @@ public final class StructureRuntimePlanCompiler {
         for (var point : definition.points()) {
             var min = point.location();
             var max = point.location();
-            if (REGION_TARGET.equals(point.target().typeId())) {
+            if (regionTarget.equals(point.target().typeId())) {
                 min = parsePos(point.target().properties().get("from"));
                 max = parsePos(point.target().properties().get("to"));
             }
@@ -59,14 +59,14 @@ public final class StructureRuntimePlanCompiler {
                     point.target().typeId().getPath(),
                     min,
                     max,
-                    Severity.INFO,
+                    Severity.info,
                     point.groups().isEmpty() ? "structure" : point.groups().iterator().next(),
                     "visualization.cumulus." + point.id().value(),
                     0));
         }
 
         var substructures = definition.components().stream()
-                .filter(component -> component.typeId().equals(SUBSTRUCTURE_COMPONENT))
+                .filter(component -> component.typeId().equals(substructureComponent))
                 .toList();
         return new StructureRuntimePlan(
                 definition.id(),
@@ -100,16 +100,16 @@ public final class StructureRuntimePlanCompiler {
             throw new IllegalArgumentException("Transform must not be null");
         }
         var id = transform.id();
-        if (id.equals(ROTATE_Y_90)) {
+        if (id.equals(rotateY90)) {
             return RelativeBlockPos.of(-position.z(), position.y(), position.x());
         }
-        if (id.equals(ROTATE_Y_180)) {
+        if (id.equals(rotateY180)) {
             return RelativeBlockPos.of(-position.x(), position.y(), -position.z());
         }
-        if (id.equals(ROTATE_Y_270)) {
+        if (id.equals(rotateY270)) {
             return RelativeBlockPos.of(position.z(), position.y(), -position.x());
         }
-        if (id.equals(HORIZONTAL_MIRROR)) {
+        if (id.equals(horizontalMirror)) {
             return RelativeBlockPos.of(-position.x(), position.y(), position.z());
         }
         return position;
@@ -130,7 +130,7 @@ public final class StructureRuntimePlanCompiler {
     }
 
     private static Bounds bounds(StructurePointDefinition point, TransformDescriptor transform) {
-        if (REGION_TARGET.equals(point.target().typeId())) {
+        if (regionTarget.equals(point.target().typeId())) {
             return transformedBounds(
                     parsePos(point.target().properties().get("from")),
                     parsePos(point.target().properties().get("to")),

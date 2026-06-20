@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.impl.definition;
 
 import dev.vfyjxf.cumulus.api.component.ComponentDescriptor;
+import dev.vfyjxf.cumulus.api.context.ContextRuleDescriptor;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinitionBuilder;
 import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
@@ -39,11 +40,16 @@ public final class StructureDefinitionCompiler {
                 transforms,
                 points,
                 componentDescriptors,
-                builder.contextRules(),
+                castContextRules(builder.contextRules()),
                 builder.versions(),
                 builder.migrations(),
                 DiagnosticMetadata.empty());
         StructureDefinitionValidator.validate(definition);
         return definition;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static List<ContextRuleDescriptor<?>> castContextRules(List raw) {
+        return (List<ContextRuleDescriptor<?>>) raw;
     }
 }

@@ -43,7 +43,7 @@ class DiagnosticsAndAssetsTest {
         var nodes = new ArrayList<DiagnosticNode>();
         nodes.add(new DiagnosticNode(
                 "missing-casing",
-                Severity.ERROR,
+                Severity.error,
                 "Casing is missing",
                 "diagnostic.cumulus.missing_casing",
                 List.of(evidence),
@@ -51,7 +51,7 @@ class DiagnosticsAndAssetsTest {
                 List.of(fix)));
         nodes.add(new DiagnosticNode(
                 "root",
-                Severity.WARN,
+                Severity.warn,
                 "Machine is incomplete",
                 "diagnostic.cumulus.machine_incomplete",
                 List.of(),
@@ -83,7 +83,7 @@ class DiagnosticsAndAssetsTest {
                 "block-region",
                 RelativeBlockPos.of(0, 0, 0),
                 RelativeBlockPos.of(2, 1, 2),
-                Severity.ERROR,
+                Severity.error,
                 "casing",
                 "visualization.cumulus.missing_casing",
                 100));

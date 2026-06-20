@@ -24,20 +24,20 @@ public final class PredicateEvaluator {
         }
         var result = registry.evaluate(predicate, new PredicateTarget(target.value(), target.properties()));
         if (result.isEmpty()) {
-            return Evaluation.UNSUPPORTED;
+            return Evaluation.unsupported;
         }
         return result.orElseThrow()
-                ? Evaluation.MATCH
-                : Evaluation.FAILED;
+                ? Evaluation.match
+                : Evaluation.failed;
     }
 
     public static boolean matches(PredicateDescriptor predicate, SnapshotTarget target) {
-        return evaluate(predicate, target) == Evaluation.MATCH;
+        return evaluate(predicate, target) == Evaluation.match;
     }
 
     public enum Evaluation {
-        MATCH,
-        FAILED,
-        UNSUPPORTED
+        match,
+        failed,
+        unsupported
     }
 }

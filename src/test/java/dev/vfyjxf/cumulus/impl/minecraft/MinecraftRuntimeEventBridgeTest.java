@@ -39,7 +39,7 @@ class MinecraftRuntimeEventBridgeTest {
         bridge.markBlockChanged(new BlockPos(2, 64, 2));
 
         var frame = engine.tick(1, 4);
-        assertEquals(InstanceStatus.VALID, frame.deltas().getFirst().status());
+        assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
     }
 
     @Test
@@ -74,7 +74,7 @@ class MinecraftRuntimeEventBridgeTest {
         bridge.discoverChangedAnchor(new BlockPos(4, 64, 4), reader, Map.of());
 
         var frame = engine.tick(1, 4);
-        assertEquals(InstanceStatus.VALID, frame.deltas().getFirst().status());
+        assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
     }
 
     @Test
@@ -115,7 +115,7 @@ class MinecraftRuntimeEventBridgeTest {
         bridge.discoverChangedAnchor(new BlockPos(5, 64, 4), reader, Map.of());
 
         var frame = engine.tick(1, 4);
-        assertEquals("5,64,4", frame.deltas().getFirst().context().values().get("controller"));
+        assertEquals("5,64,4", frame.deltas().getFirst().context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller")).orElse(null));
     }
 
     @Test
@@ -151,8 +151,8 @@ class MinecraftRuntimeEventBridgeTest {
         bridge.discoverChangedAnchor(new BlockPos(6, 64, 6), reader, Map.of());
 
         var frame = engine.tick(1, 4);
-        assertEquals(InstanceStatus.VALID, frame.deltas().getFirst().status());
-        assertEquals("6,64,6", frame.deltas().getFirst().context().values().get("controller"));
+        assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
+        assertEquals("6,64,6", frame.deltas().getFirst().context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller")).orElse(null));
     }
 
     @Test
@@ -175,8 +175,8 @@ class MinecraftRuntimeEventBridgeTest {
         bridge.discoverChangedAnchor(new BlockPos(5, 64, 4), reader, Map.of());
 
         var frame = engine.tick(1, 4);
-        assertEquals(InstanceStatus.VALID, frame.deltas().getFirst().status());
-        assertEquals("5,64,4", frame.deltas().getFirst().context().values().get("controller"));
+        assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
+        assertEquals("5,64,4", frame.deltas().getFirst().context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller")).orElse(null));
     }
 
     @Test

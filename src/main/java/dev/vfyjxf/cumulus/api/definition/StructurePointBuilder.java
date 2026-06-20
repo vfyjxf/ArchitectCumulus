@@ -32,11 +32,11 @@ public record StructurePointBuilder(
     }
 
     public StructurePointBuilder(String id, RelativeBlockPos location, TargetPattern target) {
-        this(id, location, target, PointRequirement.REQUIRED, Set.of(), DiagnosticMetadata.empty());
+        this(id, location, target, PointRequirement.required, Set.of(), DiagnosticMetadata.empty());
     }
 
     public StructurePointBuilder optional() {
-        return new StructurePointBuilder(id, location, target, PointRequirement.OPTIONAL, groups, diagnostics);
+        return new StructurePointBuilder(id, location, target, PointRequirement.optional, groups, diagnostics);
     }
 
     public StructurePointBuilder group(String group) {

@@ -13,12 +13,12 @@ import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 
 public final class BuildPlanExecutor {
-    private static final ResourceLocation BLOCK = ResourceLocation.parse("cumulus:block");
-    private static final ResourceLocation BLOCK_ENTITY = ResourceLocation.parse("cumulus:block_entity");
-    private static final ResourceLocation CAPABILITY = ResourceLocation.parse("cumulus:capability");
-    private static final ResourceLocation ENTITY = ResourceLocation.parse("cumulus:entity");
-    private static final ResourceLocation FLUID = ResourceLocation.parse("cumulus:fluid");
-    private static final ResourceLocation REGION = ResourceLocation.parse("cumulus:region");
+    private static final ResourceLocation block = ResourceLocation.parse("cumulus:block");
+    private static final ResourceLocation blockEntity = ResourceLocation.parse("cumulus:block_entity");
+    private static final ResourceLocation capability = ResourceLocation.parse("cumulus:capability");
+    private static final ResourceLocation entity = ResourceLocation.parse("cumulus:entity");
+    private static final ResourceLocation fluid = ResourceLocation.parse("cumulus:fluid");
+    private static final ResourceLocation region = ResourceLocation.parse("cumulus:region");
 
     private BuildPlanExecutor() {
     }
@@ -40,7 +40,7 @@ public final class BuildPlanExecutor {
         for (var action : actions) {
             if (!supported(action) || !target.supports(action)) {
                 return new BuildPlanResult(
-                        BuildPlanStatus.UNSUPPORTED_TARGET,
+                        BuildPlanStatus.unsupportedTarget,
                         actions,
                         unsupportedDiagnostics(action));
             }
@@ -54,7 +54,7 @@ public final class BuildPlanExecutor {
             }
         }
         return new BuildPlanResult(
-                changed ? BuildPlanStatus.APPLIED : BuildPlanStatus.NOOP,
+                changed ? BuildPlanStatus.applied : BuildPlanStatus.noop,
                 actions,
                 emptyDiagnostics());
     }
@@ -62,7 +62,7 @@ public final class BuildPlanExecutor {
     private static BuildAction action(RuntimePlanEntry entry) {
         return new BuildAction(
                 entry.id(),
-                REGION.equals(entry.targetType()) ? BuildActionKind.REGION : BuildActionKind.POINT,
+                region.equals(entry.targetType()) ? BuildActionKind.region : BuildActionKind.point,
                 entry.targetType(),
                 entry.min(),
                 entry.max(),
@@ -70,16 +70,16 @@ public final class BuildPlanExecutor {
     }
 
     private static boolean supported(BuildAction action) {
-        return BLOCK.equals(action.targetType())
-                || BLOCK_ENTITY.equals(action.targetType())
-                || ENTITY.equals(action.targetType())
-                || FLUID.equals(action.targetType())
-                || REGION.equals(action.targetType())
+        return block.equals(action.targetType())
+                || blockEntity.equals(action.targetType())
+                || entity.equals(action.targetType())
+                || fluid.equals(action.targetType())
+                || region.equals(action.targetType())
                 || supportedCapability(action);
     }
 
     private static boolean supportedCapability(BuildAction action) {
-        if (!CAPABILITY.equals(action.targetType())) {
+        if (!capability.equals(action.targetType())) {
             return false;
         }
         return !action.properties().getOrDefault("block", "").isBlank()
@@ -89,7 +89,7 @@ public final class BuildPlanExecutor {
     private static DiagnosticGraph unsupportedDiagnostics(BuildAction action) {
         var root = new DiagnosticNode(
                 "root",
-                Severity.ERROR,
+                Severity.error,
                 "Build plan failed",
                 "diagnostic.cumulus.build_failed",
                 List.of(),
@@ -97,7 +97,7 @@ public final class BuildPlanExecutor {
                 List.of());
         var node = new DiagnosticNode(
                 action.id(),
-                Severity.ERROR,
+                Severity.error,
                 "Unsupported build target",
                 "diagnostic.cumulus.unsupported_build_target",
                 List.of(DiagnosticEvidence.relative(

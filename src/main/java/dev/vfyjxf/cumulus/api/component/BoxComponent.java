@@ -49,7 +49,7 @@ public record BoxComponent(
     }
 
     public BoxComponent(String name, RelativeBlockPos from, RelativeBlockPos to) {
-        this(name, from, to, false, Targets.block(), PointRequirement.REQUIRED, Set.of(), DiagnosticMetadata.empty());
+        this(name, from, to, false, Targets.block(), PointRequirement.required, Set.of(), DiagnosticMetadata.empty());
     }
 
     public BoxComponent target(TargetPattern target) {
@@ -61,7 +61,7 @@ public record BoxComponent(
     }
 
     public BoxComponent optional() {
-        return new BoxComponent(name, from, to, hollow, target, PointRequirement.OPTIONAL, groups, diagnostics);
+        return new BoxComponent(name, from, to, hollow, target, PointRequirement.optional, groups, diagnostics);
     }
 
     public BoxComponent group(String group) {

@@ -40,7 +40,7 @@ class RuntimeAssetLoaderTest {
 
         assertFalse(result.valid());
         assertEquals(List.of("DUPLICATE_RESOURCE_PATH"), result.diagnostics().nodes().stream()
-                .filter(node -> node.severity() == Severity.ERROR)
+                .filter(node -> node.severity() == Severity.error)
                 .map(node -> node.id())
                 .toList());
     }
@@ -80,7 +80,7 @@ class RuntimeAssetLoaderTest {
                         "MISSING_DEBUG_ASSET",
                         "MISSING_RUNTIME_PLAN"),
                 result.diagnostics().nodes().stream()
-                        .filter(node -> node.severity() == Severity.ERROR)
+                        .filter(node -> node.severity() == Severity.error)
                         .map(node -> node.id())
                         .toList());
     }
@@ -96,7 +96,7 @@ class RuntimeAssetLoaderTest {
 
         assertFalse(result.valid());
         assertEquals(List.of("INVALID_PREDICATE"), result.diagnostics().nodes().stream()
-                .filter(node -> node.severity() == Severity.ERROR)
+                .filter(node -> node.severity() == Severity.error)
                 .map(node -> node.id())
                 .toList());
     }

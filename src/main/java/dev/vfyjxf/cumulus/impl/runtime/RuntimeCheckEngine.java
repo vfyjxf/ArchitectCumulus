@@ -3,10 +3,12 @@ package dev.vfyjxf.cumulus.impl.runtime;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticGraph;
 import dev.vfyjxf.cumulus.api.partition.SectionKey;
+import dev.vfyjxf.cumulus.api.context.WellKnownContextKeys;
 import dev.vfyjxf.cumulus.api.runtime.InstanceDelta;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.RuntimeStructureContext;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.impl.StructureRuntimePlanCompiler;
 import dev.vfyjxf.cumulus.impl.check.StructureCheckExecutor;
 import dev.vfyjxf.cumulus.impl.check.StructureCheckPlan;
@@ -37,7 +39,7 @@ public final class RuntimeCheckEngine {
             new LinkedHashMap<>();
     private final SubstructureClaimState substructureClaimState = new SubstructureClaimState();
     private final List<Consumer<SubstructureLifecycleEvent>> substructureLifecycleListeners = new ArrayList<>();
-    private SubstructureSyncPolicy substructureSyncPolicy = SubstructureSyncPolicy.STATUS_ONLY;
+    private SubstructureSyncPolicy substructureSyncPolicy = SubstructureSyncPolicy.statusOnly;
 
     public RuntimeCheckEngine substructureSyncPolicy(SubstructureSyncPolicy policy) {
         if (policy == null) {
@@ -84,7 +86,7 @@ public final class RuntimeCheckEngine {
         if (runtimeDefinition.hasErrors()) {
             var context = RuntimeStructureContext.builder(key).revision(1).build();
             preflightResultsByInstance.put(key, new ScheduledCheckResult(
-                    List.of(new InstanceDelta(key, InstanceStatus.INVALID, context)),
+                    List.of(new InstanceDelta(key, InstanceStatus.invalid, context)),
                     List.of()));
             diagnosticsByInstance.put(key, runtimeDefinition.diagnostics());
             sourcesByInstance.remove(key);
@@ -241,18 +243,18 @@ public final class RuntimeCheckEngine {
                 publish(new SubstructureLifecycleEvent(
                         parent,
                         delta.key(),
-                        delta.context().values().get("parent_occurrence"),
+                        delta.context().get(WellKnownContextKeys.parentOccurrence).orElse(null),
                         previous,
                         delta.status(),
-                        SubstructureLifecycleTransition.ADDED));
+                        SubstructureLifecycleTransition.added));
             } else if (previous.orElseThrow() != delta.status()) {
                 publish(new SubstructureLifecycleEvent(
                         parent,
                         delta.key(),
-                        delta.context().values().get("parent_occurrence"),
+                        delta.context().get(WellKnownContextKeys.parentOccurrence).orElse(null),
                         previous,
                         delta.status(),
-                        SubstructureLifecycleTransition.STATUS_CHANGED));
+                        SubstructureLifecycleTransition.statusChanged));
             }
         }
     }
@@ -287,16 +289,18 @@ public final class RuntimeCheckEngine {
 
     private static boolean isSubstructureDelta(InstanceDelta delta, StructureInstanceKey parent) {
         var values = delta.context().values();
-        return values.containsKey("parent_occurrence")
-                && values.containsKey("parent_structure")
-                && values.containsKey("parent_anchor")
+        return values.containsKey(WellKnownContextKeys.parentOccurrence)
+                && values.containsKey(WellKnownContextKeys.parentStructure)
+                && values.containsKey(WellKnownContextKeys.parentAnchor)
                 && parentKey(values).equals(parent);
     }
 
-    private static StructureInstanceKey parentKey(Map<String, String> values) {
+    private static StructureInstanceKey parentKey(Map<ContextKey<?>, Object> values) {
+        var structure = (String) values.get(WellKnownContextKeys.parentStructure);
+        var anchor = (String) values.get(WellKnownContextKeys.parentAnchor);
         return new StructureInstanceKey(
-                ResourceLocation.parse(values.get("parent_structure")),
-                parseBlockPos(values.get("parent_anchor")));
+                ResourceLocation.parse(structure),
+                parseBlockPos(anchor));
     }
 
     private static BlockPos parseBlockPos(String value) {
@@ -355,7 +359,7 @@ public final class RuntimeCheckEngine {
 
         private boolean hasErrors() {
             return diagnostics.nodes().stream().anyMatch(node -> node.severity().ordinal()
-                    >= dev.vfyjxf.cumulus.api.diagnostic.Severity.ERROR.ordinal());
+                    >= dev.vfyjxf.cumulus.api.diagnostic.Severity.error.ordinal());
         }
     }
 }

@@ -6,7 +6,7 @@ import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 
 public final class InMemoryBuildTarget implements BuildTarget {
-    private static final ResourceLocation CAPABILITY = ResourceLocation.parse("cumulus:capability");
+    private static final ResourceLocation capability = ResourceLocation.parse("cumulus:capability");
     private final Map<String, BuiltTarget> targets = new LinkedHashMap<>();
     private final Map<String, Map<String, String>> capabilityMutations = new LinkedHashMap<>();
 
@@ -15,7 +15,7 @@ public final class InMemoryBuildTarget implements BuildTarget {
         if (action == null) {
             throw new IllegalArgumentException("Build action must not be null");
         }
-        return !CAPABILITY.equals(action.targetType())
+        return !capability.equals(action.targetType())
                 || !action.properties().getOrDefault("block", "").isBlank()
                 || !action.properties().getOrDefault("operation", "").isBlank();
     }
@@ -63,7 +63,7 @@ public final class InMemoryBuildTarget implements BuildTarget {
     }
 
     private static boolean isCapabilityMutation(BuildAction action) {
-        return CAPABILITY.equals(action.targetType())
+        return capability.equals(action.targetType())
                 && !action.properties().getOrDefault("operation", "").isBlank();
     }
 

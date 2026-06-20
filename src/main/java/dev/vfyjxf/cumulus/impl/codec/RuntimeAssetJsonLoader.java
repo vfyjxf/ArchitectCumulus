@@ -50,7 +50,7 @@ public final class RuntimeAssetJsonLoader {
         if (diagnostics.isEmpty()) {
             diagnostics.add(new DiagnosticNode(
                     "root",
-                    Severity.INFO,
+                    Severity.info,
                     "Runtime asset JSON loading failed",
                     "diagnostic.cumulus.asset_json_load_failed",
                     List.of(),
@@ -59,7 +59,7 @@ public final class RuntimeAssetJsonLoader {
         }
         diagnostics.add(new DiagnosticNode(
                 "INVALID_JSON",
-                Severity.ERROR,
+                Severity.error,
                 "Invalid runtime asset JSON",
                 "diagnostic.cumulus.invalid_json",
                 List.of(),

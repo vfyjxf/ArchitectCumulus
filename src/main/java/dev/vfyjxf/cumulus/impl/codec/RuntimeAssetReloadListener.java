@@ -15,7 +15,7 @@ import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 public final class RuntimeAssetReloadListener extends SimplePreparableReloadListener<RuntimeAssetLoadResult> {
-    public static final String ROOT_PATH = "cumulus/structures";
+    public static final String rootPath = "cumulus/structures";
 
     private final RuntimeAssetRepository repository;
     private final Runnable validReloadHook;
@@ -59,7 +59,7 @@ public final class RuntimeAssetReloadListener extends SimplePreparableReloadList
         var sources = new ArrayList<RuntimeAssetJsonSource>();
         var diagnostics = new ArrayList<DiagnosticNode>();
         var edges = new ArrayList<DiagnosticEdge>();
-        resourceManager.listResources(ROOT_PATH, RuntimeAssetReloadListener::isRuntimeAsset).entrySet().stream()
+        resourceManager.listResources(rootPath, RuntimeAssetReloadListener::isRuntimeAsset).entrySet().stream()
                 .sorted(Comparator.comparing(entry -> entry.getKey().toString()))
                 .forEach(entry -> {
                     try (var reader = entry.getValue().openAsReader()) {
@@ -86,7 +86,7 @@ public final class RuntimeAssetReloadListener extends SimplePreparableReloadList
     }
 
     private static boolean isRuntimeAsset(ResourceLocation location) {
-        return location.getPath().startsWith(ROOT_PATH + "/")
+        return location.getPath().startsWith(rootPath + "/")
                 && location.getPath().endsWith(".json");
     }
 
@@ -101,7 +101,7 @@ public final class RuntimeAssetReloadListener extends SimplePreparableReloadList
         if (diagnostics.isEmpty()) {
             diagnostics.add(new DiagnosticNode(
                     "root",
-                    Severity.INFO,
+                    Severity.info,
                     "Runtime asset datapack loading failed",
                     "diagnostic.cumulus.asset_reload_failed",
                     List.of(),
@@ -110,7 +110,7 @@ public final class RuntimeAssetReloadListener extends SimplePreparableReloadList
         }
         diagnostics.add(new DiagnosticNode(
                 "INVALID_RESOURCE_IO",
-                Severity.ERROR,
+                Severity.error,
                 "Failed to read runtime asset resource",
                 "diagnostic.cumulus.invalid_resource_io",
                 List.of(),

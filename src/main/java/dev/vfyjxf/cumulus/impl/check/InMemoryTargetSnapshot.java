@@ -9,12 +9,12 @@ import net.minecraft.resources.ResourceLocation;
 public record InMemoryTargetSnapshot(
         Map<TargetKey, SnapshotTarget> targets,
         Map<String, String> contextValues) {
-    private static final ResourceLocation BLOCK = ResourceLocation.parse("cumulus:block");
-    private static final ResourceLocation BLOCK_ENTITY = ResourceLocation.parse("cumulus:block_entity");
-    private static final ResourceLocation ENTITY = ResourceLocation.parse("cumulus:entity");
-    private static final ResourceLocation FLUID = ResourceLocation.parse("cumulus:fluid");
-    private static final ResourceLocation CAPABILITY = ResourceLocation.parse("cumulus:capability");
-    private static final ResourceLocation REGION = ResourceLocation.parse("cumulus:region");
+    private static final ResourceLocation block = ResourceLocation.parse("cumulus:block");
+    private static final ResourceLocation blockEntity = ResourceLocation.parse("cumulus:block_entity");
+    private static final ResourceLocation entity = ResourceLocation.parse("cumulus:entity");
+    private static final ResourceLocation fluid = ResourceLocation.parse("cumulus:fluid");
+    private static final ResourceLocation capability = ResourceLocation.parse("cumulus:capability");
+    private static final ResourceLocation region = ResourceLocation.parse("cumulus:region");
 
     public InMemoryTargetSnapshot {
         targets = Map.copyOf(targets);
@@ -56,7 +56,7 @@ public record InMemoryTargetSnapshot(
         }
 
         public Builder block(RelativeBlockPos pos, String value, Map<String, String> properties) {
-            put(BLOCK, pos, pos, value, properties);
+            put(block, pos, pos, value, properties);
             return this;
         }
 
@@ -65,7 +65,7 @@ public record InMemoryTargetSnapshot(
         }
 
         public Builder blockEntity(RelativeBlockPos pos, String value, Map<String, String> properties) {
-            put(BLOCK_ENTITY, pos, pos, value, properties);
+            put(blockEntity, pos, pos, value, properties);
             return this;
         }
 
@@ -74,7 +74,7 @@ public record InMemoryTargetSnapshot(
         }
 
         public Builder entity(RelativeBlockPos pos, String value, Map<String, String> properties) {
-            put(ENTITY, pos, pos, value, properties);
+            put(entity, pos, pos, value, properties);
             return this;
         }
 
@@ -83,7 +83,7 @@ public record InMemoryTargetSnapshot(
         }
 
         public Builder fluid(RelativeBlockPos pos, String value, Map<String, String> properties) {
-            put(FLUID, pos, pos, value, properties);
+            put(fluid, pos, pos, value, properties);
             return this;
         }
 
@@ -92,7 +92,7 @@ public record InMemoryTargetSnapshot(
         }
 
         public Builder capability(RelativeBlockPos pos, String value, Map<String, String> properties) {
-            put(CAPABILITY, pos, pos, value, properties);
+            put(capability, pos, pos, value, properties);
             return this;
         }
 
@@ -112,7 +112,7 @@ public record InMemoryTargetSnapshot(
         }
 
         public Builder region(RelativeBlockPos min, RelativeBlockPos max, String value, Map<String, String> properties) {
-            put(REGION, min, max, value, properties);
+            put(region, min, max, value, properties);
             return this;
         }
 

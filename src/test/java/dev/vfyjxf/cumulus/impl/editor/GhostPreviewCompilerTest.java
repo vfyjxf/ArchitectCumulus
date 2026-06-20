@@ -68,7 +68,7 @@ class GhostPreviewCompilerTest {
                 .findFirst()
                 .orElseThrow();
         assertEquals(new BlockPos(7, 70, 5), selected.min());
-        assertEquals(Severity.WARN, selected.severity());
+        assertEquals(Severity.warn, selected.severity());
         assertEquals(100, selected.priority());
     }
 
@@ -90,10 +90,10 @@ class GhostPreviewCompilerTest {
         assertEquals(List.of("controller", "port"),
                 renderPlan.commands().stream().map(GhostPreviewRenderCommand::elementId).toList());
         var normal = renderPlan.commands().getFirst();
-        assertEquals(GhostPreviewRenderStyle.INFO, normal.style());
+        assertEquals(GhostPreviewRenderStyle.info, normal.style());
         assertEquals(0.25F, normal.alpha());
         var selected = renderPlan.commands().get(1);
-        assertEquals(GhostPreviewRenderStyle.SELECTED, selected.style());
+        assertEquals(GhostPreviewRenderStyle.selected, selected.style());
         assertEquals(1.0F, selected.red());
         assertEquals(0.72F, selected.green());
         assertEquals(0.15F, selected.blue());

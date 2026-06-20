@@ -38,7 +38,7 @@ class RuntimeAssetRepositoryTest {
         assertEquals(List.of(asset), repository.assets());
         assertFalse(repository.lastResult().orElseThrow().valid());
         assertEquals("INVALID_JSON", repository.lastResult().orElseThrow().diagnostics().nodes().stream()
-                .filter(node -> node.severity() == Severity.ERROR)
+                .filter(node -> node.severity() == Severity.error)
                 .findFirst()
                 .orElseThrow()
                 .id());
@@ -66,7 +66,7 @@ class RuntimeAssetRepositoryTest {
                 "root",
                 List.of(new DiagnosticNode(
                         id,
-                        Severity.ERROR,
+                        Severity.error,
                         id,
                         "diagnostic.cumulus.test",
                         List.of(),

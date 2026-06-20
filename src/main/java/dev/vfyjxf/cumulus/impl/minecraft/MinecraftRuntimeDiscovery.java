@@ -77,7 +77,7 @@ public final class MinecraftRuntimeDiscovery {
         }
         var inferred = new ArrayList<DiscoveryCandidate>();
         for (var point : definition.points()) {
-            if (point.requirement() == PointRequirement.REQUIRED) {
+            if (point.requirement() == PointRequirement.required) {
                 inferred.add(new DiscoveryCandidate(definition.id(), point.location(), point));
             }
         }
@@ -102,7 +102,7 @@ public final class MinecraftRuntimeDiscovery {
             return false;
         }
         for (var predicate : point.predicates()) {
-            if (PredicateEvaluator.evaluate(predicate, target) != PredicateEvaluator.Evaluation.MATCH) {
+            if (PredicateEvaluator.evaluate(predicate, target) != PredicateEvaluator.Evaluation.match) {
                 return false;
             }
         }

@@ -33,25 +33,25 @@ class BuildPlanExecutorTest {
         assertEquals(List.of(
                         new BuildAction(
                                 "controller",
-                                BuildActionKind.POINT,
+                                BuildActionKind.point,
                                 ResourceLocation.parse("cumulus:block"),
                                 RelativeBlockPos.of(0, 0, 0),
                                 RelativeBlockPos.of(0, 0, 0)),
                         new BuildAction(
                                 "port",
-                                BuildActionKind.POINT,
+                                BuildActionKind.point,
                                 ResourceLocation.parse("cumulus:block_entity"),
                                 RelativeBlockPos.of(2, 0, 0),
                                 RelativeBlockPos.of(2, 0, 0)),
                         new BuildAction(
                                 "coolant",
-                                BuildActionKind.POINT,
+                                BuildActionKind.point,
                                 ResourceLocation.parse("cumulus:fluid"),
                                 RelativeBlockPos.of(3, 0, 0),
                                 RelativeBlockPos.of(3, 0, 0)),
                         new BuildAction(
                                 "frame",
-                                BuildActionKind.REGION,
+                                BuildActionKind.region,
                                 ResourceLocation.parse("cumulus:region"),
                                 RelativeBlockPos.of(-1, 0, 0),
                                 RelativeBlockPos.of(1, 2, 0),
@@ -125,8 +125,8 @@ class BuildPlanExecutorTest {
         var firstResult = BuildPlanExecutor.apply(StructureRuntimePlanCompiler.compile(definition), target);
         var secondResult = BuildPlanExecutor.apply(StructureRuntimePlanCompiler.compile(definition), target);
 
-        assertEquals(BuildPlanStatus.APPLIED, firstResult.status());
-        assertEquals(BuildPlanStatus.NOOP, secondResult.status());
+        assertEquals(BuildPlanStatus.applied, firstResult.status());
+        assertEquals(BuildPlanStatus.noop, secondResult.status());
         assertEquals(Set.of(new BuiltTarget(
                         ResourceLocation.parse("cumulus:capability"),
                         RelativeBlockPos.of(0, 0, 0),
@@ -147,8 +147,8 @@ class BuildPlanExecutorTest {
         var firstResult = BuildPlanExecutor.apply(StructureRuntimePlanCompiler.compile(definition), target);
         var secondResult = BuildPlanExecutor.apply(StructureRuntimePlanCompiler.compile(definition), target);
 
-        assertEquals(BuildPlanStatus.APPLIED, firstResult.status());
-        assertEquals(BuildPlanStatus.NOOP, secondResult.status());
+        assertEquals(BuildPlanStatus.applied, firstResult.status());
+        assertEquals(BuildPlanStatus.noop, secondResult.status());
         assertEquals(Map.of(
                         "operation", "insert",
                         "resource", "minecraft:coal",
@@ -165,7 +165,7 @@ class BuildPlanExecutorTest {
 
         var result = BuildPlanExecutor.apply(StructureRuntimePlanCompiler.compile(definition), target);
 
-        assertEquals(BuildPlanStatus.UNSUPPORTED_TARGET, result.status());
+        assertEquals(BuildPlanStatus.unsupportedTarget, result.status());
         assertTrue(target.targets().isEmpty());
         var diagnostic = result.diagnostics().childrenOf("root").getFirst();
         assertEquals("energy", diagnostic.id());
@@ -185,8 +185,8 @@ class BuildPlanExecutorTest {
 
         var secondResult = BuildPlanExecutor.apply(StructureRuntimePlanCompiler.compile(definition), target);
 
-        assertEquals(BuildPlanStatus.APPLIED, firstResult.status());
-        assertEquals(BuildPlanStatus.NOOP, secondResult.status());
+        assertEquals(BuildPlanStatus.applied, firstResult.status());
+        assertEquals(BuildPlanStatus.noop, secondResult.status());
         assertEquals(firstSnapshot, target.targets());
         assertEquals(Set.of(
                         new BuiltTarget(
@@ -218,13 +218,13 @@ class BuildPlanExecutorTest {
 
         var result = BuildPlanExecutor.apply(StructureRuntimePlanCompiler.compile(definition), target);
 
-        assertEquals(BuildPlanStatus.UNSUPPORTED_TARGET, result.status());
+        assertEquals(BuildPlanStatus.unsupportedTarget, result.status());
         assertTrue(target.targets().isEmpty());
         assertEquals("root", result.diagnostics().rootNodeId());
         assertEquals(2, result.diagnostics().nodes().size());
         var diagnostic = result.diagnostics().childrenOf("root").getFirst();
         assertEquals("energy", diagnostic.id());
-        assertEquals(Severity.ERROR, diagnostic.severity());
+        assertEquals(Severity.error, diagnostic.severity());
         assertEquals("UNSUPPORTED_BUILD_TARGET", diagnostic.evidence().getFirst().detail());
         assertEquals("cumulus:unknown_target", diagnostic.evidence().getFirst().targetId());
     }

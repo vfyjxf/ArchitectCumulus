@@ -10,7 +10,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 public final class StructureEditorClientBridge {
-    private static final String CATEGORY = "key.categories." + Cumulus.MODID + ".editor";
+    private static final String category = "key.categories." + Cumulus.MODID + ".editor";
 
     private final StructureEditorController controller;
     private final GhostPreviewRenderer renderer;
@@ -18,12 +18,12 @@ public final class StructureEditorClientBridge {
             "key." + Cumulus.MODID + ".editor.select_next",
             InputConstants.Type.KEYSYM,
             InputConstants.KEY_RIGHT,
-            CATEGORY);
+            category);
     private final KeyMapping closeKey = new KeyMapping(
             "key." + Cumulus.MODID + ".editor.close",
             InputConstants.Type.KEYSYM,
             InputConstants.KEY_ESCAPE,
-            CATEGORY);
+            category);
 
     public StructureEditorClientBridge(StructureEditorController controller) {
         this(controller, new GhostPreviewRenderer());

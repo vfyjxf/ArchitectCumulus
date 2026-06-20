@@ -1,12 +1,14 @@
 package dev.vfyjxf.cumulus.impl;
 
 import dev.vfyjxf.cumulus.api.component.Components;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.Structures;
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
 import dev.vfyjxf.cumulus.api.ownership.ClaimMode;
 import dev.vfyjxf.cumulus.api.ownership.PartClaim;
 import dev.vfyjxf.cumulus.api.partition.SectionKey;
+import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptors;
 import dev.vfyjxf.cumulus.api.request.RequestReason;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
@@ -34,9 +36,9 @@ class StructureInstanceManagerTest {
         var frame = manager.track(definition.id(), new BlockPos(0, 64, 0));
 
         assertEquals(2, frame.requests().size());
-        assertEquals(RequestReason.PREFETCH_INCOMPLETE_INSTANCE, frame.requests().getFirst().reason());
+        assertEquals(RequestReason.prefetchIncompleteInstance, frame.requests().getFirst().reason());
         assertEquals(new SectionKey(0, 4, 0), frame.requests().getFirst().section());
-        assertEquals(InstanceStatus.INCOMPLETE, frame.deltas().getFirst().status());
+        assertEquals(InstanceStatus.incomplete, frame.deltas().getFirst().status());
     }
 
     @Test
@@ -48,19 +50,19 @@ class StructureInstanceManagerTest {
                 new dev.vfyjxf.cumulus.api.visualization.VisualizationModel("empty", java.util.List.of())));
         manager.track(definitionId, anchor);
 
-        var frame = manager.publishContext(definitionId, anchor, Map.of("facing", "north"));
+        var frame = manager.publishContext(definitionId, anchor, java.util.Map.of(ContextKey.string("facing"), "north"));
 
         assertEquals(1, frame.deltas().size());
-        assertEquals(InstanceStatus.VALID, frame.deltas().getFirst().status());
+        assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
         assertEquals(1, frame.deltas().getFirst().context().revision());
-        assertEquals("north", frame.deltas().getFirst().context().values().get("facing"));
+        assertEquals("north", frame.deltas().getFirst().context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("facing")).orElse(null));
     }
 
     @Test
     void managerRunsCheckAndPublishesResultFrame() {
         var definition = Structures.define(ResourceLocation.parse("cumulus:machine"))
                 .point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block()
-                        .where(dev.vfyjxf.cumulus.api.predicate.PredicateDescriptors.id("cumulus:controller"))
+                        .where(PredicateDescriptors.id("cumulus:controller"))
                         .capture("controller"))
                 .build();
         var anchor = new BlockPos(4, 64, 4);
@@ -74,8 +76,8 @@ class StructureInstanceManagerTest {
                         .block(RelativeBlockPos.of(0, 0, 0), "cumulus:controller")
                         .build());
 
-        assertEquals(InstanceStatus.VALID, frame.deltas().getFirst().status());
-        assertEquals("4,64,4", frame.deltas().getFirst().context().values().get("controller"));
+        assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
+        assertEquals("4,64,4", frame.deltas().getFirst().context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller")).orElse(null));
         assertEquals(0, frame.requests().size());
     }
 
@@ -90,15 +92,15 @@ class StructureInstanceManagerTest {
         var manager = registeredManager(definition);
 
         manager.check(definition, firstAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(part, first, ClaimMode.EXCLUSIVE)));
+                new PartClaim(part, first, ClaimMode.exclusive)));
 
         var frame = manager.check(definition, secondAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(part, second, ClaimMode.EXCLUSIVE)));
+                new PartClaim(part, second, ClaimMode.exclusive)));
 
-        assertEquals(InstanceStatus.INVALID, frame.deltas().getFirst().status());
+        assertEquals(InstanceStatus.invalid, frame.deltas().getFirst().status());
         var conflict = manager.diagnostics(second).childrenOf("root").getFirst();
         assertEquals("ownership-conflict", conflict.id());
-        assertEquals(Severity.ERROR, conflict.severity());
+        assertEquals(Severity.error, conflict.severity());
         assertEquals("OWNERSHIP_CONFLICT", conflict.evidence().getFirst().detail());
     }
 
@@ -113,12 +115,12 @@ class StructureInstanceManagerTest {
         var manager = registeredManager(definition);
 
         manager.check(definition, firstAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(part, first, ClaimMode.SHARED)));
+                new PartClaim(part, first, ClaimMode.shared)));
 
         var frame = manager.check(definition, secondAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(part, second, ClaimMode.SHARED)));
+                new PartClaim(part, second, ClaimMode.shared)));
 
-        assertEquals(InstanceStatus.VALID, frame.deltas().getFirst().status());
+        assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
         assertTrue(manager.diagnostics(second).nodes().isEmpty());
     }
 
@@ -133,17 +135,17 @@ class StructureInstanceManagerTest {
         var manager = registeredManager(definition);
 
         manager.check(definition, firstAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(part, first, ClaimMode.SHARED)));
+                new PartClaim(part, first, ClaimMode.shared)));
 
         var frame = manager.check(definition, secondAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(part, second, ClaimMode.EXCLUSIVE)));
+                new PartClaim(part, second, ClaimMode.exclusive)));
 
-        assertEquals(InstanceStatus.INVALID, frame.deltas().getFirst().status());
+        assertEquals(InstanceStatus.invalid, frame.deltas().getFirst().status());
         var evidence = manager.diagnostics(second).childrenOf("root").getFirst().evidence().getFirst();
         assertEquals("OWNERSHIP_CONFLICT", evidence.detail());
         assertEquals(first.toString(), evidence.descriptors().get("existing.owner"));
-        assertEquals(ClaimMode.SHARED.name(), evidence.descriptors().get("existing.mode"));
-        assertEquals(ClaimMode.EXCLUSIVE.name(), evidence.descriptors().get("attempted.mode"));
+        assertEquals(ClaimMode.shared.name(), evidence.descriptors().get("existing.mode"));
+        assertEquals(ClaimMode.exclusive.name(), evidence.descriptors().get("attempted.mode"));
     }
 
     @Test
@@ -157,12 +159,12 @@ class StructureInstanceManagerTest {
         var manager = registeredManager(definition);
 
         var invalidFrame = manager.check(definition, invalidAnchor, InMemoryTargetSnapshot.empty(), List.of(
-                new PartClaim(part, invalid, ClaimMode.EXCLUSIVE)));
+                new PartClaim(part, invalid, ClaimMode.exclusive)));
         var validFrame = manager.check(definition, validAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(part, valid, ClaimMode.EXCLUSIVE)));
+                new PartClaim(part, valid, ClaimMode.exclusive)));
 
-        assertEquals(InstanceStatus.INCOMPLETE, invalidFrame.deltas().getFirst().status());
-        assertEquals(InstanceStatus.VALID, validFrame.deltas().getFirst().status());
+        assertEquals(InstanceStatus.incomplete, invalidFrame.deltas().getFirst().status());
+        assertEquals(InstanceStatus.valid, validFrame.deltas().getFirst().status());
         assertTrue(manager.diagnostics(valid).nodes().isEmpty());
     }
 
@@ -180,15 +182,15 @@ class StructureInstanceManagerTest {
         var manager = registeredManager(definition);
 
         manager.check(definition, firstAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(existingPart, first, ClaimMode.EXCLUSIVE)));
+                new PartClaim(existingPart, first, ClaimMode.exclusive)));
         var conflictFrame = manager.check(definition, secondAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(newPart, second, ClaimMode.EXCLUSIVE),
-                new PartClaim(existingPart, second, ClaimMode.EXCLUSIVE)));
+                new PartClaim(newPart, second, ClaimMode.exclusive),
+                new PartClaim(existingPart, second, ClaimMode.exclusive)));
         var thirdFrame = manager.check(definition, thirdAnchor, validControllerSnapshot(), List.of(
-                new PartClaim(newPart, third, ClaimMode.EXCLUSIVE)));
+                new PartClaim(newPart, third, ClaimMode.exclusive)));
 
-        assertEquals(InstanceStatus.INVALID, conflictFrame.deltas().getFirst().status());
-        assertEquals(InstanceStatus.VALID, thirdFrame.deltas().getFirst().status());
+        assertEquals(InstanceStatus.invalid, conflictFrame.deltas().getFirst().status());
+        assertEquals(InstanceStatus.valid, thirdFrame.deltas().getFirst().status());
         assertTrue(manager.diagnostics(third).nodes().isEmpty());
     }
 
@@ -201,7 +203,7 @@ class StructureInstanceManagerTest {
     private static dev.vfyjxf.cumulus.api.definition.StructureDefinition validControllerDefinition(ResourceLocation id) {
         return Structures.define(id)
                 .point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block()
-                        .where(dev.vfyjxf.cumulus.api.predicate.PredicateDescriptors.id("cumulus:controller")))
+                        .where(PredicateDescriptors.id("cumulus:controller")))
                 .build();
     }
 

@@ -9,14 +9,16 @@ import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticNode;
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
 import dev.vfyjxf.cumulus.api.migration.MigrationDescriptor;
 import dev.vfyjxf.cumulus.api.runtime.RuntimeStructureContext;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public final class StructureContextMigrationExecutor {
-    private static final String RENAME_CONTEXT = "rename_context";
+    private static final String renameContext = "rename_context";
 
     private StructureContextMigrationExecutor() {
     }
@@ -91,12 +93,12 @@ public final class StructureContextMigrationExecutor {
                 .orElse(null);
     }
 
-    private static void apply(MigrationDescriptor migration, LinkedHashMap<String, String> values) {
+    private static void apply(MigrationDescriptor migration, Map<ContextKey<?>, Object> values) {
         var operation = migration.properties().get("operation");
         if (operation == null || operation.isBlank()) {
-            operation = RENAME_CONTEXT;
+            operation = renameContext;
         }
-        if (!RENAME_CONTEXT.equals(operation)) {
+        if (!renameContext.equals(operation)) {
             throw unsupportedMigration(migration, "Unsupported migration operation " + operation);
         }
 
@@ -106,24 +108,27 @@ public final class StructureContextMigrationExecutor {
             throw unsupportedMigration(migration, "Context rename migration requires from_context and to_context");
         }
 
-        if (!values.containsKey(from)) {
+        var fromKey = findKeyByName(values, from);
+        if (fromKey.isEmpty()) {
             var defaultValue = migration.properties().get("default_value");
             if (defaultValue == null) {
                 return;
             }
-            values.put(to, defaultValue);
+            values.put(ContextKey.string(to), defaultValue);
             return;
         }
 
-        var value = values.remove(from);
-        values.put(to, value);
+        var value = values.remove(fromKey.get());
+        values.put(ContextKey.string(to), value);
     }
 
-    private static RuntimeStructureContext rebuild(RuntimeStructureContext context, LinkedHashMap<String, String> values) {
+    private static Optional<ContextKey<?>> findKeyByName(Map<ContextKey<?>, Object> values, String name) {
+        return values.keySet().stream().filter(k -> k.name().equals(name)).findFirst();
+    }
+
+    private static RuntimeStructureContext rebuild(RuntimeStructureContext context, Map<ContextKey<?>, Object> values) {
         var builder = RuntimeStructureContext.builder(context.key()).revision(context.revision());
-        for (var entry : values.entrySet()) {
-            builder.put(entry.getKey(), entry.getValue());
-        }
+        builder.putAll(values);
         return builder.build();
     }
 
@@ -170,7 +175,7 @@ public final class StructureContextMigrationExecutor {
             Map<String, String> descriptors) {
         var root = new DiagnosticNode(
                 "root",
-                Severity.ERROR,
+                Severity.error,
                 "Structure migration failed",
                 "diagnostic.cumulus.structure_migration_failed",
                 List.of(),
@@ -178,7 +183,7 @@ public final class StructureContextMigrationExecutor {
                 List.of());
         var node = new DiagnosticNode(
                 nodeId,
-                Severity.ERROR,
+                Severity.error,
                 message,
                 localizationKey,
                 List.of(DiagnosticEvidence.relative(

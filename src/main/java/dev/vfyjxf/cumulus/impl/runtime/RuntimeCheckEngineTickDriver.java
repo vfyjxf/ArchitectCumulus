@@ -7,14 +7,14 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 public final class RuntimeCheckEngineTickDriver {
-    private static final int DEFAULT_MAX_CHECKS_PER_TICK = 16;
-    private static final int MAX_RETAINED_FRAMES = 32;
+    private static final int defaultMaxChecksPerTick = 16;
+    private static final int maxRetainedFrames = 32;
 
     private final FrameRunner diagnosticRunner;
     private final FrameRunner fastRunner;
     private final IntSupplier pendingChecks;
     private final List<RuntimeFrameResult> lastFrames = new ArrayList<>();
-    private int maxChecksPerTick = DEFAULT_MAX_CHECKS_PER_TICK;
+    private int maxChecksPerTick = defaultMaxChecksPerTick;
     private int currentTick;
     private boolean diagnosticTickRequested;
 
@@ -63,7 +63,7 @@ public final class RuntimeCheckEngineTickDriver {
         diagnosticTickRequested = false;
         var frame = runner.tick(currentTick, maxChecksPerTick);
         lastFrames.add(frame);
-        if (lastFrames.size() > MAX_RETAINED_FRAMES) {
+        if (lastFrames.size() > maxRetainedFrames) {
             lastFrames.removeFirst();
         }
     }

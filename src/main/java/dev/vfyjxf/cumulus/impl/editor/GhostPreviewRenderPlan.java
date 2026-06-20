@@ -29,12 +29,12 @@ public record GhostPreviewRenderPlan(
 
     private static GhostPreviewRenderCommand command(GhostPreviewElement element) {
         var selected = element.priority() > 0;
-        var style = selected ? GhostPreviewRenderStyle.SELECTED : styleFor(element.severity());
+        var style = selected ? GhostPreviewRenderStyle.selected : styleFor(element.severity());
         return switch (style) {
-            case SELECTED -> command(element, style, 1.0F, 0.72F, 0.15F, 0.72F);
-            case ERROR -> command(element, style, 1.0F, 0.18F, 0.18F, 0.5F);
-            case WARNING -> command(element, style, 1.0F, 0.82F, 0.2F, 0.4F);
-            case INFO -> command(element, style, 0.35F, 0.78F, 1.0F, 0.25F);
+            case selected -> command(element, style, 1.0F, 0.72F, 0.15F, 0.72F);
+            case error -> command(element, style, 1.0F, 0.18F, 0.18F, 0.5F);
+            case warning -> command(element, style, 1.0F, 0.82F, 0.2F, 0.4F);
+            case info -> command(element, style, 0.35F, 0.78F, 1.0F, 0.25F);
         };
     }
 
@@ -58,9 +58,9 @@ public record GhostPreviewRenderPlan(
 
     private static GhostPreviewRenderStyle styleFor(Severity severity) {
         return switch (severity) {
-            case ERROR -> GhostPreviewRenderStyle.ERROR;
-            case WARN -> GhostPreviewRenderStyle.WARNING;
-            case INFO -> GhostPreviewRenderStyle.INFO;
+            case error -> GhostPreviewRenderStyle.error;
+            case warn -> GhostPreviewRenderStyle.warning;
+            case info -> GhostPreviewRenderStyle.info;
         };
     }
 }

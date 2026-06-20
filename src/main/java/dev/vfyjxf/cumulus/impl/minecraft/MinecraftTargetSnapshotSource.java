@@ -20,12 +20,12 @@ import net.neoforged.neoforge.capabilities.BlockCapability;
 import org.jetbrains.annotations.Nullable;
 
 public final class MinecraftTargetSnapshotSource implements TargetSnapshotSource {
-    private static final ResourceLocation BLOCK = ResourceLocation.parse("cumulus:block");
-    private static final ResourceLocation BLOCK_ENTITY = ResourceLocation.parse("cumulus:block_entity");
-    private static final ResourceLocation ENTITY = ResourceLocation.parse("cumulus:entity");
-    private static final ResourceLocation FLUID = ResourceLocation.parse("cumulus:fluid");
-    private static final ResourceLocation CAPABILITY = ResourceLocation.parse("cumulus:capability");
-    private static final ResourceLocation REGION = ResourceLocation.parse("cumulus:region");
+    private static final ResourceLocation block = ResourceLocation.parse("cumulus:block");
+    private static final ResourceLocation blockEntity = ResourceLocation.parse("cumulus:block_entity");
+    private static final ResourceLocation entity = ResourceLocation.parse("cumulus:entity");
+    private static final ResourceLocation fluid = ResourceLocation.parse("cumulus:fluid");
+    private static final ResourceLocation capability = ResourceLocation.parse("cumulus:capability");
+    private static final ResourceLocation region = ResourceLocation.parse("cumulus:region");
 
     private final BlockPos anchor;
     private final LevelTargetReader reader;
@@ -78,27 +78,27 @@ public final class MinecraftTargetSnapshotSource implements TargetSnapshotSource
         if (!boundsLoaded(absoluteMin, absoluteMax)) {
             return Optional.empty();
         }
-        if (BLOCK.equals(targetType)) {
+        if (block.equals(targetType)) {
             return Optional.ofNullable(reader.block(absoluteMin));
         }
-        if (BLOCK_ENTITY.equals(targetType)) {
+        if (blockEntity.equals(targetType)) {
             return Optional.ofNullable(reader.blockEntity(absoluteMin));
         }
-        if (ENTITY.equals(targetType)) {
+        if (entity.equals(targetType)) {
             return reader.entities(absoluteMin, absoluteMax).stream()
                     .min(Comparator.comparing(SnapshotTarget::value))
                     .map(target -> new SnapshotTarget(target.value(), target.properties()));
         }
-        if (FLUID.equals(targetType)) {
+        if (fluid.equals(targetType)) {
             return Optional.ofNullable(reader.fluid(absoluteMin));
         }
-        if (CAPABILITY.equals(targetType)) {
+        if (capability.equals(targetType)) {
             return Optional.ofNullable(reader.capability(
                     absoluteMin,
                     targetProperties.getOrDefault("name", ""),
                     targetProperties));
         }
-        if (REGION.equals(targetType)) {
+        if (region.equals(targetType)) {
             return region(absoluteMin, absoluteMax);
         }
         return Optional.empty();

@@ -81,7 +81,7 @@ class SubstructureGraphResolverTest {
         assertTrue(result.graph().isEmpty());
         var diagnostic = result.diagnostics().childrenOf("root").getFirst();
         assertEquals("missing-child-definition", diagnostic.id());
-        assertEquals(Severity.ERROR, diagnostic.severity());
+        assertEquals(Severity.error, diagnostic.severity());
         var evidence = diagnostic.evidence().getFirst();
         assertEquals("MISSING_SUBSTRUCTURE_DEFINITION", evidence.detail());
         assertEquals("cumulus:missing_child", evidence.descriptors().get("missing.definition"));
@@ -106,7 +106,7 @@ class SubstructureGraphResolverTest {
         assertTrue(result.graph().isEmpty());
         var diagnostic = result.diagnostics().childrenOf("root").getFirst();
         assertEquals("substructure-cycle", diagnostic.id());
-        assertEquals(Severity.ERROR, diagnostic.severity());
+        assertEquals(Severity.error, diagnostic.severity());
         var evidence = diagnostic.evidence().getFirst();
         assertEquals("SUBSTRUCTURE_CYCLE", evidence.detail());
         assertEquals("cumulus:factory -> cumulus:arm -> cumulus:factory", evidence.descriptors().get("cycle"));

@@ -2,6 +2,8 @@ package dev.vfyjxf.cumulus.api.runtime;
 
 import dev.vfyjxf.cumulus.api.component.Components;
 import dev.vfyjxf.cumulus.api.context.ContextRuleDescriptor;
+import dev.vfyjxf.cumulus.api.context.ContextSources;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.Structures;
 import dev.vfyjxf.cumulus.api.migration.MigrationDescriptor;
@@ -85,7 +87,7 @@ class DefinitionExpansionTest {
     @Test
     void builderPreservesContextAndMigrationDescriptors() {
         var definition = Structures.define(ResourceLocation.parse("cumulus:migrating_machine"))
-                .context(ContextRuleDescriptor.derive("facing", "controller.facing"))
+                .context(ContextRuleDescriptor.derive(ContextKey.string("facing"), ContextSources.capture("controller").property("facing")))
                 .version(new StructureVersionDescriptor(2, ResourceLocation.parse("cumulus:machine/v2")))
                 .migration(new MigrationDescriptor(
                         1,
@@ -95,9 +97,9 @@ class DefinitionExpansionTest {
                 .build();
 
         assertEquals(1, definition.contextRules().size());
-        assertEquals(ResourceLocation.parse("cumulus:derive"), definition.contextRules().get(0).id());
-        assertEquals("facing", definition.contextRules().get(0).properties().get("key"));
-        assertEquals("controller.facing", definition.contextRules().get(0).properties().get("source"));
+        assertEquals("facing", definition.contextRules().get(0).targetKey().name());
+        assertEquals("controller", ((dev.vfyjxf.cumulus.api.context.sources.CapturePropertySource) definition.contextRules().get(0).source()).point().value());
+        assertEquals("facing", ((dev.vfyjxf.cumulus.api.context.sources.CapturePropertySource) definition.contextRules().get(0).source()).property());
 
         assertEquals(1, definition.versions().size());
         assertEquals(2, definition.versions().get(0).version());

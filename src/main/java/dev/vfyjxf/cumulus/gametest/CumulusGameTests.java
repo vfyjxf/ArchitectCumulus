@@ -20,10 +20,10 @@ import net.neoforged.testframework.gametest.StructureTemplateBuilder;
 @EventBusSubscriber(modid = Cumulus.MODID)
 @GameTestHolder(Cumulus.MODID)
 public final class CumulusGameTests {
-    private static final ResourceLocation TEMPLATE_ID = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation templateId = ResourceLocation.fromNamespaceAndPath(
             Cumulus.MODID,
             "definitiondslbuildsinsidegametest");
-    private static final DynamicStructureTemplates TEMPLATES = new DynamicStructureTemplates();
+    private static final DynamicStructureTemplates templates = new DynamicStructureTemplates();
 
     private CumulusGameTests() {
     }
@@ -33,9 +33,9 @@ public final class CumulusGameTests {
         if (!GameTestHooks.isGametestServer()) {
             return;
         }
-        TEMPLATES.register(TEMPLATE_ID, StructureTemplateBuilder.empty(3, 3, 3));
+        templates.register(templateId, StructureTemplateBuilder.empty(3, 3, 3));
         try {
-            TEMPLATES.setup(event.getServer().getStructureManager());
+            templates.setup(event.getServer().getStructureManager());
         } catch (Throwable throwable) {
             throw new RuntimeException("Failed to register Cumulus GameTest templates", throwable);
         }

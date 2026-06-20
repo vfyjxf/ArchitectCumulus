@@ -11,7 +11,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
 
 public final class MinecraftCapabilityBuildWriters {
-    private static final TypedCapabilityBuildWriter UNSUPPORTED = new TypedCapabilityBuildWriter() {
+    private static final TypedCapabilityBuildWriter unsupported = new TypedCapabilityBuildWriter() {
         @Override
         public boolean canWrite(String operation) {
             return false;
@@ -51,7 +51,7 @@ public final class MinecraftCapabilityBuildWriters {
     }
 
     public static TypedCapabilityBuildWriter unsupported() {
-        return UNSUPPORTED;
+        return unsupported;
     }
 
     public static TypedCapabilityBuildWriter energy(IEnergyStorage storage) {
@@ -102,11 +102,11 @@ public final class MinecraftCapabilityBuildWriters {
     }
 
     private record EnergyCapabilityBuildWriter(IEnergyStorage storage) implements TypedCapabilityBuildWriter {
-        private static final String ENSURE_ENERGY = "ensure_energy";
+        private static final String ensureEnergy = "ensure_energy";
 
         @Override
         public boolean canWrite(String operation) {
-            return ENSURE_ENERGY.equals(operation) && storage.canReceive();
+            return ensureEnergy.equals(operation) && storage.canReceive();
         }
 
         @Override
@@ -125,11 +125,11 @@ public final class MinecraftCapabilityBuildWriters {
     }
 
     private record ItemCapabilityBuildWriter(IItemHandler handler) implements TypedCapabilityBuildWriter {
-        private static final String ENSURE_ITEM = "ensure_item";
+        private static final String ensureItem = "ensure_item";
 
         @Override
         public boolean canWrite(String operation) {
-            return ENSURE_ITEM.equals(operation);
+            return ensureItem.equals(operation);
         }
 
         @Override
@@ -174,11 +174,11 @@ public final class MinecraftCapabilityBuildWriters {
     }
 
     private record FluidCapabilityBuildWriter(IFluidHandler handler) implements TypedCapabilityBuildWriter {
-        private static final String ENSURE_FLUID = "ensure_fluid";
+        private static final String ensureFluid = "ensure_fluid";
 
         @Override
         public boolean canWrite(String operation) {
-            return ENSURE_FLUID.equals(operation);
+            return ensureFluid.equals(operation);
         }
 
         @Override

@@ -56,9 +56,9 @@ class StructureCheckExecutorTest {
 
         var result = StructureCheckExecutor.check(definition, new BlockPos(10, 64, 10), snapshot);
 
-        assertEquals(InstanceStatus.VALID, result.status());
-        assertEquals("10,64,10", result.context().values().get("controller"));
-        assertEquals("11,64,10", result.context().values().get("inventory"));
+        assertEquals(InstanceStatus.valid, result.status());
+        assertEquals("10,64,10", result.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller")).orElse(null));
+        assertEquals("11,64,10", result.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("inventory")).orElse(null));
         assertEquals(0, result.diagnostics().nodes().size());
     }
 
@@ -74,11 +74,11 @@ class StructureCheckExecutorTest {
 
         var result = StructureCheckExecutor.check(definition, new BlockPos(0, 64, 0), snapshot);
 
-        assertEquals(InstanceStatus.INVALID, result.status());
+        assertEquals(InstanceStatus.invalid, result.status());
         assertEquals("root", result.diagnostics().rootNodeId());
         assertEquals(2, result.diagnostics().nodes().size());
         assertEquals("door", result.diagnostics().childrenOf("root").getFirst().id());
-        assertEquals(Severity.ERROR, result.diagnostics().childrenOf("root").getFirst().severity());
+        assertEquals(Severity.error, result.diagnostics().childrenOf("root").getFirst().severity());
         assertTrue(result.visualization().elements().stream().anyMatch(element -> element.id().equals("door-error")));
     }
 
@@ -91,7 +91,7 @@ class StructureCheckExecutorTest {
 
         var result = StructureCheckExecutor.check(definition, new BlockPos(0, 64, 0), InMemoryTargetSnapshot.empty());
 
-        assertEquals(InstanceStatus.INCOMPLETE, result.status());
+        assertEquals(InstanceStatus.incomplete, result.status());
         assertEquals(1, result.requests().size());
         assertEquals("controller", result.diagnostics().childrenOf("root").getFirst().id());
     }
@@ -108,7 +108,7 @@ class StructureCheckExecutorTest {
 
         var result = StructureCheckExecutor.check(definition, new BlockPos(0, 0, 0), snapshot);
 
-        assertEquals(InstanceStatus.VALID, result.status());
+        assertEquals(InstanceStatus.valid, result.status());
     }
 
     @Test
@@ -119,9 +119,9 @@ class StructureCheckExecutorTest {
                         .capture("controller"))
                 .point("inventory", RelativeBlockPos.of(1, 0, 0), Targets.blockEntity()
                         .where(PredicateDescriptors.id("cumulus:item_handler")))
-                .context(ContextRuleDescriptor.derive("facing", "controller.facing"))
-                .context(ContextRuleDescriptor.derive("controller_id", "controller.value"))
-                .context(ContextRuleDescriptor.derive("inventory_position", "inventory.position"))
+                .context(ContextRuleDescriptor.derive(dev.vfyjxf.cumulus.api.types.ContextKey.string("facing"), dev.vfyjxf.cumulus.impl.codec.LegacySourceParser.parse("controller.facing")))
+                .context(ContextRuleDescriptor.derive(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller_id"), dev.vfyjxf.cumulus.impl.codec.LegacySourceParser.parse("controller.value")))
+                .context(ContextRuleDescriptor.derive(dev.vfyjxf.cumulus.api.types.ContextKey.string("inventory_position"), dev.vfyjxf.cumulus.impl.codec.LegacySourceParser.parse("inventory.position")))
                 .build();
         var snapshot = InMemoryTargetSnapshot.builder()
                 .block(RelativeBlockPos.of(0, 0, 0), "cumulus:controller", Map.of("facing", "north"))
@@ -130,11 +130,11 @@ class StructureCheckExecutorTest {
 
         var result = StructureCheckExecutor.check(definition, new BlockPos(10, 64, 10), snapshot);
 
-        assertEquals(InstanceStatus.VALID, result.status());
-        assertEquals("10,64,10", result.context().values().get("controller"));
-        assertEquals("north", result.context().values().get("facing"));
-        assertEquals("cumulus:controller", result.context().values().get("controller_id"));
-        assertEquals("11,64,10", result.context().values().get("inventory_position"));
+        assertEquals(InstanceStatus.valid, result.status());
+        assertEquals("10,64,10", result.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller")).orElse(null));
+        assertEquals("north", result.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("facing")).orElse(null));
+        assertEquals("cumulus:controller", result.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller_id")).orElse(null));
+        assertEquals("11,64,10", result.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("inventory_position")).orElse(null));
     }
 
     @Test
@@ -158,7 +158,7 @@ class StructureCheckExecutorTest {
 
         var result = StructureCheckExecutor.check(definition, new BlockPos(0, 0, 0), snapshot, registry);
 
-        assertEquals(InstanceStatus.VALID, result.status());
+        assertEquals(InstanceStatus.valid, result.status());
     }
 
     @Test
@@ -168,7 +168,7 @@ class StructureCheckExecutorTest {
                         "true".equals(target.properties().get("hot")));
         var definition = Structures.define(ResourceLocation.parse("cumulus:propertyless_custom_predicate"))
                 .point("heater", RelativeBlockPos.of(0, 0, 0), Targets.block()
-                        .where(new PredicateDescriptor(ResourceLocation.parse("cumulus:is_hot"), Map.of())))
+                        .where(dev.vfyjxf.cumulus.test.TestHelpers.legacyPredicate("cumulus:is_hot", Map.of())))
                 .build();
         var snapshot = InMemoryTargetSnapshot.builder()
                 .block(RelativeBlockPos.of(0, 0, 0), "cumulus:heater", Map.of("hot", "true"))
@@ -176,7 +176,7 @@ class StructureCheckExecutorTest {
 
         var result = StructureCheckExecutor.check(definition, new BlockPos(0, 0, 0), snapshot, registry);
 
-        assertEquals(InstanceStatus.VALID, result.status());
+        assertEquals(InstanceStatus.valid, result.status());
     }
 
     @Test
@@ -211,7 +211,7 @@ class StructureCheckExecutorTest {
                                 definition.points().get(1).location(),
                                 definition.points().get(1).target(),
                                 definition.points().get(1).predicates(),
-                                dev.vfyjxf.cumulus.api.definition.PointRequirement.OPTIONAL,
+                                dev.vfyjxf.cumulus.api.definition.PointRequirement.optional,
                                 definition.points().get(1).captures(),
                                 definition.points().get(1).groups(),
                                 definition.points().get(1).diagnostics())),
@@ -226,7 +226,7 @@ class StructureCheckExecutorTest {
 
         var result = StructureCheckExecutor.check(optionalDefinition, new BlockPos(0, 0, 0), snapshot);
 
-        assertEquals(InstanceStatus.VALID, result.status());
+        assertEquals(InstanceStatus.valid, result.status());
         assertEquals(0, result.requests().size());
     }
 
@@ -234,7 +234,7 @@ class StructureCheckExecutorTest {
     void unsupportedPredicateFailsWithDiagnosticInsteadOfPassingSilently() {
         var definition = Structures.define(ResourceLocation.parse("cumulus:unsupported"))
                 .point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block()
-                        .where(new PredicateDescriptor(ResourceLocation.parse("cumulus:unsupported_predicate"), Map.of("mode", "strict"))))
+                        .where(dev.vfyjxf.cumulus.test.TestHelpers.legacyPredicate("cumulus:unsupported_predicate", Map.of("mode", "strict"))))
                 .build();
         var snapshot = InMemoryTargetSnapshot.builder()
                 .block(RelativeBlockPos.of(0, 0, 0), "cumulus:controller")
@@ -242,7 +242,7 @@ class StructureCheckExecutorTest {
 
         var result = StructureCheckExecutor.check(definition, new BlockPos(0, 0, 0), snapshot);
 
-        assertEquals(InstanceStatus.INVALID, result.status());
+        assertEquals(InstanceStatus.invalid, result.status());
         assertEquals("controller", result.diagnostics().childrenOf("root").getFirst().id());
     }
 
@@ -261,17 +261,17 @@ class StructureCheckExecutorTest {
 
         var result = StructureCheckExecutor.check(definition, new BlockPos(0, 0, 0), InMemoryTargetSnapshot.empty());
 
-        assertEquals(InstanceStatus.INVALID, result.status());
+        assertEquals(InstanceStatus.invalid, result.status());
         assertEquals(0, result.requests().size());
         var evidence = result.diagnostics().childrenOf("root").getFirst().evidence().getFirst();
-        assertEquals("UNSUPPORTED_TARGET", evidence.detail());
+        assertEquals("WRONG_TARGET_TYPE", evidence.detail());
         assertEquals("cumulus:unknown_target", evidence.targetId());
     }
 
     @Test
     void unsupportedPredicateDiagnosticNamesTheUnsupportedPredicate() {
-        var unsupportedPredicate = new PredicateDescriptor(
-                ResourceLocation.parse("cumulus:unsupported_predicate"),
+        var unsupportedPredicate = dev.vfyjxf.cumulus.test.TestHelpers.legacyPredicate(
+                "cumulus:unsupported_predicate",
                 Map.of("mode", "strict"));
         var definition = Structures.define(ResourceLocation.parse("cumulus:unsupported_predicate"))
                 .point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block()
@@ -322,9 +322,9 @@ class StructureCheckExecutorTest {
                 new BlockPos(0, 0, 0),
                 InMemoryTargetSnapshot.builder().context("facing", "south").build());
 
-        assertEquals(InstanceStatus.INCOMPLETE, missing.status());
-        assertEquals("MISSING_CONTEXT", missing.diagnostics().childrenOf("root").getFirst().evidence().getFirst().detail());
-        assertEquals(InstanceStatus.INVALID, mismatched.status());
+        assertEquals(InstanceStatus.incomplete, missing.status());
+        assertEquals("CONTEXT_CAPTURE_FAILED", missing.diagnostics().childrenOf("root").getFirst().evidence().getFirst().detail());
+        assertEquals(InstanceStatus.invalid, mismatched.status());
         assertEquals("PREDICATE_FAILED", mismatched.diagnostics().childrenOf("root").getFirst().evidence().getFirst().detail());
         assertEquals(0, mismatched.requests().size());
     }
@@ -344,7 +344,7 @@ class StructureCheckExecutorTest {
 
         var result = StructureCheckExecutor.check(definition, new BlockPos(0, 0, 0), snapshot);
 
-        assertEquals(InstanceStatus.VALID, result.status());
+        assertEquals(InstanceStatus.valid, result.status());
     }
 
     @Test
@@ -364,8 +364,8 @@ class StructureCheckExecutorTest {
 
         var result = StructureCheckExecutor.check(definition, new BlockPos(10, 64, 10), snapshot);
 
-        assertEquals(InstanceStatus.VALID, result.status());
-        assertEquals("10,64,11", result.context().values().get("port"));
+        assertEquals(InstanceStatus.valid, result.status());
+        assertEquals("10,64,11", result.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("port")).orElse(null));
     }
 
     @Test
@@ -385,7 +385,7 @@ class StructureCheckExecutorTest {
 
         var result = StructureCheckExecutor.fastCheck(plan, snapshot);
 
-        assertEquals(InstanceStatus.VALID, result.status());
+        assertEquals(InstanceStatus.valid, result.status());
         assertEquals(2, result.candidatesEvaluated());
         assertEquals(4, result.entriesEvaluated());
         assertEquals(1, result.validCandidateIndex());
@@ -407,7 +407,7 @@ class StructureCheckExecutorTest {
 
         var result = StructureCheckExecutor.fastCheck(plan, source);
 
-        assertEquals(InstanceStatus.VALID, result.status());
+        assertEquals(InstanceStatus.valid, result.status());
         assertEquals(2, result.candidatesEvaluated());
         assertEquals(4, result.entriesEvaluated());
         assertEquals(4, source.reads);
@@ -427,7 +427,7 @@ class StructureCheckExecutorTest {
 
         var result = StructureCheckExecutor.check(definition, new BlockPos(0, 0, 0), snapshot);
 
-        assertEquals(InstanceStatus.VALID, result.status());
+        assertEquals(InstanceStatus.valid, result.status());
     }
 
     private static final class CountingSource implements TargetSnapshotSource {

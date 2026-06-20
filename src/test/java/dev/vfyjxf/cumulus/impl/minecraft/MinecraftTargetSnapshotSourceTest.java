@@ -19,12 +19,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MinecraftTargetSnapshotSourceTest {
-    private static final ResourceLocation BLOCK = ResourceLocation.parse("cumulus:block");
-    private static final ResourceLocation BLOCK_ENTITY = ResourceLocation.parse("cumulus:block_entity");
-    private static final ResourceLocation ENTITY = ResourceLocation.parse("cumulus:entity");
-    private static final ResourceLocation FLUID = ResourceLocation.parse("cumulus:fluid");
-    private static final ResourceLocation CAPABILITY = ResourceLocation.parse("cumulus:capability");
-    private static final ResourceLocation REGION = ResourceLocation.parse("cumulus:region");
+    private static final ResourceLocation block = ResourceLocation.parse("cumulus:block");
+    private static final ResourceLocation blockEntity = ResourceLocation.parse("cumulus:block_entity");
+    private static final ResourceLocation entity = ResourceLocation.parse("cumulus:entity");
+    private static final ResourceLocation fluid = ResourceLocation.parse("cumulus:fluid");
+    private static final ResourceLocation capability = ResourceLocation.parse("cumulus:capability");
+    private static final ResourceLocation region = ResourceLocation.parse("cumulus:region");
 
     @Test
     void readsLoadedBlockBlockEntityFluidEntityCapabilityAndContextTargetsAtAnchorOffset() {
@@ -40,23 +40,23 @@ class MinecraftTargetSnapshotSourceTest {
                 Map.of("facing", "north"));
 
         assertEquals("minecraft:furnace", source.target(
-                BLOCK,
+                block,
                 RelativeBlockPos.of(0, 0, -1),
                 RelativeBlockPos.of(0, 0, -1)).orElseThrow().value());
         assertEquals("3", source.target(
-                BLOCK_ENTITY,
+                blockEntity,
                 RelativeBlockPos.of(0, 0, -1),
                 RelativeBlockPos.of(0, 0, -1)).orElseThrow().properties().get("inventory"));
         assertEquals("minecraft:water", source.target(
-                FLUID,
+                fluid,
                 RelativeBlockPos.of(1, 0, 0),
                 RelativeBlockPos.of(1, 0, 0)).orElseThrow().value());
         assertEquals("armorer", source.target(
-                ENTITY,
+                entity,
                 RelativeBlockPos.of(0, 1, 0),
                 RelativeBlockPos.of(0, 1, 0)).orElseThrow().properties().get("profession"));
         assertEquals("north", source.target(
-                CAPABILITY,
+                capability,
                 RelativeBlockPos.of(1, 1, 0),
                 RelativeBlockPos.of(1, 1, 0),
                 Map.of("name", "energy")).orElseThrow().properties().get("side"));
@@ -71,7 +71,7 @@ class MinecraftTargetSnapshotSourceTest {
         var source = new MinecraftTargetSnapshotSource(BlockPos.ZERO, reader, Map.of());
 
         assertTrue(source.target(
-                BLOCK,
+                block,
                 RelativeBlockPos.of(48, 64, 0),
                 RelativeBlockPos.of(48, 64, 0)).isEmpty());
     }
@@ -86,7 +86,7 @@ class MinecraftTargetSnapshotSourceTest {
         var source = new MinecraftTargetSnapshotSource(BlockPos.ZERO, reader, Map.of());
 
         var target = source.target(
-                REGION,
+                region,
                 RelativeBlockPos.of(0, 0, 0),
                 RelativeBlockPos.of(1, 1, 0)).orElseThrow();
 
@@ -116,7 +116,7 @@ class MinecraftTargetSnapshotSourceTest {
         var snapshot = TargetSnapshotReader.fromDefinition(definition, source);
         var result = StructureCheckExecutor.check(definition, new BlockPos(5, 70, 5), snapshot);
 
-        assertEquals(InstanceStatus.VALID, result.status());
+        assertEquals(InstanceStatus.valid, result.status());
     }
 
     @Test
@@ -126,7 +126,7 @@ class MinecraftTargetSnapshotSourceTest {
         var source = new MinecraftTargetSnapshotSource(BlockPos.ZERO, reader, Map.of());
 
         var target = source.target(
-                CAPABILITY,
+                capability,
                 RelativeBlockPos.of(0, 0, 0),
                 RelativeBlockPos.of(0, 0, 0),
                 Map.of("name", "energy", "side", "east")).orElseThrow();

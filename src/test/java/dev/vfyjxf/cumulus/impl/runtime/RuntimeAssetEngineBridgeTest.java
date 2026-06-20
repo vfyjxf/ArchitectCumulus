@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.impl.runtime;
 
 import dev.vfyjxf.cumulus.api.datagen.DataDrivenStructureAsset;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinitionRegistry;
 import dev.vfyjxf.cumulus.api.definition.Structures;
@@ -26,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RuntimeAssetEngineBridgeTest {
-    private static final ResourceLocation BLOCK = ResourceLocation.parse("cumulus:block");
+    private static final ResourceLocation block = ResourceLocation.parse("cumulus:block");
 
     @Test
     void registersEmbeddedDefinitionsFromLatestValidRuntimeAssetSnapshot() {
@@ -52,11 +53,11 @@ class RuntimeAssetEngineBridgeTest {
 
         assertEquals(List.of(definition.id()), registered);
         engine.track(definition.id(), new BlockPos(0, 64, 0), source()
-                .put(BLOCK, RelativeBlockPos.of(0, 0, 0), "cumulus:controller"));
+                .put(block, RelativeBlockPos.of(0, 0, 0), "cumulus:controller"));
         engine.markDirty(new SectionKey(0, 4, 0));
         var frame = engine.tick(10, 4);
-        assertEquals(InstanceStatus.VALID, frame.deltas().getFirst().status());
-        assertEquals("0,64,0", frame.deltas().getFirst().context().values().get("controller"));
+        assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
+        assertEquals("0,64,0", frame.deltas().getFirst().context().get(ContextKey.string("controller")).orElse(null));
     }
 
     @Test
@@ -95,10 +96,10 @@ class RuntimeAssetEngineBridgeTest {
 
         assertEquals(List.of(definition.id()), registered);
         engine.track(definition.id(), new BlockPos(0, 64, 0), source()
-                .put(BLOCK, RelativeBlockPos.of(0, 0, 0), "cumulus:controller"));
+                .put(block, RelativeBlockPos.of(0, 0, 0), "cumulus:controller"));
         engine.markDirty(new SectionKey(0, 4, 0));
         var frame = engine.tick(10, 4);
-        assertEquals(InstanceStatus.VALID, frame.deltas().getFirst().status());
+        assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
     }
 
     @Test
@@ -136,10 +137,10 @@ class RuntimeAssetEngineBridgeTest {
 
         assertEquals(List.of(definition.id()), registered);
         engine.track(definition.id(), new BlockPos(0, 64, 0), source()
-                .put(BLOCK, RelativeBlockPos.of(0, 0, 0), "cumulus:controller"));
+                .put(block, RelativeBlockPos.of(0, 0, 0), "cumulus:controller"));
         engine.markDirty(new SectionKey(0, 4, 0));
         var frame = engine.tick(10, 4);
-        assertEquals(InstanceStatus.VALID, frame.deltas().getFirst().status());
+        assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
     }
 
     @Test

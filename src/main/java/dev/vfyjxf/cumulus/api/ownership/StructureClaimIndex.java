@@ -36,7 +36,7 @@ public final class StructureClaimIndex {
             if (existing.owner().equals(claim.owner())) {
                 continue;
             }
-            if (existing.mode() == ClaimMode.EXCLUSIVE || claim.mode() == ClaimMode.EXCLUSIVE) {
+            if (existing.mode() == ClaimMode.exclusive || claim.mode() == ClaimMode.exclusive) {
                 return Optional.of(new ClaimConflict(existing, claim));
             }
         }

@@ -24,7 +24,7 @@ class StructureDefinitionTest {
                 RelativeBlockPos.of(0, 0, 0),
                 new TargetDescriptor(ResourceLocation.parse("cumulus:block"), Map.of()),
                 predicates,
-                PointRequirement.REQUIRED,
+                PointRequirement.required,
                 Set.of("controller"),
                 Set.of("core"),
                 DiagnosticMetadata.empty());
@@ -43,7 +43,7 @@ class StructureDefinitionTest {
                 List.of(),
                 DiagnosticMetadata.empty());
 
-        assertEquals(1, definition.schemaVersion());
+        assertEquals(2, definition.schemaVersion());
     }
 
     @Test

@@ -17,6 +17,7 @@ import dev.vfyjxf.cumulus.api.request.RequestReason;
 import dev.vfyjxf.cumulus.api.runtime.InstanceDelta;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.RuntimeStructureContext;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
 import dev.vfyjxf.cumulus.impl.check.InMemoryTargetSnapshot;
 import dev.vfyjxf.cumulus.impl.check.StructureCheckExecutor;
@@ -49,12 +50,12 @@ public final class StructureInstanceManager {
         for (var section : sortedSections(plan, anchor)) {
             requests.add(new DataRequest(
                     section,
-                    RequestReason.PREFETCH_INCOMPLETE_INSTANCE,
-                    RequestPriority.NORMAL,
+                    RequestReason.prefetchIncompleteInstance,
+                    RequestPriority.normal,
                     20,
                     definitionId + "/footprint"));
         }
-        return new EngineFrame(List.of(new InstanceDelta(key, InstanceStatus.INCOMPLETE, context)), requests);
+        return new EngineFrame(List.of(new InstanceDelta(key, InstanceStatus.incomplete, context)), requests);
     }
 
     private static List<SectionKey> sortedSections(StructureRuntimePlan plan, BlockPos anchor) {
@@ -66,18 +67,16 @@ public final class StructureInstanceManager {
                 .toList();
     }
 
-    public EngineFrame publishContext(ResourceLocation definitionId, BlockPos anchor, Map<String, String> values) {
+    public EngineFrame publishContext(ResourceLocation definitionId, BlockPos anchor, Map<ContextKey<?>, Object> values) {
         requirePlan(definitionId);
         var key = new StructureInstanceKey(definitionId, anchor);
         var previous = contextsByKey.get(key);
         var revision = previous == null ? 1 : previous.revision() + 1;
         var builder = RuntimeStructureContext.builder(key).revision(revision);
-        for (var entry : values.entrySet()) {
-            builder.put(entry.getKey(), entry.getValue());
-        }
+        builder.putAll(values);
         var context = builder.build();
         contextsByKey.put(key, context);
-        return new EngineFrame(List.of(new InstanceDelta(key, InstanceStatus.VALID, context)), List.of());
+        return new EngineFrame(List.of(new InstanceDelta(key, InstanceStatus.valid, context)), List.of());
     }
 
     public EngineFrame check(StructureDefinition definition, BlockPos anchor, InMemoryTargetSnapshot snapshot) {
@@ -99,7 +98,7 @@ public final class StructureInstanceManager {
         var result = StructureCheckExecutor.check(definition, anchor, snapshot);
         var key = result.context().key();
         contextsByKey.put(key, result.context());
-        if (result.status() != InstanceStatus.VALID) {
+        if (result.status() != InstanceStatus.valid) {
             diagnosticsByKey.put(key, result.diagnostics());
             return new EngineFrame(
                     List.of(new InstanceDelta(key, result.status(), result.context())),
@@ -107,7 +106,7 @@ public final class StructureInstanceManager {
         }
 
         var conflict = firstConflict(key, claims);
-        var status = conflict == null ? result.status() : InstanceStatus.INVALID;
+        var status = conflict == null ? result.status() : InstanceStatus.invalid;
         var diagnostics = conflict == null ? result.diagnostics() : conflictDiagnostics(conflict);
         diagnosticsByKey.put(key, diagnostics);
         if (conflict == null) {
@@ -149,7 +148,7 @@ public final class StructureInstanceManager {
         var attempted = conflict.attempted();
         var root = new DiagnosticNode(
                 "root",
-                Severity.ERROR,
+                Severity.error,
                 "Structure ownership conflict",
                 "diagnostic.cumulus.structure_ownership_conflict",
                 List.of(),
@@ -157,7 +156,7 @@ public final class StructureInstanceManager {
                 List.of());
         var conflictNode = new DiagnosticNode(
                 "ownership-conflict",
-                Severity.ERROR,
+                Severity.error,
                 "Part ownership conflict",
                 "diagnostic.cumulus.ownership_conflict",
                 List.of(DiagnosticEvidence.relative(

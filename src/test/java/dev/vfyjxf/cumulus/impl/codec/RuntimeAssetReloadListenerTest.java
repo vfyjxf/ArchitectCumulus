@@ -108,7 +108,7 @@ class RuntimeAssetReloadListenerTest {
         listener.apply(listener.loadFrom(manager), manager, net.minecraft.util.profiling.InactiveProfiler.INSTANCE);
 
         assertTrue(repository.lastResult().orElseThrow().diagnostics().nodes().stream()
-                .anyMatch(node -> node.severity() == Severity.ERROR));
+                .anyMatch(node -> node.severity() == Severity.error));
         assertEquals(List.of(), registered);
     }
 
@@ -123,7 +123,7 @@ class RuntimeAssetReloadListenerTest {
         var result = new RuntimeAssetReloadListener().loadFrom(manager);
 
         assertEquals(List.of("INVALID_RESOURCE_IO"), result.diagnostics().nodes().stream()
-                .filter(node -> node.severity() == Severity.ERROR)
+                .filter(node -> node.severity() == Severity.error)
                 .map(node -> node.id())
                 .toList());
     }

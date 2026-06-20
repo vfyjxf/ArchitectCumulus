@@ -7,13 +7,13 @@ import java.util.Comparator;
 import net.minecraft.resources.ResourceLocation;
 
 public final class TargetSnapshotReader {
-    private static final ResourceLocation BLOCK = ResourceLocation.parse("cumulus:block");
-    private static final ResourceLocation BLOCK_ENTITY = ResourceLocation.parse("cumulus:block_entity");
-    private static final ResourceLocation ENTITY = ResourceLocation.parse("cumulus:entity");
-    private static final ResourceLocation FLUID = ResourceLocation.parse("cumulus:fluid");
-    private static final ResourceLocation CAPABILITY = ResourceLocation.parse("cumulus:capability");
-    private static final ResourceLocation REGION = ResourceLocation.parse("cumulus:region");
-    private static final ResourceLocation CONTEXT = ResourceLocation.parse("cumulus:context");
+    private static final ResourceLocation block = ResourceLocation.parse("cumulus:block");
+    private static final ResourceLocation blockEntity = ResourceLocation.parse("cumulus:block_entity");
+    private static final ResourceLocation entity = ResourceLocation.parse("cumulus:entity");
+    private static final ResourceLocation fluid = ResourceLocation.parse("cumulus:fluid");
+    private static final ResourceLocation capability = ResourceLocation.parse("cumulus:capability");
+    private static final ResourceLocation region = ResourceLocation.parse("cumulus:region");
+    private static final ResourceLocation context = ResourceLocation.parse("cumulus:context");
 
     private TargetSnapshotReader() {
     }
@@ -58,15 +58,15 @@ public final class TargetSnapshotReader {
         var missingRequired = 0;
         for (var entry : checkCandidate.entries()) {
             var point = entry.point();
-            if (CONTEXT.equals(point.target().typeId())) {
+            if (context.equals(point.target().typeId())) {
                 var key = point.target().properties().get("key");
                 var value = source.context(key);
                 if (value.isPresent()) {
                     builder.context(key, value.orElseThrow());
-                    if (point.requirement() == PointRequirement.REQUIRED) {
+                    if (point.requirement() == PointRequirement.required) {
                         presentRequired++;
                     }
-                } else if (point.requirement() == PointRequirement.REQUIRED) {
+                } else if (point.requirement() == PointRequirement.required) {
                     missingRequired++;
                 }
                 continue;
@@ -79,10 +79,10 @@ public final class TargetSnapshotReader {
                     point.target().properties());
             if (target.isPresent()) {
                 put(builder, point.target().typeId(), entry, target.orElseThrow());
-                if (point.requirement() == PointRequirement.REQUIRED) {
+                if (point.requirement() == PointRequirement.required) {
                     presentRequired++;
                 }
-            } else if (point.requirement() == PointRequirement.REQUIRED) {
+            } else if (point.requirement() == PointRequirement.required) {
                 missingRequired++;
             }
         }
@@ -94,27 +94,27 @@ public final class TargetSnapshotReader {
             ResourceLocation targetType,
             CheckPlanEntry entry,
             SnapshotTarget target) {
-        if (BLOCK.equals(targetType)) {
+        if (block.equals(targetType)) {
             builder.block(entry.min(), target.value(), target.properties());
             return;
         }
-        if (BLOCK_ENTITY.equals(targetType)) {
+        if (blockEntity.equals(targetType)) {
             builder.blockEntity(entry.min(), target.value(), target.properties());
             return;
         }
-        if (ENTITY.equals(targetType)) {
+        if (entity.equals(targetType)) {
             builder.entity(entry.min(), target.value(), target.properties());
             return;
         }
-        if (FLUID.equals(targetType)) {
+        if (fluid.equals(targetType)) {
             builder.fluid(entry.min(), target.value(), target.properties());
             return;
         }
-        if (CAPABILITY.equals(targetType)) {
+        if (capability.equals(targetType)) {
             builder.capability(entry.min(), target.value(), target.properties());
             return;
         }
-        if (REGION.equals(targetType)) {
+        if (region.equals(targetType)) {
             builder.region(entry.min(), entry.max(), target.value(), target.properties());
         }
     }
