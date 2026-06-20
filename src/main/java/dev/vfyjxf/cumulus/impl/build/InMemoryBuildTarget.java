@@ -1,13 +1,14 @@
 package dev.vfyjxf.cumulus.impl.build;
 
 import net.minecraft.resources.ResourceLocation;
+import dev.vfyjxf.cumulus.api.target.types.CapabilityTargetType;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class InMemoryBuildTarget implements BuildTarget {
-    private static final ResourceLocation capability = ResourceLocation.parse("cumulus:capability");
+    private static final ResourceLocation capability = CapabilityTargetType.id;
     private final Map<String, BuiltTarget> targets = new LinkedHashMap<>();
     private final Map<String, Map<String, String>> capabilityMutations = new LinkedHashMap<>();
 

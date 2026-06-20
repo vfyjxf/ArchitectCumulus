@@ -23,6 +23,9 @@ import dev.vfyjxf.cumulus.api.request.RequestPriority;
 import dev.vfyjxf.cumulus.api.request.RequestReason;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
+import dev.vfyjxf.cumulus.api.target.TargetTypes;
+import dev.vfyjxf.cumulus.api.target.types.ContextTargetType;
+import dev.vfyjxf.cumulus.api.target.types.RegionTargetType;
 import dev.vfyjxf.cumulus.api.transform.Transforms;
 import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.api.visualization.VisualizationElement;
@@ -40,7 +43,10 @@ import java.util.Map;
 public final class StructureCheckExecutor {
     private static final ResourceLocation regionTarget = ResourceLocation.parse("cumulus:region");
     private static final ResourceLocation contextTarget = ResourceLocation.parse("cumulus:context");
-    private static final List<ResourceLocation> supportedTargets = List.of(ResourceLocation.parse("cumulus:block"), ResourceLocation.parse("cumulus:block_entity"), ResourceLocation.parse("cumulus:entity"), ResourceLocation.parse("cumulus:fluid"), ResourceLocation.parse("cumulus:capability"), regionTarget, contextTarget);
+    // Typed dispatch: use TargetTypes registry instead of hardcoded ResourceLocation list
+    private static boolean isSupportedTarget(ResourceLocation typeId) {
+        return TargetTypes.isRegistered(typeId);
+    }
 
     private StructureCheckExecutor() {}
 
@@ -186,7 +192,7 @@ public final class StructureCheckExecutor {
             entriesEvaluated++;
             var point = entry.point();
             var bounds = new Bounds(entry.min(), entry.max());
-            if (!supportedTargets.contains(point.target().typeId())) {
+            if (!isSupportedTarget(point.target().typeId())) {
                 if (point.requirement() == PointRequirement.optional) {
                     continue;
                 }
@@ -291,7 +297,7 @@ public final class StructureCheckExecutor {
             List<DiagnosticNode> nodes, List<DiagnosticEdge> edges,
             List<DataRequest> requests, List<VisualizationElement> visualization,
             List<MatchedPoint> matchedPoints) {
-        if (!supportedTargets.contains(point.target().typeId())) {
+        if (!isSupportedTarget(point.target().typeId())) {
             if (point.requirement() == PointRequirement.optional) {
                 return;
             }
@@ -303,8 +309,8 @@ public final class StructureCheckExecutor {
             if (point.requirement() == PointRequirement.optional) {
                 return;
             }
-            var code = contextTarget.equals(point.target().typeId()) ? "CONTEXT_CAPTURE_FAILED" : "MISSING_TARGET";
-            var localizationKey = contextTarget.equals(point.target().typeId()) ? "diagnostic.cumulus.context_capture_failed" : "diagnostic.cumulus.missing_target";
+            var code = ContextTargetType.instance.id().equals(point.target().typeId()) ? "CONTEXT_CAPTURE_FAILED" : "MISSING_TARGET";
+            var localizationKey = ContextTargetType.instance.id().equals(point.target().typeId()) ? "diagnostic.cumulus.context_capture_failed" : "diagnostic.cumulus.missing_target";
             addProblem(point, bounds, code, "Missing target", localizationKey, null, nodes, edges, visualization);
             requests.add(new DataRequest(
                             SectionKey.fromBlock(anchor.offset(bounds.min().x(), bounds.min().y(), bounds.min().z())),
@@ -366,14 +372,14 @@ public final class StructureCheckExecutor {
     }
 
     private static SnapshotTarget resolveTarget(StructurePointDefinition point, Bounds bounds, InMemoryTargetSnapshot snapshot) {
-        if (contextTarget.equals(point.target().typeId())) {
+        if (ContextTargetType.instance.id().equals(point.target().typeId())) {
             return snapshot.context(point.target().properties().get("key")).orElse(null);
         }
         return snapshot.target(point.target().typeId(), bounds.min(), bounds.max()).orElse(null);
     }
 
     private static SnapshotTarget resolveTarget(StructurePointDefinition point, Bounds bounds, TargetSnapshotSource source) {
-        if (contextTarget.equals(point.target().typeId())) {
+        if (ContextTargetType.instance.id().equals(point.target().typeId())) {
             var key = point.target().properties().get("key");
             if (key == null || key.isBlank()) {
                 return null;
@@ -400,16 +406,22 @@ public final class StructureCheckExecutor {
                         Severity.error,
                         message,
                         localizationKey,
-                        List.of(DiagnosticEvidence.relative(bounds.min(), point.target().typeId().toString(), predicate == null ? code : predicate.id().toString(), pointId, code, descriptors(bounds, predicate))),
+                        List.of(DiagnosticEvidence.relative(bounds.min(), point.target().typeId().toString(), predicate == null ? code : predicate.id().toString(), pointId, code, descriptors(bounds, predicate, point))),
                         "runtime/check/" + pointId,
                         List.of()));
         edges.add(new DiagnosticEdge("root", pointId, "caused_by"));
         visualization.add(VisualizationElement.region(pointId + "-error", point.target().typeId().getPath(), bounds.min(), bounds.max(), Severity.error, point.groups().isEmpty() ? "structure" : point.groups().iterator().next(), localizationKey, 100));
     }
 
-    private static Map<String, String> descriptors(Bounds bounds, PredicateDescriptor predicate) {
+    private static Map<String, String> descriptors(Bounds bounds, PredicateDescriptor predicate, StructurePointDefinition point) {
         var descriptors = new LinkedHashMap<String, String>();
         descriptors.put("to", bounds.max().asString());
+        // Include point's DiagnosticMetadata for richer diagnostics
+        if (!point.diagnostics().isEmpty()) {
+            for (var entry : point.diagnostics().properties().entrySet()) {
+                descriptors.put("meta." + entry.getKey(), entry.getValue());
+            }
+        }
         if (predicate != null) {
             for (var entry : predicate.properties().entrySet()) {
                 descriptors.put("predicate." + entry.getKey(), entry.getValue());

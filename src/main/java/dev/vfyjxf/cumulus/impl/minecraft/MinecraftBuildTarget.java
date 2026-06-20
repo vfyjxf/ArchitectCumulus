@@ -3,6 +3,12 @@ package dev.vfyjxf.cumulus.impl.minecraft;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.impl.build.BuildAction;
 import dev.vfyjxf.cumulus.impl.build.BuildTarget;
+import dev.vfyjxf.cumulus.api.target.types.BlockTargetType;
+import dev.vfyjxf.cumulus.api.target.types.BlockEntityTargetType;
+import dev.vfyjxf.cumulus.api.target.types.EntityTargetType;
+import dev.vfyjxf.cumulus.api.target.types.FluidTargetType;
+import dev.vfyjxf.cumulus.api.target.types.CapabilityTargetType;
+import dev.vfyjxf.cumulus.api.target.types.RegionTargetType;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -26,12 +32,12 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public final class MinecraftBuildTarget implements BuildTarget {
-    private static final ResourceLocation block = ResourceLocation.parse("cumulus:block");
-    private static final ResourceLocation blockEntity = ResourceLocation.parse("cumulus:block_entity");
-    private static final ResourceLocation capability = ResourceLocation.parse("cumulus:capability");
-    private static final ResourceLocation entity = ResourceLocation.parse("cumulus:entity");
-    private static final ResourceLocation fluid = ResourceLocation.parse("cumulus:fluid");
-    private static final ResourceLocation region = ResourceLocation.parse("cumulus:region");
+    private static final ResourceLocation block = BlockTargetType.id;
+    private static final ResourceLocation blockEntity = BlockEntityTargetType.id;
+    private static final ResourceLocation capability = CapabilityTargetType.id;
+    private static final ResourceLocation entity = EntityTargetType.id;
+    private static final ResourceLocation fluid = FluidTargetType.id;
+    private static final ResourceLocation region = RegionTargetType.id;
     private static final ResourceLocation defaultBlock = ResourceLocation.parse("minecraft:air");
     private static final ResourceLocation defaultFluid = ResourceLocation.parse("minecraft:water");
 

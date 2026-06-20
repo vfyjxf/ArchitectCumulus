@@ -6,6 +6,7 @@ import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
 import dev.vfyjxf.cumulus.api.diagnostic.FixHint;
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
 import dev.vfyjxf.cumulus.api.transform.TransformDescriptor;
+import dev.vfyjxf.cumulus.api.target.types.RegionTargetType;
 import dev.vfyjxf.cumulus.api.visualization.VisualizationElement;
 import dev.vfyjxf.cumulus.api.visualization.VisualizationModel;
 import dev.vfyjxf.cumulus.impl.check.CheckPlanCandidate;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class StructureRuntimePlanCompiler {
-    private static final ResourceLocation regionTarget = ResourceLocation.parse("cumulus:region");
+    private static final ResourceLocation regionTarget = RegionTargetType.id;
     private static final ResourceLocation substructureComponent = ResourceLocation.parse("cumulus:substructure");
     private static final ResourceLocation rotateY90 = ResourceLocation.parse("cumulus:rotate_y_90");
     private static final ResourceLocation rotateY180 = ResourceLocation.parse("cumulus:rotate_y_180");
@@ -40,7 +41,7 @@ public final class StructureRuntimePlanCompiler {
         for (var point : definition.points()) {
             var min = point.location();
             var max = point.location();
-            if (regionTarget.equals(point.target().typeId())) {
+            if (RegionTargetType.instance.id().equals(point.target().typeId())) {
                 min = parsePos(point.target().properties().get("from"));
                 max = parsePos(point.target().properties().get("to"));
             }
@@ -114,7 +115,7 @@ public final class StructureRuntimePlanCompiler {
     }
 
     private static Bounds bounds(StructurePointDefinition point, TransformDescriptor transform) {
-        if (regionTarget.equals(point.target().typeId())) {
+        if (RegionTargetType.instance.id().equals(point.target().typeId())) {
             return transformedBounds(parsePos(point.target().properties().get("from")), parsePos(point.target().properties().get("to")), transform);
         }
         return transformedBounds(point.location(), point.location(), transform);

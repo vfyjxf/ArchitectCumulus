@@ -9,6 +9,7 @@ import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
 import dev.vfyjxf.cumulus.api.definition.StructurePointId;
 import dev.vfyjxf.cumulus.api.target.TargetDescriptor;
 import dev.vfyjxf.cumulus.api.types.ContextKey;
+import dev.vfyjxf.cumulus.api.target.types.RegionTargetType;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class SubstructureRuntimeComposer {
-    private static final ResourceLocation regionTarget = ResourceLocation.parse("cumulus:region");
+    private static final ResourceLocation regionTarget = RegionTargetType.id;
 
     private SubstructureRuntimeComposer() {}
 

@@ -6,6 +6,7 @@ import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
 import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptor;
 import dev.vfyjxf.cumulus.api.transform.TransformDescriptor;
+import dev.vfyjxf.cumulus.api.target.types.RegionTargetType;
 
 import net.minecraft.resources.ResourceLocation;
 
@@ -15,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public final class RuntimeAssetExporter {
-    private static final ResourceLocation regionTarget = ResourceLocation.parse("cumulus:region");
+    private static final ResourceLocation regionTarget = RegionTargetType.id;
 
     private RuntimeAssetExporter() {}
 
