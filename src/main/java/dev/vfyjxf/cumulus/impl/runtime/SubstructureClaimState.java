@@ -15,8 +15,11 @@ import dev.vfyjxf.cumulus.api.runtime.InstanceDelta;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,8 +29,8 @@ final class SubstructureClaimState {
     private final StructureClaimIndex claims = new StructureClaimIndex();
 
     ClaimResult resolve(List<InstanceDelta> deltas) {
-        var resolved = new java.util.ArrayList<InstanceDelta>();
-        var diagnostics = new java.util.LinkedHashMap<StructureInstanceKey, DiagnosticGraph>();
+        var resolved = new ArrayList<InstanceDelta>();
+        var diagnostics = new LinkedHashMap<StructureInstanceKey, DiagnosticGraph>();
         for (var delta : deltas) {
             if (isChildOccurrence(delta) && delta.status() == InstanceStatus.valid) {
                 var claim = new PartClaim(partId(delta.key()), parentOwner(delta), ClaimMode.exclusive);
@@ -58,12 +61,12 @@ final class SubstructureClaimState {
         return new StructureInstanceKey(structure, parseBlockPos(anchor));
     }
 
-    private static net.minecraft.core.BlockPos parseBlockPos(String value) {
+    private static BlockPos parseBlockPos(String value) {
         var parts = value.split(",");
         if (parts.length != 3) {
             throw new IllegalArgumentException("Parent anchor must have x,y,z parts");
         }
-        return new net.minecraft.core.BlockPos(
+        return new BlockPos(
                         Integer.parseInt(parts[0]),
                         Integer.parseInt(parts[1]),
                         Integer.parseInt(parts[2]));

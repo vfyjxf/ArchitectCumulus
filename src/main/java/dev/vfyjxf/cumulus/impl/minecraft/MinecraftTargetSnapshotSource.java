@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -184,7 +185,7 @@ public final class MinecraftTargetSnapshotSource implements TargetSnapshotSource
         }
 
         @Override
-        public java.util.List<SnapshotTarget> entities(BlockPos min, BlockPos max) {
+        public List<SnapshotTarget> entities(BlockPos min, BlockPos max) {
             var box = new AABB(min.getX(), min.getY(), min.getZ(), max.getX() + 1.0, max.getY() + 1.0, max.getZ() + 1.0);
             return level.getEntities((Entity) null, box, entity -> true).stream().map(entity -> {
                 var id = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());

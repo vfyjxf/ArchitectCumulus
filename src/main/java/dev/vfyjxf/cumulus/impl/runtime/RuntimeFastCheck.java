@@ -1,5 +1,6 @@
 package dev.vfyjxf.cumulus.impl.runtime;
 
+import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
 import dev.vfyjxf.cumulus.impl.check.FastCheckResult;
 
@@ -15,7 +16,7 @@ public record RuntimeFastCheck(
         }
     }
 
-    public dev.vfyjxf.cumulus.api.runtime.InstanceStatus status() {
+    public InstanceStatus status() {
         return result.status();
     }
 

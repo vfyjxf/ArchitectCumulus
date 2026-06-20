@@ -1,5 +1,6 @@
 package dev.vfyjxf.cumulus.impl.minecraft;
 
+import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.impl.build.BuildAction;
 import dev.vfyjxf.cumulus.impl.build.BuildTarget;
 
@@ -7,6 +8,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -18,7 +21,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public final class MinecraftBuildTarget implements BuildTarget {
     private static final ResourceLocation block = ResourceLocation.parse("cumulus:block");
@@ -265,7 +270,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
     }
 
     private static Map<String, String> capabilityMutation(BuildAction action) {
-        var mutation = new java.util.LinkedHashMap<String, String>();
+        var mutation = new LinkedHashMap<String, String>();
         for (var entry : action.properties().entrySet()) {
             if (!entry.getKey().equals("name") && !entry.getKey().equals("block")) {
                 mutation.put(entry.getKey(), entry.getValue());
@@ -335,7 +340,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
         }
     }
 
-    private BlockPos absolute(dev.vfyjxf.cumulus.api.definition.RelativeBlockPos pos) {
+    private BlockPos absolute(RelativeBlockPos pos) {
         return anchor.offset(pos.x(), pos.y(), pos.z());
     }
 
@@ -490,13 +495,13 @@ public final class MinecraftBuildTarget implements BuildTarget {
             if (blockEntity == null) {
                 return false;
             }
-            blockEntity.loadWithComponents(mergedNbt(blockEntity, parseNbt(nbt)), HolderLookup.Provider.create(java.util.stream.Stream.of()));
+            blockEntity.loadWithComponents(mergedNbt(blockEntity, parseNbt(nbt)), HolderLookup.Provider.create(Stream.of()));
             blockEntity.setChanged();
             return true;
         }
 
         private static CompoundTag normalizedNbt(BlockEntity blockEntity) {
-            var values = blockEntity.saveWithoutMetadata(HolderLookup.Provider.create(java.util.stream.Stream.of()));
+            var values = blockEntity.saveWithoutMetadata(HolderLookup.Provider.create(Stream.of()));
             values.remove("x");
             values.remove("y");
             values.remove("z");
@@ -504,7 +509,7 @@ public final class MinecraftBuildTarget implements BuildTarget {
         }
 
         private static CompoundTag mergedNbt(BlockEntity blockEntity, CompoundTag patch) {
-            var values = blockEntity.saveWithoutMetadata(HolderLookup.Provider.create(java.util.stream.Stream.of()));
+            var values = blockEntity.saveWithoutMetadata(HolderLookup.Provider.create(Stream.of()));
             values.merge(patch);
             return values;
         }
@@ -591,10 +596,10 @@ public final class MinecraftBuildTarget implements BuildTarget {
             return values;
         }
 
-        private static net.minecraft.nbt.ListTag newDoubleList(double... values) {
-            var list = new net.minecraft.nbt.ListTag();
+        private static ListTag newDoubleList(double... values) {
+            var list = new ListTag();
             for (var value : values) {
-                list.add(net.minecraft.nbt.DoubleTag.valueOf(value));
+                list.add(DoubleTag.valueOf(value));
             }
             return list;
         }

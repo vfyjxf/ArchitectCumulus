@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class StructureDefinitionTest {
     @Test
     void copiesMutableInputs() {
-        var predicates = new java.util.ArrayList<PredicateDescriptor>();
+        var predicates = new ArrayList<PredicateDescriptor>();
         predicates.add(new PredicateDescriptor(ResourceLocation.parse("cumulus:any"), Map.of()));
 
         var point = new StructurePointDefinition(

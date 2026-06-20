@@ -3,18 +3,20 @@ package dev.vfyjxf.cumulus.api.predicate.types;
 import dev.vfyjxf.cumulus.api.predicate.PredicateProperties;
 import dev.vfyjxf.cumulus.api.predicate.PredicateType;
 
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.Objects;
 
 /** Predicate: a BlockState property equals an expected value. */
 public final class StatePropertyPredicateType implements PredicateType {
 
-    public static final net.minecraft.resources.ResourceLocation id = net.minecraft.resources.ResourceLocation.parse("cumulus:property");
+    public static final ResourceLocation id = ResourceLocation.parse("cumulus:property");
     public static final StatePropertyPredicateType instance = new StatePropertyPredicateType();
 
     private StatePropertyPredicateType() {}
 
     @Override
-    public net.minecraft.resources.ResourceLocation id() {
+    public ResourceLocation id() {
         return id;
     }
 

@@ -9,8 +9,11 @@ import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptors;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
 import dev.vfyjxf.cumulus.api.target.Targets;
+import dev.vfyjxf.cumulus.api.transform.Transforms;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.impl.check.SnapshotTarget;
 import dev.vfyjxf.cumulus.impl.check.TargetSnapshotSource;
+import dev.vfyjxf.cumulus.impl.codec.LegacySourceParser;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -41,7 +44,7 @@ class RuntimeCheckEngineTest {
 
         assertEquals(1, frame.deltas().size());
         assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
-        assertEquals("0,64,0", frame.deltas().getFirst().context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller")).orElse(null));
+        assertEquals("0,64,0", frame.deltas().getFirst().context().get(ContextKey.string("controller")).orElse(null));
         assertEquals(List.of(), frame.requests());
     }
 
@@ -85,7 +88,7 @@ class RuntimeCheckEngineTest {
 
         var parentDelta = frame.deltas().stream().filter(delta -> delta.key().structureId().equals(parent.id())).findFirst().orElseThrow();
         assertEquals(InstanceStatus.valid, parentDelta.status());
-        assertEquals("3,64,0", parentDelta.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("cumulus:runtime_parent/left/port")).orElse(null));
+        assertEquals("3,64,0", parentDelta.context().get(ContextKey.string("cumulus:runtime_parent/left/port")).orElse(null));
     }
 
     @Test
@@ -104,15 +107,15 @@ class RuntimeCheckEngineTest {
         assertEquals(InstanceStatus.valid, left.status());
         assertEquals(InstanceStatus.valid, right.status());
         var parentDelta = frame.deltas().stream().filter(delta -> delta.key().structureId().equals(parent.id())).findFirst().orElseThrow();
-        assertEquals(InstanceStatus.valid.name(), parentDelta.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("substructure.cumulus:runtime_parent_lifecycle/left.status")).orElse(null));
-        assertEquals(InstanceStatus.valid.name(), parentDelta.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("substructure.cumulus:runtime_parent_lifecycle/right.status")).orElse(null));
-        assertEquals("cumulus:runtime_parent_lifecycle/left", left.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("parent_occurrence")).orElse(null));
-        assertEquals("cumulus:runtime_parent_lifecycle/right", right.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("parent_occurrence")).orElse(null));
-        assertEquals(parent.id().toString(), left.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("parent_structure")).orElse(null));
-        assertEquals("0,64,0", left.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("parent_anchor")).orElse(null));
-        assertEquals(InstanceStatus.valid.name(), left.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("parent_status")).orElse(null));
-        assertEquals("3,64,0", left.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("port")).orElse(null));
-        assertEquals("6,64,0", right.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("port")).orElse(null));
+        assertEquals(InstanceStatus.valid.name(), parentDelta.context().get(ContextKey.string("substructure.cumulus:runtime_parent_lifecycle/left.status")).orElse(null));
+        assertEquals(InstanceStatus.valid.name(), parentDelta.context().get(ContextKey.string("substructure.cumulus:runtime_parent_lifecycle/right.status")).orElse(null));
+        assertEquals("cumulus:runtime_parent_lifecycle/left", left.context().get(ContextKey.string("parent_occurrence")).orElse(null));
+        assertEquals("cumulus:runtime_parent_lifecycle/right", right.context().get(ContextKey.string("parent_occurrence")).orElse(null));
+        assertEquals(parent.id().toString(), left.context().get(ContextKey.string("parent_structure")).orElse(null));
+        assertEquals("0,64,0", left.context().get(ContextKey.string("parent_anchor")).orElse(null));
+        assertEquals(InstanceStatus.valid.name(), left.context().get(ContextKey.string("parent_status")).orElse(null));
+        assertEquals("3,64,0", left.context().get(ContextKey.string("port")).orElse(null));
+        assertEquals("6,64,0", right.context().get(ContextKey.string("port")).orElse(null));
     }
 
     @Test
@@ -129,8 +132,8 @@ class RuntimeCheckEngineTest {
 
         var occurrence = "cumulus:runtime_parent_sync/left";
         var parentDelta = validFrame.deltas().stream().filter(delta -> delta.key().structureId().equals(parent.id())).findFirst().orElseThrow();
-        assertEquals("3,64,0", parentDelta.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("substructure." + occurrence + ".context.port")).orElse(null));
-        assertEquals("2,0,0", parentDelta.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("substructure." + occurrence + ".anchor_offset")).orElse(null));
+        assertEquals("3,64,0", parentDelta.context().get(ContextKey.string("substructure." + occurrence + ".context.port")).orElse(null));
+        assertEquals("2,0,0", parentDelta.context().get(ContextKey.string("substructure." + occurrence + ".anchor_offset")).orElse(null));
         assertEquals(1, events.size());
         assertEquals(SubstructureLifecycleTransition.added, events.getFirst().transition());
         assertEquals(Optional.empty(), events.getFirst().previousStatus());
@@ -146,7 +149,7 @@ class RuntimeCheckEngineTest {
         assertEquals(Optional.of(InstanceStatus.valid), events.get(1).previousStatus());
         assertEquals(InstanceStatus.invalid, events.get(1).currentStatus());
         var invalidParentDelta = invalidFrame.deltas().stream().filter(delta -> delta.key().structureId().equals(parent.id())).findFirst().orElseThrow();
-        assertEquals(InstanceStatus.invalid.name(), invalidParentDelta.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("substructure." + occurrence + ".status")).orElse(null));
+        assertEquals(InstanceStatus.invalid.name(), invalidParentDelta.context().get(ContextKey.string("substructure." + occurrence + ".status")).orElse(null));
     }
 
     @Test
@@ -161,8 +164,8 @@ class RuntimeCheckEngineTest {
 
         var occurrence = "cumulus:runtime_parent_default_sync/left";
         var parentDelta = frame.deltas().stream().filter(delta -> delta.key().structureId().equals(parent.id())).findFirst().orElseThrow();
-        assertEquals(InstanceStatus.valid.name(), parentDelta.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("substructure." + occurrence + ".status")).orElse(null));
-        assertFalse(parentDelta.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("substructure." + occurrence + ".context.port")).isPresent());
+        assertEquals(InstanceStatus.valid.name(), parentDelta.context().get(ContextKey.string("substructure." + occurrence + ".status")).orElse(null));
+        assertFalse(parentDelta.context().get(ContextKey.string("substructure." + occurrence + ".context.port")).isPresent());
     }
 
     @Test
@@ -225,10 +228,10 @@ class RuntimeCheckEngineTest {
 
     @Test
     void complexNestedSubstructureCaseConvertsStructureDataIntoRuntimeContexts() {
-        var base = Structures.define(ResourceLocation.parse("cumulus:runtime_base")).point("base_controller", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:controller")).capture("base_controller")).context(ContextRuleDescriptor.derive(dev.vfyjxf.cumulus.api.types.ContextKey.string("base_facing"), dev.vfyjxf.cumulus.impl.codec.LegacySourceParser.parse("base_controller.facing"))).build();
-        var arm = Structures.define(ResourceLocation.parse("cumulus:runtime_arm_complex")).point("arm_mount", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:arm_mount")).capture("arm_mount")).component(Components.substructure("tool", ResourceLocation.parse("cumulus:runtime_tool_complex"), RelativeBlockPos.of(1, 0, 0))).context(ContextRuleDescriptor.derive(dev.vfyjxf.cumulus.api.types.ContextKey.string("arm_mount_value"), dev.vfyjxf.cumulus.impl.codec.LegacySourceParser.parse("arm_mount.value"))).build();
-        var tool = Structures.define(ResourceLocation.parse("cumulus:runtime_tool_complex")).point("tool_head", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:tool_head")).capture("tool_head")).point("tool_region", RelativeBlockPos.of(-1, 0, 0), Targets.region(RelativeBlockPos.of(-1, 0, 0), RelativeBlockPos.of(1, 0, 0)).where(PredicateDescriptors.id("cumulus:tool_region"))).context(ContextRuleDescriptor.derive(dev.vfyjxf.cumulus.api.types.ContextKey.string("tool_head_value"), dev.vfyjxf.cumulus.impl.codec.LegacySourceParser.parse("tool_head.value"))).build();
-        var factory = Structures.define(ResourceLocation.parse("cumulus:runtime_factory_complex")).point("factory_core", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:factory_core")).capture("factory_core")).component(Components.substructure("left_arm", arm.id(), RelativeBlockPos.of(2, 0, 0))).component(Components.substructure("right_arm", arm.id(), RelativeBlockPos.of(-2, 0, 0))).component(Components.substructure("base", base.id(), RelativeBlockPos.of(0, -1, 0))).context(ContextRuleDescriptor.derive(dev.vfyjxf.cumulus.api.types.ContextKey.string("factory_core_value"), dev.vfyjxf.cumulus.impl.codec.LegacySourceParser.parse("factory_core.value"))).build();
+        var base = Structures.define(ResourceLocation.parse("cumulus:runtime_base")).point("base_controller", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:controller")).capture("base_controller")).context(ContextRuleDescriptor.derive(ContextKey.string("base_facing"), LegacySourceParser.parse("base_controller.facing"))).build();
+        var arm = Structures.define(ResourceLocation.parse("cumulus:runtime_arm_complex")).point("arm_mount", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:arm_mount")).capture("arm_mount")).component(Components.substructure("tool", ResourceLocation.parse("cumulus:runtime_tool_complex"), RelativeBlockPos.of(1, 0, 0))).context(ContextRuleDescriptor.derive(ContextKey.string("arm_mount_value"), LegacySourceParser.parse("arm_mount.value"))).build();
+        var tool = Structures.define(ResourceLocation.parse("cumulus:runtime_tool_complex")).point("tool_head", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:tool_head")).capture("tool_head")).point("tool_region", RelativeBlockPos.of(-1, 0, 0), Targets.region(RelativeBlockPos.of(-1, 0, 0), RelativeBlockPos.of(1, 0, 0)).where(PredicateDescriptors.id("cumulus:tool_region"))).context(ContextRuleDescriptor.derive(ContextKey.string("tool_head_value"), LegacySourceParser.parse("tool_head.value"))).build();
+        var factory = Structures.define(ResourceLocation.parse("cumulus:runtime_factory_complex")).point("factory_core", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:factory_core")).capture("factory_core")).component(Components.substructure("left_arm", arm.id(), RelativeBlockPos.of(2, 0, 0))).component(Components.substructure("right_arm", arm.id(), RelativeBlockPos.of(-2, 0, 0))).component(Components.substructure("base", base.id(), RelativeBlockPos.of(0, -1, 0))).context(ContextRuleDescriptor.derive(ContextKey.string("factory_core_value"), LegacySourceParser.parse("factory_core.value"))).build();
 
         var engine = new RuntimeCheckEngine().substructureSyncPolicy(SubstructureSyncPolicy.statusAndContext).register(factory).register(arm).register(tool).register(base).track(factory.id(), new BlockPos(100, 64,
                         100), source().put(BLOCK, RelativeBlockPos.of(0, 0, 0), "cumulus:factory_core").put(BLOCK, RelativeBlockPos.of(2, 0, 0), "cumulus:arm_mount").put(BLOCK, RelativeBlockPos.of(3, 0, 0), "cumulus:tool_head").put(REGION, RelativeBlockPos.of(2, 0, 0), RelativeBlockPos.of(4, 0, 0), "cumulus:tool_region").put(BLOCK, RelativeBlockPos.of(-2, 0, 0), "cumulus:arm_mount").put(BLOCK, RelativeBlockPos.of(-1, 0, 0), "cumulus:tool_head").put(REGION, RelativeBlockPos.of(-2, 0, 0), RelativeBlockPos.of(0, 0, 0), "cumulus:tool_region").put(BLOCK, RelativeBlockPos.of(0, -1, 0), "cumulus:controller", Map.of("facing", "north")));
@@ -237,18 +240,18 @@ class RuntimeCheckEngineTest {
         var frame = engine.tick(90, 8);
 
         var rootDelta = frame.deltas().stream().filter(delta -> delta.key().structureId().equals(factory.id())).findFirst().orElseThrow();
-        assertEquals("cumulus:factory_core", rootDelta.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("factory_core_value")).orElse(null));
-        assertEquals(InstanceStatus.valid.name(), rootDelta.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("substructure.cumulus:runtime_factory_complex/left_arm.status")).orElse(null));
-        assertEquals("north", rootDelta.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("substructure.cumulus:runtime_factory_complex/base.context.base_facing")).orElse(null));
+        assertEquals("cumulus:factory_core", rootDelta.context().get(ContextKey.string("factory_core_value")).orElse(null));
+        assertEquals(InstanceStatus.valid.name(), rootDelta.context().get(ContextKey.string("substructure.cumulus:runtime_factory_complex/left_arm.status")).orElse(null));
+        assertEquals("north", rootDelta.context().get(ContextKey.string("substructure.cumulus:runtime_factory_complex/base.context.base_facing")).orElse(null));
 
         var leftArmDelta = frame.deltas().stream().filter(delta -> delta.key().structureId().equals(arm.id())).filter(delta -> delta.key().anchor().equals(new BlockPos(102, 64, 100))).findFirst().orElseThrow();
-        assertEquals("cumulus:arm_mount", leftArmDelta.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("arm_mount_value")).orElse(null));
-        assertEquals("cumulus:runtime_factory_complex/left_arm", leftArmDelta.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("parent_occurrence")).orElse(null));
+        assertEquals("cumulus:arm_mount", leftArmDelta.context().get(ContextKey.string("arm_mount_value")).orElse(null));
+        assertEquals("cumulus:runtime_factory_complex/left_arm", leftArmDelta.context().get(ContextKey.string("parent_occurrence")).orElse(null));
 
         var toolDelta = frame.deltas().stream().filter(delta -> delta.key().structureId().equals(tool.id())).filter(delta -> delta.key().anchor().equals(new BlockPos(103, 64, 100))).findFirst().orElseThrow();
-        assertEquals("cumulus:tool_head", toolDelta.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("tool_head_value")).orElse(null));
-        assertEquals("cumulus:runtime_factory_complex/left_arm/tool", toolDelta.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("parent_occurrence")).orElse(null));
-        assertEquals("103,64,100", toolDelta.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("tool_head")).orElse(null));
+        assertEquals("cumulus:tool_head", toolDelta.context().get(ContextKey.string("tool_head_value")).orElse(null));
+        assertEquals("cumulus:runtime_factory_complex/left_arm/tool", toolDelta.context().get(ContextKey.string("parent_occurrence")).orElse(null));
+        assertEquals("103,64,100", toolDelta.context().get(ContextKey.string("tool_head")).orElse(null));
     }
 
     @Test
@@ -270,7 +273,7 @@ class RuntimeCheckEngineTest {
 
     @Test
     void runtimeUsesCompiledCheckPlanForRepeatedChecks() {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:compiled_runtime")).transforms(dev.vfyjxf.cumulus.api.transform.Transforms.identity(), dev.vfyjxf.cumulus.api.transform.Transforms.rotateY90()).point("controller", RelativeBlockPos.of(1, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:controller")).capture("controller")).build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:compiled_runtime")).transforms(Transforms.identity(), Transforms.rotateY90()).point("controller", RelativeBlockPos.of(1, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:controller")).capture("controller")).build();
         var engine = new RuntimeCheckEngine().register(definition).track(definition.id(), new BlockPos(0, 64, 0), source().put(BLOCK, RelativeBlockPos.of(0, 0, 1), "cumulus:controller"));
 
         engine.markDirty(new SectionKey(0, 4, 0));
@@ -280,13 +283,13 @@ class RuntimeCheckEngineTest {
 
         assertEquals(InstanceStatus.valid, first.deltas().getFirst().status());
         assertEquals(InstanceStatus.valid, second.deltas().getFirst().status());
-        assertEquals("0,64,1", second.deltas().getFirst().context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller")).orElse(null));
+        assertEquals("0,64,1", second.deltas().getFirst().context().get(ContextKey.string("controller")).orElse(null));
         assertEquals(1, engine.compiledCheckPlanCount());
     }
 
     @Test
     void fastTickUsesFastCheckPathAndSkipsDiagnosticDeltas() {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:fast_runtime")).transforms(dev.vfyjxf.cumulus.api.transform.Transforms.identity(), dev.vfyjxf.cumulus.api.transform.Transforms.rotateY90(), dev.vfyjxf.cumulus.api.transform.Transforms.rotateY180()).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:controller"))).point("port", RelativeBlockPos.of(1, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:port"))).build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:fast_runtime")).transforms(Transforms.identity(), Transforms.rotateY90(), Transforms.rotateY180()).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:controller"))).point("port", RelativeBlockPos.of(1, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:port"))).build();
         var source = source().put(BLOCK, RelativeBlockPos.of(0, 0, 0), "cumulus:controller").put(BLOCK, RelativeBlockPos.of(0, 0, 1), "cumulus:port");
         var engine = new RuntimeCheckEngine().register(definition).track(definition.id(), new BlockPos(0, 64, 0), source);
 

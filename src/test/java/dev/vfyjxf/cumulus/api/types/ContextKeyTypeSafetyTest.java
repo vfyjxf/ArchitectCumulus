@@ -9,6 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.stream.Collectors;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -60,7 +62,7 @@ class ContextKeyTypeSafetyTest {
     @Test
     void stringViewRoundTripsAllEntriesAsStrings() {
         var ctx = RuntimeStructureContext.builder(testKey()).put(facing, Direction.EAST).put(tier, 5).build();
-        var view = ctx.values().entrySet().stream().collect(java.util.stream.Collectors.toMap(e -> e.getKey().name(), e -> String.valueOf(e.getValue())));
+        var view = ctx.values().entrySet().stream().collect(Collectors.toMap(e -> e.getKey().name(), e -> String.valueOf(e.getValue())));
         assertEquals("east", view.get("facing"));
         assertEquals("5", view.get("tier"));
         assertEquals(2, view.size());

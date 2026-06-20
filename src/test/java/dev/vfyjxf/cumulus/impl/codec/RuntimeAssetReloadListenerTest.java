@@ -5,6 +5,7 @@ import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.Structures;
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
 import dev.vfyjxf.cumulus.api.target.Targets;
+import dev.vfyjxf.cumulus.impl.ExportedRuntimeAsset;
 import dev.vfyjxf.cumulus.impl.RuntimeAssetExporter;
 import dev.vfyjxf.cumulus.impl.StructureRuntimePlanCompiler;
 
@@ -12,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.profiling.InactiveProfiler;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,7 +54,7 @@ class RuntimeAssetReloadListenerTest {
         var manager = new FakeResourceManager(Map.of(ResourceLocation.parse("cumulus:cumulus/structures/machines/applied_machine.json"), resource(exported.serialized())));
         var listener = new RuntimeAssetReloadListener();
 
-        listener.apply(listener.loadFrom(manager), manager, net.minecraft.util.profiling.InactiveProfiler.INSTANCE);
+        listener.apply(listener.loadFrom(manager), manager, InactiveProfiler.INSTANCE);
 
         assertEquals(ResourceLocation.parse("cumulus:machines/applied_machine"), listener.lastResult().orElseThrow().assets().getFirst().id());
     }
@@ -63,7 +66,7 @@ class RuntimeAssetReloadListenerTest {
         var repository = new RuntimeAssetRepository();
         var listener = new RuntimeAssetReloadListener(repository);
 
-        listener.apply(listener.loadFrom(manager), manager, net.minecraft.util.profiling.InactiveProfiler.INSTANCE);
+        listener.apply(listener.loadFrom(manager), manager, InactiveProfiler.INSTANCE);
 
         assertEquals(ResourceLocation.parse("cumulus:machines/repository_machine"), repository.byId(ResourceLocation.parse("cumulus:machines/repository_machine")).orElseThrow().id());
     }
@@ -76,7 +79,7 @@ class RuntimeAssetReloadListenerTest {
         var registered = new ArrayList<ResourceLocation>();
         var listener = new RuntimeAssetReloadListener(repository, () -> registered.add(repository.byId(ResourceLocation.parse("cumulus:machines/hooked_machine")).orElseThrow().id()));
 
-        listener.apply(listener.loadFrom(manager), manager, net.minecraft.util.profiling.InactiveProfiler.INSTANCE);
+        listener.apply(listener.loadFrom(manager), manager, InactiveProfiler.INSTANCE);
 
         assertEquals(List.of(ResourceLocation.parse("cumulus:machines/hooked_machine")), registered);
     }
@@ -88,7 +91,7 @@ class RuntimeAssetReloadListenerTest {
         var registered = new ArrayList<ResourceLocation>();
         var listener = new RuntimeAssetReloadListener(repository, () -> registered.add(ResourceLocation.parse("cumulus:unexpected")));
 
-        listener.apply(listener.loadFrom(manager), manager, net.minecraft.util.profiling.InactiveProfiler.INSTANCE);
+        listener.apply(listener.loadFrom(manager), manager, InactiveProfiler.INSTANCE);
 
         assertTrue(repository.lastResult().orElseThrow().diagnostics().nodes().stream().anyMatch(node -> node.severity() == Severity.error));
         assertEquals(List.of(), registered);
@@ -105,7 +108,7 @@ class RuntimeAssetReloadListenerTest {
         assertEquals(List.of("INVALID_RESOURCE_IO"), result.diagnostics().nodes().stream().filter(node -> node.severity() == Severity.error).map(node -> node.id()).toList());
     }
 
-    private static dev.vfyjxf.cumulus.impl.ExportedRuntimeAsset exportedAsset(String id) {
+    private static ExportedRuntimeAsset exportedAsset(String id) {
         var definition = Structures.define(ResourceLocation.parse(id.replace("machines/", ""))).point("origin", RelativeBlockPos.of(0, 0, 0), Targets.block()).build();
         return RuntimeAssetExporter.export(new DataDrivenStructureAsset(
                         ResourceLocation.parse(id),
@@ -138,12 +141,12 @@ class RuntimeAssetReloadListenerTest {
 
         @Override
         public Map<ResourceLocation, Resource> listResources(String path, Predicate<ResourceLocation> filter) {
-            return resources.entrySet().stream().filter(entry -> entry.getKey().getPath().startsWith(path)).filter(entry -> filter.test(entry.getKey())).collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            return resources.entrySet().stream().filter(entry -> entry.getKey().getPath().startsWith(path)).filter(entry -> filter.test(entry.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
 
         @Override
         public Map<ResourceLocation, List<Resource>> listResourceStacks(String path, Predicate<ResourceLocation> filter) {
-            return listResources(path, filter).entrySet().stream().collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, entry -> List.of(entry.getValue())));
+            return listResources(path, filter).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> List.of(entry.getValue())));
         }
 
         @Override

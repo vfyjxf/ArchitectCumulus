@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.profiling.InactiveProfiler;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
@@ -23,6 +24,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,7 +42,7 @@ class RuntimeAssetReloadWiringTest {
         eventBus.dispatch(event);
 
         assertEquals(1, event.getListeners().size());
-        event.getListeners().getFirst().reload(CompletableFuture::completedFuture, manager(), net.minecraft.util.profiling.InactiveProfiler.INSTANCE, net.minecraft.util.profiling.InactiveProfiler.INSTANCE, Runnable::run, Runnable::run).join();
+        event.getListeners().getFirst().reload(CompletableFuture::completedFuture, manager(), InactiveProfiler.INSTANCE, InactiveProfiler.INSTANCE, Runnable::run, Runnable::run).join();
 
         assertEquals(ResourceLocation.parse("cumulus:registered_asset"), listener.lastResult().orElseThrow().assets().getFirst().id());
     }
@@ -164,12 +166,12 @@ class RuntimeAssetReloadWiringTest {
 
         @Override
         public Map<ResourceLocation, Resource> listResources(String path, Predicate<ResourceLocation> filter) {
-            return resources.entrySet().stream().filter(entry -> entry.getKey().getPath().startsWith(path)).filter(entry -> filter.test(entry.getKey())).collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            return resources.entrySet().stream().filter(entry -> entry.getKey().getPath().startsWith(path)).filter(entry -> filter.test(entry.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
 
         @Override
         public Map<ResourceLocation, List<Resource>> listResourceStacks(String path, Predicate<ResourceLocation> filter) {
-            return listResources(path, filter).entrySet().stream().collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, entry -> List.of(entry.getValue())));
+            return listResources(path, filter).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> List.of(entry.getValue())));
         }
 
         @Override

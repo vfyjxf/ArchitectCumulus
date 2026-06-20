@@ -5,6 +5,8 @@ import dev.vfyjxf.cumulus.api.migration.MigrationOps;
 import dev.vfyjxf.cumulus.api.migration.MutableRuntimeContext;
 import dev.vfyjxf.cumulus.api.types.ContextKey;
 
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -88,7 +90,7 @@ public final class MigrationOpCodec {
                 yield MigrationOps.remove(ContextKeyCodec.deserialize(keyWire));
             }
             case "custom" -> {
-                var id = net.minecraft.resources.ResourceLocation.parse(String.valueOf(wire.get("id")));
+                var id = ResourceLocation.parse(String.valueOf(wire.get("id")));
                 // No-op deserialization: caller must register a real handler under this id
                 // before the migration runs. Until then this is a placeholder.
                 yield MigrationOps.custom(id, (Consumer<MutableRuntimeContext>) ctx -> {

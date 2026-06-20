@@ -3,6 +3,7 @@ package dev.vfyjxf.cumulus.impl.codec;
 import dev.vfyjxf.cumulus.api.datagen.DataDrivenStructureAsset;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.Structures;
+import dev.vfyjxf.cumulus.api.diagnostic.Severity;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptors;
 import dev.vfyjxf.cumulus.api.target.Targets;
 import dev.vfyjxf.cumulus.api.transform.Transforms;
@@ -69,6 +70,6 @@ class RuntimeAssetJsonLoaderTest {
                         "{\"id\":\"cumulus:broken\"")));
 
         assertFalse(result.valid());
-        assertEquals(List.of("INVALID_JSON"), result.diagnostics().nodes().stream().filter(node -> node.severity() == dev.vfyjxf.cumulus.api.diagnostic.Severity.error).map(node -> node.id()).toList());
+        assertEquals(List.of("INVALID_JSON"), result.diagnostics().nodes().stream().filter(node -> node.severity() == Severity.error).map(node -> node.id()).toList());
     }
 }

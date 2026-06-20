@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
+import java.util.stream.Stream;
 
 /**
  * Read-only query surface over the set of structure points that matched during a
@@ -29,17 +30,17 @@ public final class MatchResults {
     }
 
     /** Stream over all matched points. */
-    public java.util.stream.Stream<MatchedPoint> stream() {
+    public Stream<MatchedPoint> stream() {
         return points.stream();
     }
 
     /** Points that belong to the named group. */
-    public java.util.stream.Stream<MatchedPoint> in(String group) {
+    public Stream<MatchedPoint> in(String group) {
         return points.stream().filter(p -> p.inGroup(group));
     }
 
     /** Points matching the given filter. */
-    public java.util.stream.Stream<MatchedPoint> matching(Predicate<MatchedPoint> filter) {
+    public Stream<MatchedPoint> matching(Predicate<MatchedPoint> filter) {
         return points.stream().filter(filter);
     }
 

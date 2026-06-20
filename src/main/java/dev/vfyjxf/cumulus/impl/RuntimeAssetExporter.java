@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class RuntimeAssetExporter {
     private static final ResourceLocation regionTarget = ResourceLocation.parse("cumulus:region");
@@ -129,10 +130,10 @@ public final class RuntimeAssetExporter {
 
     private static String serialize(Object value) {
         if (value instanceof Map<?, ?> map) {
-            return map.entrySet().stream().map(entry -> serialize(entry.getKey().toString()) + ":" + serialize(entry.getValue())).collect(java.util.stream.Collectors.joining(",", "{", "}"));
+            return map.entrySet().stream().map(entry -> serialize(entry.getKey().toString()) + ":" + serialize(entry.getValue())).collect(Collectors.joining(",", "{", "}"));
         }
         if (value instanceof List<?> list) {
-            return list.stream().map(RuntimeAssetExporter::serialize).collect(java.util.stream.Collectors.joining(",", "[", "]"));
+            return list.stream().map(RuntimeAssetExporter::serialize).collect(Collectors.joining(",", "[", "]"));
         }
         if (value instanceof Number || value instanceof Boolean) {
             return value.toString();

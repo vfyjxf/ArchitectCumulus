@@ -2,15 +2,23 @@ package dev.vfyjxf.cumulus.impl.check;
 
 import dev.vfyjxf.cumulus.api.component.Components;
 import dev.vfyjxf.cumulus.api.context.ContextRuleDescriptor;
+import dev.vfyjxf.cumulus.api.definition.PointRequirement;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
+import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
+import dev.vfyjxf.cumulus.api.definition.StructurePointDefinition;
 import dev.vfyjxf.cumulus.api.definition.Structures;
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptors;
 import dev.vfyjxf.cumulus.api.predicate.PredicateRegistry;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
+import dev.vfyjxf.cumulus.api.target.TargetDescriptor;
+import dev.vfyjxf.cumulus.api.target.TargetPattern;
 import dev.vfyjxf.cumulus.api.target.Targets;
 import dev.vfyjxf.cumulus.api.transform.Transforms;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.impl.StructureRuntimePlanCompiler;
+import dev.vfyjxf.cumulus.impl.codec.LegacySourceParser;
+import dev.vfyjxf.cumulus.test.TestHelpers;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -21,6 +29,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,8 +44,8 @@ class StructureCheckExecutorTest {
         var result = StructureCheckExecutor.check(definition, new BlockPos(10, 64, 10), snapshot);
 
         assertEquals(InstanceStatus.valid, result.status());
-        assertEquals("10,64,10", result.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller")).orElse(null));
-        assertEquals("11,64,10", result.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("inventory")).orElse(null));
+        assertEquals("10,64,10", result.context().get(ContextKey.string("controller")).orElse(null));
+        assertEquals("11,64,10", result.context().get(ContextKey.string("inventory")).orElse(null));
         assertEquals(0, result.diagnostics().nodes().size());
     }
 
@@ -77,16 +87,16 @@ class StructureCheckExecutorTest {
 
     @Test
     void contextRulesDeriveRuntimeContextFromMatchedTargetPropertiesAndValues() {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:context_machine")).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:controller")).capture("controller")).point("inventory", RelativeBlockPos.of(1, 0, 0), Targets.blockEntity().where(PredicateDescriptors.id("cumulus:item_handler"))).context(ContextRuleDescriptor.derive(dev.vfyjxf.cumulus.api.types.ContextKey.string("facing"), dev.vfyjxf.cumulus.impl.codec.LegacySourceParser.parse("controller.facing"))).context(ContextRuleDescriptor.derive(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller_id"), dev.vfyjxf.cumulus.impl.codec.LegacySourceParser.parse("controller.value"))).context(ContextRuleDescriptor.derive(dev.vfyjxf.cumulus.api.types.ContextKey.string("inventory_position"), dev.vfyjxf.cumulus.impl.codec.LegacySourceParser.parse("inventory.position"))).build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:context_machine")).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:controller")).capture("controller")).point("inventory", RelativeBlockPos.of(1, 0, 0), Targets.blockEntity().where(PredicateDescriptors.id("cumulus:item_handler"))).context(ContextRuleDescriptor.derive(ContextKey.string("facing"), LegacySourceParser.parse("controller.facing"))).context(ContextRuleDescriptor.derive(ContextKey.string("controller_id"), LegacySourceParser.parse("controller.value"))).context(ContextRuleDescriptor.derive(ContextKey.string("inventory_position"), LegacySourceParser.parse("inventory.position"))).build();
         var snapshot = InMemoryTargetSnapshot.builder().block(RelativeBlockPos.of(0, 0, 0), "cumulus:controller", Map.of("facing", "north")).blockEntity(RelativeBlockPos.of(1, 0, 0), "cumulus:item_handler").build();
 
         var result = StructureCheckExecutor.check(definition, new BlockPos(10, 64, 10), snapshot);
 
         assertEquals(InstanceStatus.valid, result.status());
-        assertEquals("10,64,10", result.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller")).orElse(null));
-        assertEquals("north", result.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("facing")).orElse(null));
-        assertEquals("cumulus:controller", result.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller_id")).orElse(null));
-        assertEquals("11,64,10", result.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("inventory_position")).orElse(null));
+        assertEquals("10,64,10", result.context().get(ContextKey.string("controller")).orElse(null));
+        assertEquals("north", result.context().get(ContextKey.string("facing")).orElse(null));
+        assertEquals("cumulus:controller", result.context().get(ContextKey.string("controller_id")).orElse(null));
+        assertEquals("11,64,10", result.context().get(ContextKey.string("inventory_position")).orElse(null));
     }
 
     @Test
@@ -110,7 +120,7 @@ class StructureCheckExecutorTest {
     @Test
     void registeredPropertylessPredicateUsesCustomMatcherBeforeIdFallback() {
         var registry = PredicateRegistry.defaults().register(ResourceLocation.parse("cumulus:is_hot"), (predicate, target) -> "true".equals(target.properties().get("hot")));
-        var definition = Structures.define(ResourceLocation.parse("cumulus:propertyless_custom_predicate")).point("heater", RelativeBlockPos.of(0, 0, 0), Targets.block().where(dev.vfyjxf.cumulus.test.TestHelpers.legacyPredicate("cumulus:is_hot", Map.of()))).build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:propertyless_custom_predicate")).point("heater", RelativeBlockPos.of(0, 0, 0), Targets.block().where(TestHelpers.legacyPredicate("cumulus:is_hot", Map.of()))).build();
         var snapshot = InMemoryTargetSnapshot.builder().block(RelativeBlockPos.of(0, 0, 0), "cumulus:heater", Map.of("hot", "true")).build();
 
         var result = StructureCheckExecutor.check(definition, new BlockPos(0, 0, 0), snapshot, registry);
@@ -134,16 +144,16 @@ class StructureCheckExecutorTest {
     @Test
     void optionalMissingTargetDoesNotInvalidateStructure() {
         var definition = Structures.define(ResourceLocation.parse("cumulus:optional_port")).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:controller"))).point("optional_port", RelativeBlockPos.of(1, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:port"))).build();
-        var optionalDefinition = new dev.vfyjxf.cumulus.api.definition.StructureDefinition(
+        var optionalDefinition = new StructureDefinition(
                         definition.id(),
                         definition.schemaVersion(),
                         definition.transforms(),
-                        java.util.List.of(definition.points().get(0), new dev.vfyjxf.cumulus.api.definition.StructurePointDefinition(
+                        List.of(definition.points().get(0), new StructurePointDefinition(
                                         definition.points().get(1).id(),
                                         definition.points().get(1).location(),
                                         definition.points().get(1).target(),
                                         definition.points().get(1).predicates(),
-                                        dev.vfyjxf.cumulus.api.definition.PointRequirement.optional,
+                                        PointRequirement.optional,
                                         definition.points().get(1).captures(),
                                         definition.points().get(1).groups(),
                                         definition.points().get(1).diagnostics())),
@@ -162,7 +172,7 @@ class StructureCheckExecutorTest {
 
     @Test
     void unsupportedPredicateFailsWithDiagnosticInsteadOfPassingSilently() {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:unsupported")).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block().where(dev.vfyjxf.cumulus.test.TestHelpers.legacyPredicate("cumulus:unsupported_predicate", Map.of("mode", "strict")))).build();
+        var definition = Structures.define(ResourceLocation.parse("cumulus:unsupported")).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block().where(TestHelpers.legacyPredicate("cumulus:unsupported_predicate", Map.of("mode", "strict")))).build();
         var snapshot = InMemoryTargetSnapshot.builder().block(RelativeBlockPos.of(0, 0, 0), "cumulus:controller").build();
 
         var result = StructureCheckExecutor.check(definition, new BlockPos(0, 0, 0), snapshot);
@@ -173,12 +183,12 @@ class StructureCheckExecutorTest {
 
     @Test
     void unsupportedTargetTypeIsInvalidWithoutRequestingMoreData() {
-        var definition = Structures.define(ResourceLocation.parse("cumulus:unknown_target")).point("controller", RelativeBlockPos.of(0, 0, 0), new dev.vfyjxf.cumulus.api.target.TargetPattern(
-                        new dev.vfyjxf.cumulus.api.target.TargetDescriptor(
+        var definition = Structures.define(ResourceLocation.parse("cumulus:unknown_target")).point("controller", RelativeBlockPos.of(0, 0, 0), new TargetPattern(
+                        new TargetDescriptor(
                                         ResourceLocation.parse("cumulus:unknown_target"),
                                         Map.of("name", "energy")),
-                        java.util.List.of(PredicateDescriptors.id("cumulus:unknown")),
-                        java.util.Set.of())).build();
+                        List.of(PredicateDescriptors.id("cumulus:unknown")),
+                        Set.of())).build();
 
         var result = StructureCheckExecutor.check(definition, new BlockPos(0, 0, 0), InMemoryTargetSnapshot.empty());
 
@@ -191,7 +201,7 @@ class StructureCheckExecutorTest {
 
     @Test
     void unsupportedPredicateDiagnosticNamesTheUnsupportedPredicate() {
-        var unsupportedPredicate = dev.vfyjxf.cumulus.test.TestHelpers.legacyPredicate("cumulus:unsupported_predicate", Map.of("mode", "strict"));
+        var unsupportedPredicate = TestHelpers.legacyPredicate("cumulus:unsupported_predicate", Map.of("mode", "strict"));
         var definition = Structures.define(ResourceLocation.parse("cumulus:unsupported_predicate")).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block().where(unsupportedPredicate)).build();
         var snapshot = InMemoryTargetSnapshot.builder().block(RelativeBlockPos.of(0, 0, 0), "cumulus:controller").build();
 
@@ -246,7 +256,7 @@ class StructureCheckExecutorTest {
         var result = StructureCheckExecutor.check(definition, new BlockPos(10, 64, 10), snapshot);
 
         assertEquals(InstanceStatus.valid, result.status());
-        assertEquals("10,64,11", result.context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("port")).orElse(null));
+        assertEquals("10,64,11", result.context().get(ContextKey.string("port")).orElse(null));
     }
 
     @Test
@@ -298,14 +308,14 @@ class StructureCheckExecutorTest {
         }
 
         @Override
-        public java.util.Optional<SnapshotTarget> target(ResourceLocation targetType, RelativeBlockPos min, RelativeBlockPos max) {
+        public Optional<SnapshotTarget> target(ResourceLocation targetType, RelativeBlockPos min, RelativeBlockPos max) {
             reads++;
-            return java.util.Optional.ofNullable(targets.get(new Key(targetType, min, max)));
+            return Optional.ofNullable(targets.get(new Key(targetType, min, max)));
         }
 
         @Override
-        public java.util.Optional<String> context(String key) {
-            return java.util.Optional.empty();
+        public Optional<String> context(String key) {
+            return Optional.empty();
         }
 
         private record Key(ResourceLocation targetType, RelativeBlockPos min, RelativeBlockPos max) {

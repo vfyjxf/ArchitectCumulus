@@ -28,6 +28,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -337,7 +338,7 @@ public final class StructureCheckExecutor {
     }
 
     private static Map<String, String> descriptors(Bounds bounds, PredicateDescriptor predicate) {
-        var descriptors = new java.util.LinkedHashMap<String, String>();
+        var descriptors = new LinkedHashMap<String, String>();
         descriptors.put("to", bounds.max().asString());
         if (predicate != null) {
             for (var entry : predicate.properties().entrySet()) {

@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.impl.substructure;
 
 import dev.vfyjxf.cumulus.api.component.Components;
+import dev.vfyjxf.cumulus.api.component.SubstructureComponent;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
 import dev.vfyjxf.cumulus.api.definition.Structures;
@@ -101,7 +102,7 @@ class SubstructureGraphResolverTest {
         assertEquals("cumulus:factory/arm/parent_again", evidence.componentPath());
     }
 
-    private static StructureDefinition structure(ResourceLocation id, dev.vfyjxf.cumulus.api.component.SubstructureComponent... children) {
+    private static StructureDefinition structure(ResourceLocation id, SubstructureComponent... children) {
         var builder = Structures.define(id);
         for (var child : children) {
             builder.component(child);
@@ -109,7 +110,7 @@ class SubstructureGraphResolverTest {
         return builder.build();
     }
 
-    private static dev.vfyjxf.cumulus.api.component.SubstructureComponent child(String name, ResourceLocation childId, RelativeBlockPos anchorOffset) {
+    private static SubstructureComponent child(String name, ResourceLocation childId, RelativeBlockPos anchorOffset) {
         return Components.substructure(name, childId, anchorOffset);
     }
 }

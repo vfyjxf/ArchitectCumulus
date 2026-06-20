@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.impl.substructure;
 
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticGraph;
+import dev.vfyjxf.cumulus.api.diagnostic.Severity;
 
 import java.util.Optional;
 
@@ -25,6 +26,6 @@ public record SubstructureGraphResolution(
     }
 
     public boolean hasErrors() {
-        return diagnostics.nodes().stream().anyMatch(node -> node.severity().ordinal() >= dev.vfyjxf.cumulus.api.diagnostic.Severity.error.ordinal());
+        return diagnostics.nodes().stream().anyMatch(node -> node.severity().ordinal() >= Severity.error.ordinal());
     }
 }

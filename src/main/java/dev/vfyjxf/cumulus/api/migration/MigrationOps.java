@@ -5,6 +5,7 @@ import dev.vfyjxf.cumulus.api.types.ContextKey;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -59,7 +60,7 @@ public final class MigrationOps {
      * Convenience: build a custom op from a Java lambda. The id is used for
      * serialization diagnostics; same caveats as {@link #transform} apply.
      */
-    public static MigrationOp custom(ResourceLocation id, java.util.function.Consumer<MutableRuntimeContext> action) {
+    public static MigrationOp custom(ResourceLocation id, Consumer<MutableRuntimeContext> action) {
         return new CustomOp(id, action);
     }
 
@@ -146,7 +147,7 @@ public final class MigrationOps {
 
     public record CustomOp(
                     ResourceLocation id,
-                    java.util.function.Consumer<MutableRuntimeContext> action) implements MigrationOp {
+                    Consumer<MutableRuntimeContext> action) implements MigrationOp {
         public CustomOp {
             Objects.requireNonNull(id, "custom op id must not be null");
             Objects.requireNonNull(action, "custom op action must not be null");

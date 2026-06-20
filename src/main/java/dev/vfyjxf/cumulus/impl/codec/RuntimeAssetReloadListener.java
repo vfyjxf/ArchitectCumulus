@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class RuntimeAssetReloadListener extends SimplePreparableReloadListener<RuntimeAssetLoadResult> {
     public static final String rootPath = "cumulus/structures";
@@ -63,7 +64,7 @@ public final class RuntimeAssetReloadListener extends SimplePreparableReloadList
         var edges = new ArrayList<DiagnosticEdge>();
         resourceManager.listResources(rootPath, RuntimeAssetReloadListener::isRuntimeAsset).entrySet().stream().sorted(Comparator.comparing(entry -> entry.getKey().toString())).forEach(entry -> {
             try (var reader = entry.getValue().openAsReader()) {
-                sources.add(new RuntimeAssetJsonSource(resourcePath(entry.getKey()), reader.lines().collect(java.util.stream.Collectors.joining("\n"))));
+                sources.add(new RuntimeAssetJsonSource(resourcePath(entry.getKey()), reader.lines().collect(Collectors.joining("\n"))));
             } catch (IOException ex) {
                 addResourceIoDiagnostic(diagnostics, edges, resourcePath(entry.getKey()));
             }

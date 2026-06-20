@@ -11,12 +11,15 @@ import dev.vfyjxf.cumulus.impl.runtime.RuntimeAssetReloadWiring;
 import dev.vfyjxf.cumulus.impl.runtime.RuntimeCheckEngine;
 import dev.vfyjxf.cumulus.impl.runtime.RuntimeCheckEngineTickDriver;
 
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
+
+import java.util.List;
 
 @Mod(Cumulus.modId)
 public final class Cumulus {
@@ -44,7 +47,7 @@ public final class Cumulus {
         return structureEditorController;
     }
 
-    private java.util.List<net.minecraft.resources.ResourceLocation> registerReloadedDefinitions() {
+    private List<ResourceLocation> registerReloadedDefinitions() {
         var registered = runtimeAssetEngineBridge.registerDefinitions();
         for (var asset : runtimeAssetRepository.assets()) {
             asset.definition().ifPresent(minecraftRuntimeEventBridge.discovery()::register);

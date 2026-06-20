@@ -7,8 +7,10 @@ import dev.vfyjxf.cumulus.api.predicate.types.UnknownPredicateType;
 
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Internal helper: extract a {@code Map<String, String>} view from a typed
@@ -31,9 +33,9 @@ public final class PredicatePropertyExtractor {
         } else if (props instanceof UnknownPredicateType.Props p) {
             // Preserve a stable, sorted iteration order to match the legacy
             // TreeMap-based wire format (deterministic datagen output).
-            new java.util.TreeMap<>(p.raw()).forEach(map::put);
+            new TreeMap<>(p.raw()).forEach(map::put);
         }
-        return java.util.Collections.unmodifiableMap(new LinkedHashMap<>(map));
+        return Collections.unmodifiableMap(new LinkedHashMap<>(map));
     }
 
     /** Reconstruct typed Props from a legacy v1 id + property map. */

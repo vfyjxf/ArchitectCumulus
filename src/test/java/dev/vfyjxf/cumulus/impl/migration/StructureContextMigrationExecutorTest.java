@@ -24,7 +24,7 @@ class StructureContextMigrationExecutorTest {
     void appliesDirectMigrationOverRuntimeContextValues() {
         var definition = Structures.define(ResourceLocation.parse("cumulus:machine")).version(new StructureVersionDescriptor(1, ResourceLocation.parse("cumulus:machine_v1"))).version(new StructureVersionDescriptor(2,
                         ResourceLocation.parse("cumulus:machine"))).migration(rename(1, 2, "cumulus:migrations/machine_1_to_2", "facing", "orientation")).build();
-        var context = context(java.util.Map.of(ContextKey.string("facing"), "north", ContextKey.string("controller"), "1,64,1"));
+        var context = context(Map.of(ContextKey.string("facing"), "north", ContextKey.string("controller"), "1,64,1"));
 
         var result = StructureContextMigrationExecutor.migrate(definition, context, 1, 2);
 
@@ -40,20 +40,20 @@ class StructureContextMigrationExecutorTest {
     void appliesChainedMigrationPathToTargetVersion() {
         var definition = Structures.define(ResourceLocation.parse("cumulus:machine")).version(new StructureVersionDescriptor(1, ResourceLocation.parse("cumulus:machine_v1"))).version(new StructureVersionDescriptor(2, ResourceLocation.parse("cumulus:machine_v2"))).version(new StructureVersionDescriptor(3,
                         ResourceLocation.parse("cumulus:machine"))).migration(rename(1, 2, "cumulus:migrations/machine_1_to_2", "facing", "orientation")).migration(rename(2, 3, "cumulus:migrations/machine_2_to_3", "orientation", "direction")).build();
-        var context = context(java.util.Map.of(ContextKey.string("facing"), "east"));
+        var context = context(Map.of(ContextKey.string("facing"), "east"));
 
         var result = StructureContextMigrationExecutor.migrate(definition, context, 1, 3);
 
         assertEquals(3, result.version());
         assertEquals(List.of(ResourceLocation.parse("cumulus:migrations/machine_1_to_2"), ResourceLocation.parse("cumulus:migrations/machine_2_to_3")), result.appliedMigrations().stream().map(MigrationDescriptor::migrationId).toList());
-        assertEquals(java.util.Map.of(ContextKey.string("direction"), "east"), result.context().values());
+        assertEquals(Map.of(ContextKey.string("direction"), "east"), result.context().values());
     }
 
     @Test
     void missingMigrationPathFailsWithDiagnostic() {
         var definition = Structures.define(ResourceLocation.parse("cumulus:machine")).version(new StructureVersionDescriptor(1, ResourceLocation.parse("cumulus:machine_v1"))).version(new StructureVersionDescriptor(3,
                         ResourceLocation.parse("cumulus:machine"))).migration(rename(1, 2, "cumulus:migrations/machine_1_to_2", "facing", "orientation")).build();
-        var context = context(java.util.Map.of(ContextKey.string("facing"), "south"));
+        var context = context(Map.of(ContextKey.string("facing"), "south"));
 
         var error = assertThrows(MigrationPathException.class, () -> StructureContextMigrationExecutor.migrate(definition, context, 1, 3));
 
@@ -73,7 +73,7 @@ class StructureContextMigrationExecutorTest {
                         4,
                         ResourceLocation.parse("cumulus:migrations/rename_owner"),
                         Map.of("operation", "rename_context", "from_context", "owner", "to_context", "primary_owner"))).build();
-        var context = context(java.util.Map.of(ContextKey.string("owner"), "alex", ContextKey.string("facing"), "west"));
+        var context = context(Map.of(ContextKey.string("owner"), "alex", ContextKey.string("facing"), "west"));
 
         var result = StructureContextMigrationExecutor.migrate(definition, context, 2, 4);
 
@@ -84,7 +84,7 @@ class StructureContextMigrationExecutorTest {
     @Test
     void alreadyAtTargetVersionReturnsNoOpResult() {
         var definition = Structures.define(ResourceLocation.parse("cumulus:machine")).migration(rename(1, 2, "cumulus:migrations/machine_1_to_2", "facing", "orientation")).build();
-        var context = context(java.util.Map.of(ContextKey.string("facing"), "north"));
+        var context = context(Map.of(ContextKey.string("facing"), "north"));
 
         var result = StructureContextMigrationExecutor.migrate(definition, context, 2, 2);
 
@@ -102,7 +102,7 @@ class StructureContextMigrationExecutorTest {
                         Map.of("operation", "rename_context", "from_context", fromKey, "to_context", toKey));
     }
 
-    private static RuntimeStructureContext context(java.util.Map<ContextKey<?>, Object> values) {
+    private static RuntimeStructureContext context(Map<ContextKey<?>, Object> values) {
         var builder = RuntimeStructureContext.builder(new StructureInstanceKey(
                         ResourceLocation.parse("cumulus:machine"),
                         new BlockPos(1, 64, 1))).revision(1);

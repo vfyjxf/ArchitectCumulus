@@ -1,8 +1,10 @@
 package dev.vfyjxf.cumulus.impl.minecraft;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -11,6 +13,8 @@ import net.neoforged.neoforge.items.IItemHandler;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,7 +106,7 @@ class MinecraftCapabilityBuildWritersTest {
     private static final class RecordingTypedWriter implements TypedCapabilityBuildWriter {
         private final String supportedOperation;
         private final Map<BlockPos, Map<String, String>> mutations = new LinkedHashMap<>();
-        private final List<BlockPos> writes = new java.util.ArrayList<>();
+        private final List<BlockPos> writes = new ArrayList<>();
 
         RecordingTypedWriter(String supportedOperation) {
             this.supportedOperation = supportedOperation;
@@ -191,10 +195,10 @@ class MinecraftCapabilityBuildWritersTest {
 
         FakeItemHandler(int slots) {
             this.stacks = new ItemStack[slots];
-            java.util.Arrays.fill(stacks, ItemStack.EMPTY);
+            Arrays.fill(stacks, ItemStack.EMPTY);
         }
 
-        int count(net.minecraft.world.item.Item item) {
+        int count(Item item) {
             var count = 0;
             for (var stack : stacks) {
                 if (!stack.isEmpty() && stack.is(item)) {
@@ -260,7 +264,7 @@ class MinecraftCapabilityBuildWritersTest {
             this.capacity = capacity;
         }
 
-        int amount(net.minecraft.world.level.material.Fluid fluid) {
+        int amount(Fluid fluid) {
             return !stack.isEmpty() && stack.is(fluid) ? stack.getAmount() : 0;
         }
 

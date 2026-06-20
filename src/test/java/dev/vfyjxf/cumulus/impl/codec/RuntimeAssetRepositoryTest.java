@@ -3,6 +3,7 @@ package dev.vfyjxf.cumulus.impl.codec;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticGraph;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticNode;
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
+import dev.vfyjxf.cumulus.api.visualization.VisualizationModel;
 import dev.vfyjxf.cumulus.impl.RuntimePlanEntry;
 import dev.vfyjxf.cumulus.impl.StructureRuntimePlan;
 
@@ -52,7 +53,7 @@ class RuntimeAssetRepositoryTest {
                         definition,
                         false,
                         new StructureRuntimePlan(definition, List.<RuntimePlanEntry>of(), List.of(), List.of(),
-                                        new dev.vfyjxf.cumulus.api.visualization.VisualizationModel(definitionId, List.of())),
+                                        new VisualizationModel(definitionId, List.of())),
                         List.of());
     }
 

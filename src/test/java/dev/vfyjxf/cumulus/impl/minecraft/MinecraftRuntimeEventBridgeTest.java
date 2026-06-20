@@ -5,6 +5,7 @@ import dev.vfyjxf.cumulus.api.definition.Structures;
 import dev.vfyjxf.cumulus.api.predicate.PredicateDescriptors;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.target.Targets;
+import dev.vfyjxf.cumulus.api.types.ContextKey;
 import dev.vfyjxf.cumulus.impl.check.SnapshotTarget;
 import dev.vfyjxf.cumulus.impl.runtime.RuntimeCheckEngine;
 
@@ -18,6 +19,7 @@ import net.neoforged.neoforge.event.level.BlockEvent;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -93,7 +95,7 @@ class MinecraftRuntimeEventBridgeTest {
         bridge.discoverChangedAnchor(new BlockPos(5, 64, 4), reader, Map.of());
 
         var frame = engine.tick(1, 4);
-        assertEquals("5,64,4", frame.deltas().getFirst().context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller")).orElse(null));
+        assertEquals("5,64,4", frame.deltas().getFirst().context().get(ContextKey.string("controller")).orElse(null));
     }
 
     @Test
@@ -121,7 +123,7 @@ class MinecraftRuntimeEventBridgeTest {
 
         var frame = engine.tick(1, 4);
         assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
-        assertEquals("6,64,6", frame.deltas().getFirst().context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller")).orElse(null));
+        assertEquals("6,64,6", frame.deltas().getFirst().context().get(ContextKey.string("controller")).orElse(null));
     }
 
     @Test
@@ -137,7 +139,7 @@ class MinecraftRuntimeEventBridgeTest {
 
         var frame = engine.tick(1, 4);
         assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
-        assertEquals("5,64,4", frame.deltas().getFirst().context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller")).orElse(null));
+        assertEquals("5,64,4", frame.deltas().getFirst().context().get(ContextKey.string("controller")).orElse(null));
     }
 
     @Test
@@ -148,7 +150,7 @@ class MinecraftRuntimeEventBridgeTest {
     }
 
     private static final class FakeLevelTargetReader implements LevelTargetReader {
-        private final Map<BlockPos, SnapshotTarget> blocks = new java.util.LinkedHashMap<>();
+        private final Map<BlockPos, SnapshotTarget> blocks = new LinkedHashMap<>();
 
         FakeLevelTargetReader block(BlockPos pos, String value, Map<String, String> properties) {
             blocks.put(pos, new SnapshotTarget(value, properties));

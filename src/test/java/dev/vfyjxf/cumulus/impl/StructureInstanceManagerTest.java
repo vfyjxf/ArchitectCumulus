@@ -2,6 +2,7 @@ package dev.vfyjxf.cumulus.impl;
 
 import dev.vfyjxf.cumulus.api.component.Components;
 import dev.vfyjxf.cumulus.api.definition.RelativeBlockPos;
+import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
 import dev.vfyjxf.cumulus.api.definition.Structures;
 import dev.vfyjxf.cumulus.api.diagnostic.Severity;
 import dev.vfyjxf.cumulus.api.ownership.ClaimMode;
@@ -13,6 +14,7 @@ import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
 import dev.vfyjxf.cumulus.api.runtime.StructureInstanceKey;
 import dev.vfyjxf.cumulus.api.target.Targets;
 import dev.vfyjxf.cumulus.api.types.ContextKey;
+import dev.vfyjxf.cumulus.api.visualization.VisualizationModel;
 import dev.vfyjxf.cumulus.impl.check.InMemoryTargetSnapshot;
 
 import net.minecraft.core.BlockPos;
@@ -21,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -45,16 +48,16 @@ class StructureInstanceManagerTest {
         var definitionId = ResourceLocation.parse("cumulus:machine");
         var anchor = new BlockPos(1, 64, 1);
         var manager = new StructureInstanceManager();
-        manager.register(new StructureRuntimePlan(definitionId, java.util.List.of(), java.util.List.of(), java.util.List.of(),
-                        new dev.vfyjxf.cumulus.api.visualization.VisualizationModel("empty", java.util.List.of())));
+        manager.register(new StructureRuntimePlan(definitionId, List.of(), List.of(), List.of(),
+                        new VisualizationModel("empty", List.of())));
         manager.track(definitionId, anchor);
 
-        var frame = manager.publishContext(definitionId, anchor, java.util.Map.of(ContextKey.string("facing"), "north"));
+        var frame = manager.publishContext(definitionId, anchor, Map.of(ContextKey.string("facing"), "north"));
 
         assertEquals(1, frame.deltas().size());
         assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
         assertEquals(1, frame.deltas().getFirst().context().revision());
-        assertEquals("north", frame.deltas().getFirst().context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("facing")).orElse(null));
+        assertEquals("north", frame.deltas().getFirst().context().get(ContextKey.string("facing")).orElse(null));
     }
 
     @Test
@@ -67,7 +70,7 @@ class StructureInstanceManagerTest {
         var frame = manager.check(definition, anchor, InMemoryTargetSnapshot.builder().block(RelativeBlockPos.of(0, 0, 0), "cumulus:controller").build());
 
         assertEquals(InstanceStatus.valid, frame.deltas().getFirst().status());
-        assertEquals("4,64,4", frame.deltas().getFirst().context().get(dev.vfyjxf.cumulus.api.types.ContextKey.string("controller")).orElse(null));
+        assertEquals("4,64,4", frame.deltas().getFirst().context().get(ContextKey.string("controller")).orElse(null));
         assertEquals(0, frame.requests().size());
     }
 
@@ -172,13 +175,13 @@ class StructureInstanceManagerTest {
         assertTrue(manager.diagnostics(third).nodes().isEmpty());
     }
 
-    private static StructureInstanceManager registeredManager(dev.vfyjxf.cumulus.api.definition.StructureDefinition definition) {
+    private static StructureInstanceManager registeredManager(StructureDefinition definition) {
         var manager = new StructureInstanceManager();
         manager.register(StructureRuntimePlanCompiler.compile(definition));
         return manager;
     }
 
-    private static dev.vfyjxf.cumulus.api.definition.StructureDefinition validControllerDefinition(ResourceLocation id) {
+    private static StructureDefinition validControllerDefinition(ResourceLocation id) {
         return Structures.define(id).point("controller", RelativeBlockPos.of(0, 0, 0), Targets.block().where(PredicateDescriptors.id("cumulus:controller"))).build();
     }
 

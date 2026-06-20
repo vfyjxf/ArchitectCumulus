@@ -1,6 +1,7 @@
 package dev.vfyjxf.cumulus.impl.codec;
 
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticGraph;
+import dev.vfyjxf.cumulus.api.diagnostic.Severity;
 
 import java.util.List;
 
@@ -15,6 +16,6 @@ public record RuntimeAssetLoadResult(
     }
 
     public boolean valid() {
-        return diagnostics.nodes().stream().noneMatch(node -> node.severity() == dev.vfyjxf.cumulus.api.diagnostic.Severity.error);
+        return diagnostics.nodes().stream().noneMatch(node -> node.severity() == Severity.error);
     }
 }

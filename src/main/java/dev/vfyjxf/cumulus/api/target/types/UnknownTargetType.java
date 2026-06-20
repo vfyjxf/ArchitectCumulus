@@ -5,6 +5,7 @@ import dev.vfyjxf.cumulus.api.target.TargetType;
 
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -42,10 +43,10 @@ public final class UnknownTargetType implements TargetType {
      * Unknown targets carry the raw property map verbatim — no typed access
      * is possible until a real TargetType is registered.
      */
-    public record Props(java.util.Map<String, String> raw) implements TargetProperties {
+    public record Props(Map<String, String> raw) implements TargetProperties {
         public Props {
             Objects.requireNonNull(raw, "raw properties map must not be null");
-            raw = java.util.Map.copyOf(raw);
+            raw = Map.copyOf(raw);
         }
     }
 }

@@ -14,9 +14,11 @@ import net.minecraft.resources.ResourceLocation;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -97,7 +99,7 @@ class MinecraftTargetSnapshotSourceTest {
         private final Map<BlockPos, SnapshotTarget> entities = new LinkedHashMap<>();
         private final Map<BlockPos, SnapshotTarget> capabilities = new LinkedHashMap<>();
         private Map<String, String> lastCapabilityProperties = Map.of();
-        private final java.util.Set<BlockPos> unloaded = new java.util.HashSet<>();
+        private final Set<BlockPos> unloaded = new HashSet<>();
 
         FakeLevelTargetReader block(BlockPos pos, String value, Map<String, String> properties) {
             blocks.put(pos, new SnapshotTarget(value, properties));

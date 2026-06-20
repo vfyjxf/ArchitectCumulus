@@ -4,6 +4,7 @@ import dev.vfyjxf.cumulus.impl.check.SnapshotTarget;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.energy.EnergyStorage;
@@ -37,7 +38,7 @@ class MinecraftCapabilityResolversTest {
 
     @Test
     void resolvesRegisteredCustomCapabilityByDescriptorName() {
-        var capability = BlockCapability.createVoid(net.minecraft.resources.ResourceLocation.parse("cumulus:test_flag"), FlagCapability.class);
+        var capability = BlockCapability.createVoid(ResourceLocation.parse("cumulus:test_flag"), FlagCapability.class);
         var resolvers = MinecraftCapabilityResolvers.empty().register("flag", capability, unused -> Map.of("state", unused.state()));
 
         var target = resolvers.resolve(new MinecraftCapabilityResolvers.CapabilityLookup() {

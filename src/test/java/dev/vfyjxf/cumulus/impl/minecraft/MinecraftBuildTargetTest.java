@@ -9,9 +9,12 @@ import net.minecraft.resources.ResourceLocation;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -306,9 +309,9 @@ class MinecraftBuildTargetTest {
     }
 
     private static final class FakeBlockBuildWriter implements BlockBuildWriter {
-        private final java.util.Set<ResourceLocation> knownBlocks = new java.util.HashSet<>();
+        private final Set<ResourceLocation> knownBlocks = new HashSet<>();
         private final Map<BlockPos, ResourceLocation> blocks = new LinkedHashMap<>();
-        private final List<BlockPos> writes = new java.util.ArrayList<>();
+        private final List<BlockPos> writes = new ArrayList<>();
 
         FakeBlockBuildWriter known(String id) {
             knownBlocks.add(ResourceLocation.parse(id));
@@ -347,9 +350,9 @@ class MinecraftBuildTargetTest {
     }
 
     private static final class FakeFluidBuildWriter implements FluidBuildWriter {
-        private final java.util.Set<ResourceLocation> knownFluids = new java.util.HashSet<>();
+        private final Set<ResourceLocation> knownFluids = new HashSet<>();
         private final Map<BlockPos, ResourceLocation> fluids = new LinkedHashMap<>();
-        private final List<BlockPos> writes = new java.util.ArrayList<>();
+        private final List<BlockPos> writes = new ArrayList<>();
 
         FakeFluidBuildWriter known(String id) {
             knownFluids.add(ResourceLocation.parse(id));
@@ -388,11 +391,11 @@ class MinecraftBuildTargetTest {
     }
 
     private static final class FakeBlockEntityBuildWriter implements BlockEntityBuildWriter {
-        private final java.util.Set<String> known = new java.util.HashSet<>();
+        private final Set<String> known = new HashSet<>();
         private final Map<BlockPos, ResourceLocation> blocks = new LinkedHashMap<>();
         private final Map<BlockPos, ResourceLocation> blockEntities = new LinkedHashMap<>();
         private final Map<BlockPos, String> nbt = new LinkedHashMap<>();
-        private final List<BlockPos> writes = new java.util.ArrayList<>();
+        private final List<BlockPos> writes = new ArrayList<>();
 
         FakeBlockEntityBuildWriter known(String blockId, String blockEntityId) {
             known.add(blockId + "|" + blockEntityId);
@@ -431,10 +434,10 @@ class MinecraftBuildTargetTest {
     }
 
     private static final class FakeEntityBuildWriter implements EntityBuildWriter {
-        private final java.util.Set<ResourceLocation> knownEntities = new java.util.HashSet<>();
+        private final Set<ResourceLocation> knownEntities = new HashSet<>();
         private final Map<BlockPos, ResourceLocation> entities = new LinkedHashMap<>();
         private final Map<BlockPos, String> nbt = new LinkedHashMap<>();
-        private final List<BlockPos> writes = new java.util.ArrayList<>();
+        private final List<BlockPos> writes = new ArrayList<>();
 
         FakeEntityBuildWriter known(String id) {
             knownEntities.add(ResourceLocation.parse(id));
@@ -472,9 +475,9 @@ class MinecraftBuildTargetTest {
     }
 
     private static final class FakeCapabilityBuildWriter implements CapabilityBuildWriter {
-        private final java.util.Set<String> knownCapabilities = new java.util.HashSet<>();
+        private final Set<String> knownCapabilities = new HashSet<>();
         private final Map<String, Map<String, String>> mutations = new LinkedHashMap<>();
-        private final List<BlockPos> writes = new java.util.ArrayList<>();
+        private final List<BlockPos> writes = new ArrayList<>();
 
         FakeCapabilityBuildWriter known(String name) {
             knownCapabilities.add(name);

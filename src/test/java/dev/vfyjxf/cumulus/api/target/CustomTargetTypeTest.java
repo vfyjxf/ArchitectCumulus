@@ -48,7 +48,7 @@ class CustomTargetTypeTest {
     void targetDescriptorTypeIdExposesUnderlyingTypeId() {
         var desc = new TargetDescriptor(
                         ResourceLocation.parse("cumulus:capability"),
-                        java.util.Map.of("name", "cumulus:energy"));
+                        Map.of("name", "cumulus:energy"));
         assertEquals(ResourceLocation.parse("cumulus:capability"), desc.typeId());
     }
 
@@ -56,7 +56,7 @@ class CustomTargetTypeTest {
     void targetDescriptorPropertiesExposesStringMapView() {
         var desc = new TargetDescriptor(
                         ResourceLocation.parse("cumulus:capability"),
-                        java.util.Map.of("name", "cumulus:energy"));
+                        Map.of("name", "cumulus:energy"));
         var props = desc.properties();
         assertEquals("cumulus:energy", props.get("name"));
     }
@@ -65,7 +65,7 @@ class CustomTargetTypeTest {
     void targetDescriptorRejectsNullTypeId() {
         assertThrows(IllegalArgumentException.class, () -> new TargetDescriptor(
                         null,
-                        java.util.Map.of()));
+                        Map.of()));
     }
 
     @Test

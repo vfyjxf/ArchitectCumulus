@@ -3,6 +3,7 @@ package dev.vfyjxf.cumulus.impl.runtime;
 import dev.vfyjxf.cumulus.api.context.WellKnownContextKeys;
 import dev.vfyjxf.cumulus.api.definition.StructureDefinition;
 import dev.vfyjxf.cumulus.api.diagnostic.DiagnosticGraph;
+import dev.vfyjxf.cumulus.api.diagnostic.Severity;
 import dev.vfyjxf.cumulus.api.partition.SectionKey;
 import dev.vfyjxf.cumulus.api.runtime.InstanceDelta;
 import dev.vfyjxf.cumulus.api.runtime.InstanceStatus;
@@ -330,7 +331,7 @@ public final class RuntimeCheckEngine {
         }
 
         private boolean hasErrors() {
-            return diagnostics.nodes().stream().anyMatch(node -> node.severity().ordinal() >= dev.vfyjxf.cumulus.api.diagnostic.Severity.error.ordinal());
+            return diagnostics.nodes().stream().anyMatch(node -> node.severity().ordinal() >= Severity.error.ordinal());
         }
     }
 }
