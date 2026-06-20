@@ -53,11 +53,11 @@ public final class CheckContext {
 
     /** Derived values from context rules. Keyed by typed ContextKey.
      *  Carried over into RuntimeStructureContext. */
-    private final Map<ContextKey<?>, Object> derived = new LinkedHashMap<>();
+    private final ContextMap.Mutable derived = ContextMap.mutable();
 
-    /** Computed values from ContextPlan operations. Keyed by typed ContextKey.
+    /** Computed values from EvaluationPhase. Keyed by typed ContextKey.
      *  Carried over into RuntimeStructureContext; shadows derived under the same key. */
-    private final Map<ContextKey<?>, Object> computed = new LinkedHashMap<>();
+    private final ContextMap.Mutable computed = ContextMap.mutable();
 
     public CheckContext() {}
 
@@ -90,63 +90,40 @@ public final class CheckContext {
     // ── derived (→ runtime context) ───────────────────────────────────
 
     public <T> void putDerived(ContextKey<T> key, T value) {
-        Objects.requireNonNull(key, "derived key must not be null");
-        Objects.requireNonNull(value, "derived value must not be null");
-        if (!key.type().isInstance(value)) {
-            throw new ClassCastException(
-                            "ContextKey '" + key.name() + "' expects " + key.type().getName() + " but got " + value.getClass().getName());
-        }
         derived.put(key, value);
     }
 
-    @SuppressWarnings("unchecked")
     public <T> Optional<T> derivedValue(ContextKey<T> key) {
-        var raw = derived.get(key);
-        return raw == null ? Optional.empty() : Optional.of((T) raw);
+        return derived.get(key);
     }
 
     /** True if any derived value exists under {@code key}. */
     public boolean hasDerived(ContextKey<?> key) {
-        return derived.containsKey(key);
+        return derived.contains(key);
     }
 
-    // ── computed (ContextPlan operations → runtime context) ──────────────
+    // ── computed (EvaluationPhase → runtime context) ──────────────────
 
     public <T> void putComputed(ContextKey<T> key, T value) {
-        Objects.requireNonNull(key, "computed key must not be null");
-        Objects.requireNonNull(value, "computed value must not be null");
-        if (!key.type().isInstance(value)) {
-            throw new ClassCastException(
-                            "ContextKey '" + key.name() + "' expects " + key.type().getName() + " but got " + value.getClass().getName());
-        }
         computed.put(key, value);
     }
 
-    @SuppressWarnings("unchecked")
     public <T> Optional<T> computedValue(ContextKey<T> key) {
-        var raw = computed.get(key);
-        return raw == null ? Optional.empty() : Optional.of((T) raw);
+        return computed.get(key);
     }
 
     /** True if any computed value exists under {@code key}. */
     public boolean hasComputed(ContextKey<?> key) {
-        return computed.containsKey(key);
+        return computed.contains(key);
     }
 
     /**
      * Cross-tier lookup: return the value under {@code key} from the computed
-     * tier if present, otherwise from the derived tier. This is the read view
-     * exposed to {@link EvaluationPhase}s via {@link PhaseContext} — an
-     * operation can consume another operation's output or a context rule's
-     * derived value without knowing which tier produced it.
+     * tier if present, otherwise from the derived tier.
      */
-    @SuppressWarnings("unchecked")
     public <T> Optional<T> anyValue(ContextKey<T> key) {
-        var raw = computed.get(key);
-        if (raw == null) {
-            raw = derived.get(key);
-        }
-        return raw == null ? Optional.empty() : Optional.of((T) raw);
+        var computedVal = computed.get(key);
+        return computedVal.isPresent() ? computedVal : derived.get(key);
     }
 
     // ── conversion ────────────────────────────────────────────────────
@@ -158,8 +135,8 @@ public final class CheckContext {
      */
     public RuntimeStructureContext toRuntime(StructureInstanceKey key, int revision) {
         var merged = new LinkedHashMap<ContextKey<?>, Object>();
-        merged.putAll(derived);
-        merged.putAll(computed);
+        merged.putAll(derived.entries());
+        merged.putAll(computed.entries());
         return RuntimeStructureContext.builder(key).revision(revision).putAll(merged).build();
     }
 
@@ -170,8 +147,8 @@ public final class CheckContext {
     public void absorb(CheckContext other) {
         this.resolvedTargets.putAll(other.resolvedTargets);
         this.captures.putAll(other.captures);
-        this.derived.putAll(other.derived);
-        this.computed.putAll(other.computed);
+        this.derived.putAll(other.derived.entries());
+        this.computed.putAll(other.computed.entries());
     }
 
     /**

@@ -18,7 +18,7 @@ public record PointComponent(
                 TargetPattern target,
                 PointRequirement requirement,
                 Set<String> groups,
-                DiagnosticMetadata diagnostics) implements StructureComponent {
+                DiagnosticMetadata diagnostics) implements StructureComponent, PointConfigured<PointComponent> {
     public PointComponent {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Point component name must not be blank");
@@ -52,6 +52,10 @@ public record PointComponent(
 
     public PointComponent optional() {
         return new PointComponent(name, location, target, PointRequirement.optional, groups, diagnostics);
+    }
+
+    public PointComponent required() {
+        return new PointComponent(name, location, target, PointRequirement.required, groups, diagnostics);
     }
 
     public PointComponent group(String group) {

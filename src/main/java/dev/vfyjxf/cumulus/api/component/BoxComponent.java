@@ -20,7 +20,7 @@ public record BoxComponent(
                 TargetPattern target,
                 PointRequirement requirement,
                 Set<String> groups,
-                DiagnosticMetadata diagnostics) implements StructureComponent {
+                DiagnosticMetadata diagnostics) implements StructureComponent, PointConfigured<BoxComponent> {
     public BoxComponent {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Box component name must not be blank");
@@ -63,6 +63,10 @@ public record BoxComponent(
 
     public BoxComponent optional() {
         return new BoxComponent(name, from, to, hollow, target, PointRequirement.optional, groups, diagnostics);
+    }
+
+    public BoxComponent required() {
+        return new BoxComponent(name, from, to, hollow, target, PointRequirement.required, groups, diagnostics);
     }
 
     public BoxComponent group(String group) {

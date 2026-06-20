@@ -19,7 +19,7 @@ public record RegionComponent(
                 TargetPattern target,
                 PointRequirement requirement,
                 Set<String> groups,
-                DiagnosticMetadata diagnostics) implements StructureComponent {
+                DiagnosticMetadata diagnostics) implements StructureComponent, PointConfigured<RegionComponent> {
     public RegionComponent {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Region component name must not be blank");
@@ -47,6 +47,10 @@ public record RegionComponent(
 
     public RegionComponent optional() {
         return new RegionComponent(name, from, to, target, PointRequirement.optional, groups, diagnostics);
+    }
+
+    public RegionComponent required() {
+        return new RegionComponent(name, from, to, target, PointRequirement.required, groups, diagnostics);
     }
 
     public RegionComponent group(String group) {
