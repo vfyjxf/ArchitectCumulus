@@ -23,7 +23,7 @@ import java.util.Optional;
  *       primary values). Internal, used by {@link ContextSource} resolution.</li>
  *   <li><b>derived</b> — values produced by {@link ContextRuleDescriptor} sources.
  *       Carried over into {@link RuntimeStructureContext}.</li>
- *   <li><b>computed</b> — values produced by {@code ContextOperation}s in a
+ *   <li><b>computed</b> — values produced by {@link EvaluationPhase}s in a
  *       {@code ContextPlan}. Also carried over into {@link RuntimeStructureContext};
  *       visible to later operations via {@link #anyValue}.</li>
  * </ol>
@@ -136,7 +136,7 @@ public final class CheckContext {
     /**
      * Cross-tier lookup: return the value under {@code key} from the computed
      * tier if present, otherwise from the derived tier. This is the read view
-     * exposed to {@code ContextOperation}s via {@code OperationContext} — an
+     * exposed to {@link EvaluationPhase}s via {@link PhaseContext} — an
      * operation can consume another operation's output or a context rule's
      * derived value without knowing which tier produced it.
      */

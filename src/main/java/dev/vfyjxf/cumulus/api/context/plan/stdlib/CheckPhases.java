@@ -119,7 +119,7 @@ public final class CheckPhases {
             }
             // Write the max possible layer count; the executor will match them
             // and the actual count (how many matched) can be derived by a
-            // subsequent ContextOperation reading matchResults.
+            // subsequent EvaluationPhase reading matchResults.
             // For now we write max as a placeholder; a follow-up operation
             // can count the actual matched layers.
             ctx.context().putComputed(outKey, max);

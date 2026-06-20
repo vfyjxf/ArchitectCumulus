@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 /**
  * Read-only query surface over the set of structure points that matched during a
- * check. Handed to every {@link ContextOperation} via {@link OperationContext#matches()}.
+ * check. Handed to every {@link EvaluationPhase} via {@link PhaseContext#matches()}.
  *
  * <p>Standard-library operations ({@code count}, {@code sum}, {@code bounds}, …)
  * are thin wrappers around these queries; custom operations may use them directly

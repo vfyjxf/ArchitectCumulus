@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Typed view of one matched structure point, exposed to {@link ContextOperation}s
+ * Typed view of one matched structure point, exposed to {@link EvaluationPhase}s
  * through {@link MatchResults}.
  *
  * <p>This is the runtime counterpart of {@code StructurePointDefinition} after a

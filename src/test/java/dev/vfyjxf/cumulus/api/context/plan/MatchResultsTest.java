@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * {@link MatchedPoint}/{@link Bounds3d} value types it operates on.
  *
  * <p>These are the primitives the generic context-operation pipeline hands to
- * each {@link ContextOperation}; their correctness (count/sum/bounds/interior
+ * each {@link EvaluationPhase}; their correctness (count/sum/bounds/interior
  * volume, typed property access) is asserted here directly so the pipeline has
  * a trustworthy foundation even before the orchestration layer is wired in.
  */
